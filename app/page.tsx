@@ -150,6 +150,32 @@ export default async function VitrineAtacadoPage({
             <span>{APP_NAME}</span>
           </Link>
           
+          <form action="/" method="GET" className="flex-1 flex items-center gap-2 max-w-2xl">
+            {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="Buscar por nome ou código..."
+              className="h-10 flex-1 rounded-sm border-none bg-white px-4 text-sm text-[#333] shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3483FA]/50"
+            />
+            <select
+              name="ordem"
+              defaultValue={ordem}
+              className="h-10 rounded-sm border-none bg-white px-3 text-sm text-[#333] shadow-sm outline-none focus:ring-2 focus:ring-[#3483FA]/50 hidden sm:block"
+            >
+              <option value="recentes">Mais recentes</option>
+              <option value="menor-preco">Menor preço</option>
+              <option value="maior-preco">Maior preço</option>
+            </select>
+            <button
+              type="submit"
+              className="h-10 rounded-sm bg-[#3483FA] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8]"
+            >
+              Aplicar
+            </button>
+          </form>
+
           <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition shrink-0 hidden sm:block">
             Entrar
           </Link>
