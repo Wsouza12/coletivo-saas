@@ -64,7 +64,7 @@ export function AdminSidebarNav({ userEmail }: { userEmail?: string | null }) {
           const Icon = item.icon;
           return (
             <Tooltip key={item.href}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <Link
                   href={item.href}
                   className={cn(

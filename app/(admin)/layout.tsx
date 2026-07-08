@@ -15,7 +15,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delay={200}>
       <div className="flex min-h-screen bg-background">
         <aside className="hidden w-[240px] shrink-0 border-r border-sidebar-border md:block">
           <AdminSidebarNav userEmail={session.user.email} />
