@@ -139,47 +139,7 @@ export function ConfiguracoesFinanceiroForm({
           Usado pro cálculo real de frete (Melhor Envio) nas reservas de compra coletiva — Fase 6.
         </span>
       </div>
-      <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
-        <span className="text-sm font-medium text-foreground">Lista de Fornecedores (produto separado)</span>
-        <Label>Preço da lista completa (R$)</Label>
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          value={precoListaFornecedores}
-          onChange={(e) => setPrecoListaFornecedores(e.target.value)}
-          required
-        />
-        <span className="text-xs text-muted-foreground">
-          Preço cobrado em /fornecedores (venda da lista completa de contatos + catálogos, via Pix).
-        </span>
 
-        <Label>Preço do downsell — só catálogos, sem contatos (R$)</Label>
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          value={precoCatalogosSemContato}
-          onChange={(e) => setPrecoCatalogosSemContato(e.target.value)}
-          required
-        />
-        <span className="text-xs text-muted-foreground">
-          Plano mais barato: só os PDFs dos catálogos, sem telefone/endereço dos vendedores.
-        </span>
-
-        <Label>Order-bump — acesso à comunidade (+R$)</Label>
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          value={precoUpsellComunidade}
-          onChange={(e) => setPrecoUpsellComunidade(e.target.value)}
-          required
-        />
-        <span className="text-xs text-muted-foreground">
-          Acréscimo no checkout pra incluir acesso à comunidade (rateio). Sugestão: R$ 5 a R$ 10.
-        </span>
-      </div>
 
       <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
         <span className="text-sm font-medium text-foreground">Atacado Coletivo</span>

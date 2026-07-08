@@ -94,7 +94,6 @@ export default async function AdminConfiguracoesPage() {
       <Tabs defaultValue="perfil">
         <TabsList>
           <TabsTrigger value="perfil">Perfil</TabsTrigger>
-          <TabsTrigger value="plataformas">Plataformas</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
           <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
           <TabsTrigger value="categorias">Categorias</TabsTrigger>
@@ -109,19 +108,7 @@ export default async function AdminConfiguracoesPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="plataformas">
-          <Card>
-            <CardContent className="flex max-w-md flex-col gap-3 pt-6 text-sm">
-              <p className="text-xs text-muted-foreground">
-                Chaves configuradas via variáveis de ambiente (.env.local) — somente leitura aqui.
-              </p>
-              <Campo label="Mercado Livre — App ID" valor={mascarar(process.env.ML_APP_ID)} />
-              <Campo label="Mercado Livre — Secret" valor={mascarar(process.env.ML_SECRET)} />
-              <Campo label="Shopee — Partner ID" valor={mascarar(process.env.SHOPEE_PARTNER_ID)} />
-              <Campo label="Shopee — Partner Key" valor={mascarar(process.env.SHOPEE_PARTNER_KEY)} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
         <TabsContent value="financeiro">
           <Card>
@@ -168,16 +155,6 @@ export default async function AdminConfiguracoesPage() {
             <CardContent className="flex max-w-xl flex-col gap-4 pt-6 text-sm">
               <Campo label="Banco de dados" valor={dbOk ? "Conectado" : "Falhou"} />
               <Campo label="Redis" valor={redisOk ? "Conectado" : "Falhou"} />
-              <Campo label="Integrações ML ativas" valor={String(mlAtivas)} />
-              <Campo label="Integrações Shopee ativas" valor={String(shopeeAtivas)} />
-              <Campo
-                label="Último webhook ML"
-                valor={ultimoWebhookMl ? formatDateTime(ultimoWebhookMl) : "Nenhum recebido"}
-              />
-              <Campo
-                label="Último webhook Shopee"
-                valor={ultimoWebhookShopee ? formatDateTime(ultimoWebhookShopee) : "Nenhum recebido"}
-              />
               <Campo
                 label="Última sincronização (cron)"
                 valor={jobSync ? `${formatDateTime(jobSync.executadoEm)} — ${jobSync.synced} novo(s)` : "Nunca executado"}
