@@ -142,6 +142,31 @@ export default function LinksPage() {
             filter: drop-shadow(0 0 44px rgba(255,210,40,0.65));
         }
 
+        .avatar-wrap {
+            animation: fadeDown 0.7s ease both;
+            margin-bottom: 1.5rem;
+        }
+        .avatar-ring {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin: 0 auto;
+            position: relative;
+            box-shadow:
+                0 0 0 3px rgba(255,210,40,0.55),
+                0 0 0 7px rgba(255,210,40,0.12),
+                0 24px 60px rgba(0,0,0,0.55);
+        }
+        
+        @media (min-width: 768px) {
+            .avatar-ring {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
         .page-heading {
             font-family: 'Syne', sans-serif;
             font-weight: 800;
@@ -280,6 +305,9 @@ export default function LinksPage() {
 
         <section className="links-container">
           <div className="text-center">
+            <div className="avatar-wrap">
+              <div className="avatar-ring" style={{ backgroundImage: "url('/biolinks/perfil.jpg')" }}></div>
+            </div>
             <h1 className="page-heading" style={{ fontSize: "clamp(2.5rem, 8vw, 4rem)", marginBottom: "10px", marginTop: 0 }}>Seller Pro</h1>
             <h2 className="text-2xl font-bold text-white mb-2">Seja bem-vindo(a)!</h2>
             <hr className="divider" />
