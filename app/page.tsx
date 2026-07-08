@@ -143,27 +143,33 @@ export default async function VitrineAtacadoPage({
       <div className="absolute top-0 left-0 w-full h-[320px] bg-[#FFE600] z-0" />
       
       <header className="relative z-10 bg-transparent">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 gap-6">
-          <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277] shrink-0">
-            <svg className="size-5 text-[#2D3277]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-            </svg>
-            <span>{APP_NAME}</span>
-          </Link>
+        <div className="mx-auto flex max-w-6xl flex-col sm:flex-row sm:items-center justify-between px-4 py-4 gap-4 sm:gap-6">
+          <div className="w-full sm:w-auto flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277] shrink-0">
+              <svg className="size-5 text-[#2D3277]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+              </svg>
+              <span>{APP_NAME}</span>
+            </Link>
+            
+            <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition shrink-0 sm:hidden">
+              Entrar
+            </Link>
+          </div>
           
-          <form action="/" method="GET" className="flex-1 flex items-center gap-2 max-w-2xl">
+          <form action="/" method="GET" className="w-full sm:flex-1 flex items-center gap-2 max-w-2xl">
             {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
             <input
               type="search"
               name="q"
               defaultValue={q}
-              placeholder="Buscar por nome ou código..."
+              placeholder="Buscar produtos..."
               className="h-10 flex-1 rounded-sm border-none bg-white px-4 text-sm text-[#333] shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3483FA]/50"
             />
             <select
               name="ordem"
               defaultValue={ordem}
-              className="h-10 rounded-sm border-none bg-white px-3 text-sm text-[#333] shadow-sm outline-none focus:ring-2 focus:ring-[#3483FA]/50 hidden sm:block"
+              className="h-10 rounded-sm border-none bg-white px-3 text-sm text-[#333] shadow-sm outline-none focus:ring-2 focus:ring-[#3483FA]/50 hidden md:block"
             >
               <option value="recentes">Mais recentes</option>
               <option value="menor-preco">Menor preço</option>
@@ -171,9 +177,10 @@ export default async function VitrineAtacadoPage({
             </select>
             <button
               type="submit"
-              className="h-10 rounded-sm bg-[#3483FA] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8]"
+              className="h-10 flex items-center justify-center rounded-sm bg-[#3483FA] px-4 sm:px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8]"
             >
-              Aplicar
+              <Search className="size-4 sm:hidden" />
+              <span className="hidden sm:inline">Aplicar</span>
             </button>
           </form>
 
