@@ -29,9 +29,9 @@ export default async function AdminAtacadoProdutosPage() {
               Voltar pra rodadas
             </Button>
           </Link>
-          <h1 className="text-xl font-bold text-foreground">Catálogo do Atacado Coletivo</h1>
+          <h1 className="text-xl font-bold text-foreground">Vitrine</h1>
           <p className="text-sm text-muted-foreground">
-            Cadastro separado do catálogo normal — produto vendido em caixa fechada.
+            Todos os produtos cadastrados e ativados vão aparecer no site.
           </p>
         </div>
         <CriarProdutoAtacadoDialog fornecedores={fornecedores} />
