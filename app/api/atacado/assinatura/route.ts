@@ -11,8 +11,17 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: { code: "VALIDATION", message: "doc é obrigatório" } }, { status: 422 });
   }
 
-  const resultado = await verificarAssinatura(doc);
-  return NextResponse.json({ data: resultado }, { status: 200 });
+  const [resultado, config] = await Promise.all([
+    verificarAssinatura(doc),
+    import("@/lib/prisma").then(m => m.prisma.configuracaoFinanceira.findFirst())
+  ]);
+
+  return NextResponse.json({
+    data: {
+      ...resultado,
+      taxaServicoAssinanteAtacado: Number(config?.taxaServicoAssinanteAtacado ?? 10)
+    }
+  }, { status: 200 });
 }
 
 // Inicia (ou reaproveita) a assinatura mensal e devolve o link de pagamento Pix/MP.

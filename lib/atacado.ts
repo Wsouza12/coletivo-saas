@@ -283,10 +283,13 @@ export async function criarReserva(dados: {
   qrCodeBase64: string | null;
   valorTotal: number;
 }> {
-  const rodada = await prisma.rodadaAtacado.findUniqueOrThrow({
-    where: { id: dados.rodadaId },
-    include: { produtoAtacado: true },
-  });
+  const [rodada, config] = await Promise.all([
+    prisma.rodadaAtacado.findUniqueOrThrow({
+      where: { id: dados.rodadaId },
+      include: { produtoAtacado: true },
+    }),
+    prisma.configuracaoFinanceira.findFirst(),
+  ]);
 
   if (rodada.status !== "ABERTA") {
     throw new Error("Essa rodada não está mais aberta para reservas");
@@ -316,9 +319,13 @@ export async function criarReserva(dados: {
     opcaoFreteId: dados.opcaoFreteId,
   });
 
+  const taxaServicoUsada = dados.assinaturaId
+    ? Number(config?.taxaServicoAssinanteAtacado ?? 10)
+    : Number(rodada.taxaServicoPercentual);
+
   const valorProduto = Number(rodada.custoUnitario) * quantidade;
   const valorTaxaServico =
-    (Number(rodada.custoUnitario) * (Number(rodada.taxaServicoPercentual) / 100)) * quantidade;
+    (Number(rodada.custoUnitario) * (taxaServicoUsada / 100)) * quantidade;
   const valorTotal = valorProduto + valorTaxaServico + opcaoFrete.preco;
 
   const reserva = await prisma.reservaAtacado.create({

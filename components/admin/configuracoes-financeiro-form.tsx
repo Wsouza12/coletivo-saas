@@ -20,6 +20,7 @@ export function ConfiguracoesFinanceiroForm({
   initialCepOrigem,
   initialValorAssinaturaAtacado,
   initialTaxaServicoPadraoAtacado,
+  initialTaxaServicoAssinanteAtacado,
   initialExigirAssinaturaAtacado,
   initialLoopDescansoInicio,
   initialLoopDescansoFim,
@@ -33,6 +34,7 @@ export function ConfiguracoesFinanceiroForm({
   initialCepOrigem?: string | null;
   initialValorAssinaturaAtacado: number;
   initialTaxaServicoPadraoAtacado: number;
+  initialTaxaServicoAssinanteAtacado: number;
   initialExigirAssinaturaAtacado: boolean;
   initialLoopDescansoInicio: number;
   initialLoopDescansoFim: number;
@@ -46,6 +48,7 @@ export function ConfiguracoesFinanceiroForm({
   const [cepOrigem, setCepOrigem] = useState(initialCepOrigem ?? "");
   const [valorAssinaturaAtacado, setValorAssinaturaAtacado] = useState(String(initialValorAssinaturaAtacado));
   const [taxaServicoPadraoAtacado, setTaxaServicoPadraoAtacado] = useState(String(initialTaxaServicoPadraoAtacado));
+  const [taxaServicoAssinanteAtacado, setTaxaServicoAssinanteAtacado] = useState(String(initialTaxaServicoAssinanteAtacado));
   const [exigirAssinaturaAtacado, setExigirAssinaturaAtacado] = useState(initialExigirAssinaturaAtacado);
   const [loopDescansoInicio, setLoopDescansoInicio] = useState(initialLoopDescansoInicio);
   const [loopDescansoFim, setLoopDescansoFim] = useState(initialLoopDescansoFim);
@@ -66,6 +69,7 @@ export function ConfiguracoesFinanceiroForm({
         margemOperacional: Number(margemOperacional),
         valorAssinaturaAtacado: Number(valorAssinaturaAtacado),
         taxaServicoPadraoAtacado: Number(taxaServicoPadraoAtacado),
+        taxaServicoAssinanteAtacado: Number(taxaServicoAssinanteAtacado),
         exigirAssinaturaAtacado,
         loopDescansoInicio,
         loopDescansoFim,
@@ -170,6 +174,20 @@ export function ConfiguracoesFinanceiroForm({
         <span className="text-xs text-muted-foreground">
           Valor pré-preenchido ao criar uma nova rodada — cada rodada ainda pode ajustar a taxa
           individualmente na criação.
+        </span>
+
+        <Label>Taxa de serviço para Assinantes (%)</Label>
+        <Input
+          type="number"
+          step="0.1"
+          min="0"
+          max="100"
+          value={taxaServicoAssinanteAtacado}
+          onChange={(e) => setTaxaServicoAssinanteAtacado(e.target.value)}
+          required
+        />
+        <span className="text-xs text-muted-foreground">
+          Taxa reduzida aplicada automaticamente aos clientes que possuírem uma assinatura ativa.
         </span>
 
         <div className="flex items-center space-x-2 pt-2">

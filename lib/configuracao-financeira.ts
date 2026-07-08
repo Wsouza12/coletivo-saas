@@ -20,6 +20,7 @@ export async function updateConfiguracaoFinanceira(data: {
   cepOrigem?: string;
   valorAssinaturaAtacado?: number;
   taxaServicoPadraoAtacado?: number;
+  taxaServicoAssinanteAtacado?: number;
   exigirAssinaturaAtacado?: boolean;
   loopDescansoInicio?: number;
   loopDescansoFim?: number;

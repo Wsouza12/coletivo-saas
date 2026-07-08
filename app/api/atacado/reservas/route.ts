@@ -20,20 +20,20 @@ export async function POST(req: Request) {
 
   let assinaturaId: string | undefined;
 
-  if (exigirAssinatura) {
-    const { ativa, assinaturaId: id } = await verificarAssinatura(parsed.data.compradorDoc);
-    if (!ativa || !id) {
-      return NextResponse.json(
-        {
-          error: {
-            code: "SEM_ASSINATURA_ATIVA",
-            message: "Você não faz parte do grupo de compras coletivas. Assine pra poder reservar.",
-          },
-        },
-        { status: 403 }
-      );
-    }
+  const { ativa, assinaturaId: id } = await verificarAssinatura(parsed.data.compradorDoc);
+
+  if (ativa && id) {
     assinaturaId = id;
+  } else if (exigirAssinatura) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "SEM_ASSINATURA_ATIVA",
+          message: "Você não faz parte do grupo de compras coletivas. Assine pra poder reservar.",
+        },
+      },
+      { status: 403 }
+    );
   }
 
   const origem = (await cookies()).get(COOKIE_ORIGEM)?.value || undefined;

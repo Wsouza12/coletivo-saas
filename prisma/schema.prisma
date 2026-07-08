@@ -561,9 +561,10 @@ model ConfiguracaoFinanceira {
   cepOrigem          String?
   // Fase 6 — Atacado Coletivo: valor da assinatura mensal e taxa de serviço padrão
   // (essa última é só o valor pré-preenchido ao criar rodada; cada rodada pode ter a sua)
-  valorAssinaturaAtacado   Decimal @default(100) @db.Decimal(10, 2)
-  taxaServicoPadraoAtacado Decimal @default(10) @db.Decimal(5, 2)
-  exigirAssinaturaAtacado  Boolean @default(true)
+  valorAssinaturaAtacado      Decimal @default(100) @db.Decimal(10, 2)
+  taxaServicoPadraoAtacado    Decimal @default(10) @db.Decimal(5, 2)
+  taxaServicoAssinanteAtacado Decimal @default(10) @db.Decimal(5, 2)
+  exigirAssinaturaAtacado     Boolean @default(true)
   // Horário de descanso do loop: nenhuma mensagem automática é enviada entre
   // loopDescansoInicio e loopDescansoFim (inclusive). Ex: 23 e 6 = silêncio de 23h até 05:59h
   loopDescansoInicio        Int     @default(23) // hora local (0-23)

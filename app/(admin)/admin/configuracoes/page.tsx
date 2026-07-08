@@ -119,6 +119,7 @@ export default async function AdminConfiguracoesPage() {
                 initialCepOrigem={financeiro.cepOrigem}
                 initialValorAssinaturaAtacado={Number(financeiro.valorAssinaturaAtacado)}
                 initialTaxaServicoPadraoAtacado={Number(financeiro.taxaServicoPadraoAtacado)}
+                initialTaxaServicoAssinanteAtacado={Number(financeiro.taxaServicoAssinanteAtacado)}
                 initialExigirAssinaturaAtacado={financeiro.exigirAssinaturaAtacado}
                 initialLoopDescansoInicio={financeiro.loopDescansoInicio}
                 initialLoopDescansoFim={financeiro.loopDescansoFim}

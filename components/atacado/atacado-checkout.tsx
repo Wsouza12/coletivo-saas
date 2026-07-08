@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,10 @@ export function AtacadoCheckout({
   const [nome, setNome] = useState("");
   const [doc, setDoc] = useState("");
   const [telefone, setTelefone] = useState("");
+  
+  // Desconto de assinante
+  const [taxaEfetiva, setTaxaEfetiva] = useState(taxaServicoPercentual);
+  const [temDesconto, setTemDesconto] = useState(false);
 
   const [pix, setPix] = useState<{ qrCode: string; qrCodeBase64: string; valor: number; tipo: "assinatura" | "reserva"; reservaId?: string } | null>(null);
 
@@ -81,10 +85,43 @@ export function AtacadoCheckout({
     ? gradeValida
     : Number(quantidade) >= minimoUnidadesPorReserva && Number(quantidade) <= unidadesRestantes;
   const valorProdutoFornecedor = custoUnitario * (temVariacoes ? quantidadeEfetiva || 1 : Number(quantidade || 1));
-  const valorTaxaServico = valorProdutoFornecedor * (taxaServicoPercentual / 100);
+  const valorTaxaServico = valorProdutoFornecedor * (taxaEfetiva / 100);
   
   const opcaoEscolhida = opcoesFrete?.find((o) => o.id === opcaoFreteId) ?? null;
   const valorTotal = opcaoEscolhida ? valorProdutoFornecedor + valorTaxaServico + opcaoEscolhida.preco : null;
+
+  useEffect(() => {
+    const limpo = doc.replace(/\D/g, "");
+    if (limpo.length !== 11 && limpo.length !== 14) {
+      setTaxaEfetiva(taxaServicoPercentual);
+      setTemDesconto(false);
+      setAssinaturaId(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/atacado/assinatura?doc=${encodeURIComponent(doc.trim())}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data?.ativa && json.data?.assinaturaId) {
+            setAssinaturaId(json.data.assinaturaId);
+            setTaxaEfetiva(Number(json.data.taxaServicoAssinanteAtacado ?? 10));
+            setTemDesconto(true);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao checar assinatura para desconto", err);
+      }
+      
+      setTaxaEfetiva(taxaServicoPercentual);
+      setTemDesconto(false);
+      setAssinaturaId(null);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [doc, taxaServicoPercentual]);
 
   async function buscarCepEFrete(cepBusca: string) {
     const limpo = cepBusca.replace(/\D/g, "");
@@ -524,8 +561,25 @@ export function AtacadoCheckout({
             {opcaoEscolhida && (
               <div className="rounded-lg bg-muted p-3 text-sm mt-2">
                 <div className="flex justify-between"><span>Produto ({quantidade}un)</span><span>{formatBRL(valorProdutoFornecedor)}</span></div>
-                <div className="flex justify-between"><span>Taxa de Serviço ({taxaServicoPercentual}%)</span><span>{formatBRL(valorTaxaServico)}</span></div>
-                <div className="flex justify-between"><span>Frete</span><span>{opcaoEscolhida.preco > 0 ? formatBRL(opcaoEscolhida.preco) : "Grátis"}</span></div>
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span>Taxa de Serviço ({taxaEfetiva}%)</span>
+                    {temDesconto && (
+                      <span className="text-[10px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded w-fit mt-0.5">
+                        🎉 Desconto Assinante Aplicado!
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end">
+                    {temDesconto && (
+                      <span className="text-xs text-muted-foreground line-through">
+                        {formatBRL(valorProdutoFornecedor * (taxaServicoPercentual / 100))}
+                      </span>
+                    )}
+                    <span className="font-medium text-foreground">{formatBRL(valorTaxaServico)}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between mt-1"><span>Frete</span><span>{opcaoEscolhida.preco > 0 ? formatBRL(opcaoEscolhida.preco) : "Grátis"}</span></div>
                 <div className="mt-2 flex justify-between border-t border-border pt-2 font-bold text-base"><span>Total</span><span>{formatBRL(valorTotal ?? 0)}</span></div>
               </div>
             )}
