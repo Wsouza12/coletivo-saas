@@ -15,6 +15,11 @@ tem a **infra dele** (Supabase, WhatsApp/Evolution, conta Mercado Pago, domínio
   banco do `dropsync` e **não** são copiados — cada instância nasce **vazia** e o cliente cadastra os
   fornecedores dele (privacidade do fornecedor + é o seu ativo).
 
+## 🗺️ ETAPAS / ONDE ESTAMOS (resumo — detalhe em [STATUS.md](STATUS.md))
+`✅ Fase 0 Extração` · `✅ Fase 1 Enxugar+White-label` · `✅ Fase 2 Painel Dev` ·
+`👉 Fase 3 GitHub (push bloqueado por permissão)` · `⏳ Fase 4 Deploy Vercel` ·
+`⏳ Fase 5 Infra cliente + banco` · `⏳ Fase 6 Chaves /admin/dev + testes` · `⏳ Fase 7 Vender`.
+
 ## 🎯 O QUE ESTE PRODUTO FAZ (só o coletivo)
 - **Vitrine pública** `/atacado` + checkout `/atacado/[slug]` (Pix direto via Mercado Pago)
 - **Rodadas** de compra coletiva (reservas, meta, rateio, frete via Melhor Envio)

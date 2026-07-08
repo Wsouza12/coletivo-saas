@@ -3,6 +3,43 @@
 > Produto separado, revendável, extraído do `dropsync`. Você hospeda por cliente + mensalidade.
 > Caminho local: `C:\Users\pablo\coletivo-saas` · GitHub: https://github.com/Wsouza12/coletivo-saas
 
+## 🗺️ ETAPAS DO PROJETO — ONDE ESTAMOS
+
+```
+[✅] FASE 0 — Extração
+     Cópia do dropsync numa pasta separada (original intocado), sem segredos. git init + commit.
+
+[✅] FASE 1 — Enxugar + White-label
+     Menu admin só do coletivo. Marca via NEXT_PUBLIC_APP_NAME (lib/brand.ts) em todas as telas.
+     Home/links → /atacado. Build local passando (exit 0).
+
+[✅] FASE 2 — Painel do Desenvolvedor
+     /admin/dev com chaves criptografadas (ConfigApp + lib/config-app + instrumentation.ts).
+     Wrappers intactos (env hidratado no startup). API /api/admin/dev/config.
+
+[👉] FASE 3 — GitHub  ← VOCÊ ESTÁ AQUI
+     Repo criado (Wsouza12/coletivo-saas). PUSH BLOQUEADO por permissão (git logado como
+     ceopablowanderson-art, sem escrita no repo do Wsouza12 — erro 403).
+     Destravar: (A) add ceopablowanderson-art como colaborador → eu faço o push; ou
+     (B) trocar credencial pra Wsouza12; ou (C) criar repo em ceopablowanderson-art.
+
+[ ] FASE 4 — Deploy na Vercel (você)
+     Importar repo + .env mínimo (bootstrap + NEXT_PUBLIC_*). Domínio.
+
+[ ] FASE 5 — Infra do cliente (você) + banco
+     Supabase (+ create extension vector) → prisma db push + admin seed (eu rodo com o DATABASE_URL).
+     Evolution/Railway (WhatsApp), conta Mercado Pago, cron-job.org.
+
+[ ] FASE 6 — Chaves no /admin/dev + testes ponta a ponta
+     Colar MP/Groq/Jina/Evolution/R2/Melhor Envio/Resend → redeploy → testar vitrine, Pix, WhatsApp.
+
+[ ] FASE 7 — Vender/hospedar por cliente
+     Repetir Fases 4-6 por cliente (código único). Cobrar mensalidade.
+
+[ ] OPCIONAIS — deletar código morto (lojista/ML/Shopee/Lista/quiz) · seed de dados de teste.
+```
+
+
 ## ✅ FEITO
 - **Cópia independente criada** a partir do `dropsync` (original intocado), sem `node_modules`/`.git`/
   `.next`/segredos. `git init` + commit inicial (447 arquivos, sem `.env`).
