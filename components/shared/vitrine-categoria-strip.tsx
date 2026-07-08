@@ -165,7 +165,7 @@ export function VitrineCategoriaStrip({
         >
           <span
             className={`flex size-14 items-center justify-center rounded-full shadow-sm transition-transform group-hover:scale-105 sm:size-16 ${
-              !categoriaAtiva ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground group-hover:border-primary group-hover:text-primary"
+              !categoriaAtiva ? "bg-[#3483FA] text-white" : "bg-white border border-gray-200 text-gray-500 group-hover:border-[#3483FA] group-hover:text-[#3483FA]"
             }`}
           >
             <Layers className="size-6 sm:size-7" />
@@ -185,12 +185,12 @@ export function VitrineCategoriaStrip({
             >
               <span
                 className={`relative flex size-14 items-center justify-center rounded-full shadow-sm transition-transform group-hover:scale-105 sm:size-16 ${
-                  ativo ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground group-hover:border-primary group-hover:text-primary"
+                  ativo ? "bg-[#3483FA] text-white" : "bg-white border border-gray-200 text-gray-500 group-hover:border-[#3483FA] group-hover:text-[#3483FA]"
                 }`}
               >
                 <Icone className="size-6 sm:size-7" />
                 {p.filhas.length > 0 ? (
-                  <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border-2 border-background bg-primary text-[10px] font-bold text-primary-foreground">
+                  <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border-2 border-white bg-[#3483FA] text-[10px] font-bold text-white">
                     {p.filhas.length + 1}
                   </span>
                 ) : null}
@@ -237,8 +237,8 @@ export function VitrineSubcategoriasSidebar({
           href={linkCategoria(grupo.nome)}
           className={`rounded-md px-2 py-1.5 text-sm font-medium transition ${
             categoriaAtiva === grupo.nome
-              ? "bg-primary text-primary-foreground"
-              : "text-foreground hover:bg-muted"
+              ? "bg-[#3483FA] text-white"
+              : "text-[#333] hover:bg-gray-100"
           }`}
         >
           Tudo de {grupo.nome}
@@ -251,8 +251,8 @@ export function VitrineSubcategoriasSidebar({
               href={linkCategoria(valor)}
               className={`rounded-md px-2 py-1.5 text-sm transition ${
                 categoriaAtiva === valor
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-foreground hover:bg-muted"
+                  ? "bg-[#3483FA] text-white font-medium"
+                  : "text-[#333] hover:bg-gray-100"
               }`}
             >
               {f.nome}{" "}

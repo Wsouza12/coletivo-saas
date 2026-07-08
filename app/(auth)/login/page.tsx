@@ -5,12 +5,13 @@ import { APP_NAME } from "@/lib/brand";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { Crown } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,24 +46,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-black px-4 text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(168,85,247,0.25),rgba(0,0,0,0))]" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#EBEBEB] px-4 text-[#333333]">
+      <div className="absolute top-0 left-0 w-full h-[320px] bg-[#FFE600] z-0" />
 
       <div className="relative z-10 w-full max-w-sm">
-        <Link href="/" className="mb-8 flex items-center justify-center gap-1.5 text-xl font-bold">
-          <Crown className="size-5 text-amber-400" />
-          <span className="bg-gradient-to-r from-purple-400 to-amber-300 bg-clip-text text-transparent">
-            {APP_NAME}
-          </span>
+        <Link href="/" className="mb-8 flex items-center justify-center gap-1.5 text-xl font-extrabold text-[#2D3277]">
+          <svg className="size-6 text-[#2D3277]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+          </svg>
+          <span>{APP_NAME}</span>
         </Link>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur">
-          <h1 className="mb-6 text-center text-lg font-semibold text-white">Entrar na sua conta</h1>
+        <div className="rounded-md border border-gray-100 bg-white p-8 shadow-sm">
+          <h1 className="mb-6 text-center text-xl font-semibold text-[#333]">Olá! Digite seu e-mail e senha</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm text-white/70">
-                Email
+              <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                E-mail
               </label>
               <input
                 id="email"
@@ -70,43 +71,53 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40"
+                className="rounded-sm border border-gray-300 bg-white px-3 py-2.5 text-sm text-[#333] outline-none transition focus:border-[#3483FA] focus:ring-1 focus:ring-[#3483FA]"
               />
             </div>
+            
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-sm text-white/70">
+              <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Senha
               </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-sm border border-gray-300 bg-white px-3 py-2.5 text-sm text-[#333] outline-none transition focus:border-[#3483FA] focus:ring-1 focus:ring-[#3483FA]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 px-4 py-2.5 text-sm font-bold text-black shadow-lg shadow-purple-900/40 transition hover:opacity-90 disabled:opacity-60"
+              className="mt-2 rounded-sm bg-[#3483FA] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8] disabled:opacity-60"
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>
 
-            <div className="flex items-center gap-3 text-xs text-white/40">
-              <span className="h-px flex-1 bg-white/10" />
+            <div className="flex items-center gap-3 text-xs text-gray-400 my-2">
+              <span className="h-px flex-1 bg-gray-200" />
               ou
-              <span className="h-px flex-1 bg-white/10" />
+              <span className="h-px flex-1 bg-gray-200" />
             </div>
 
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/90 transition hover:bg-white/10"
+              className="flex items-center justify-center gap-2 rounded-sm border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-[#333] transition hover:bg-gray-50"
             >
               <svg className="size-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -117,9 +128,9 @@ export default function LoginPage() {
               Entrar com Google
             </button>
 
-            <p className="text-center text-sm text-white/50">
+            <p className="text-center text-sm text-gray-500 mt-2">
               Não tem conta?{" "}
-              <Link href="/register" className="font-medium text-amber-300 hover:underline">
+              <Link href="/register" className="font-semibold text-[#3483FA] hover:underline">
                 Criar conta
               </Link>
             </p>

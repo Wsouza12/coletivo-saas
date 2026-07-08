@@ -21,7 +21,7 @@ export function VitrineHero() {
             <p className="text-lg sm:text-xl font-medium opacity-90 mb-6">
               Os melhores preços direto dos fornecedores. Participe dos grupos e economize!
             </p>
-            <span className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+            <span className="inline-flex items-center justify-center rounded-lg bg-[#3483FA] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#2968c8]">
               Ver Ofertas
             </span>
           </div>

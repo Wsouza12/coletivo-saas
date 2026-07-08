@@ -142,14 +142,15 @@ export default async function VitrineAtacadoPage({
       <div className="absolute top-0 left-0 w-full h-[320px] bg-[#FFE600] z-0" />
       
       <header className="relative z-10 bg-transparent">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 gap-6">
+          <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277] shrink-0">
             <svg className="size-5 text-[#2D3277]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
             </svg>
             <span>{APP_NAME}</span>
           </Link>
-          <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition">
+          
+          <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition shrink-0 hidden sm:block">
             Entrar
           </Link>
         </div>
@@ -164,34 +165,7 @@ export default async function VitrineAtacadoPage({
           <VitrineCategoriaStrip categorias={categorias} categoriaAtiva={categoria} basePath="/" />
         </div>
 
-        <form
-          method="get"
-          className="mx-auto mt-6 flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center"
-        >
-          {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
-          <input
-            type="search"
-            name="q"
-            defaultValue={q}
-            placeholder="Buscar por nome ou código..."
-            className="h-10 flex-1 rounded-sm border-none bg-white px-4 text-sm text-[#333] shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3483FA]/50"
-          />
-          <select
-            name="ordem"
-            defaultValue={ordem}
-            className="h-10 rounded-sm border-none bg-white px-3 text-sm text-[#333] shadow-sm outline-none focus:ring-2 focus:ring-[#3483FA]/50"
-          >
-            <option value="recentes">Mais recentes</option>
-            <option value="menor-preco">Menor preço</option>
-            <option value="maior-preco">Maior preço</option>
-          </select>
-          <button
-            type="submit"
-            className="h-10 rounded-sm bg-[#3483FA] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8]"
-          >
-            Aplicar
-          </button>
-        </form>
+
 
         {/* Sidebar de subcategorias só aparece se o pai ativo tiver filhas;
             caso contrário, o grid usa a largura total. */}
