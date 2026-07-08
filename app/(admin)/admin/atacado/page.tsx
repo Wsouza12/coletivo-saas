@@ -89,13 +89,9 @@ export default async function AdminAtacadoPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Atacado Coletivo</h1>
+          <h1 className="text-xl font-bold text-foreground">Caixas</h1>
           <p className="text-sm text-muted-foreground">
-            Rodadas de compra coletiva — acesso só pra quem tem assinatura mensal ativa (
-            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-              Number(config.valorAssinaturaAtacado)
-            )}
-            /mês).
+            Rodada de caixas, aberta e fechadas e finalizadas
           </p>
         </div>
         <div className="flex gap-2">
