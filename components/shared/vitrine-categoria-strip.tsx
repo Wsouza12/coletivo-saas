@@ -112,7 +112,7 @@ export function agruparCategorias(
 export function VitrineCategoriaStrip({
   categorias,
   categoriaAtiva,
-  basePath = "/vitrine",
+  basePath = "/",
 }: {
   categorias: { nome: string; total: number }[];
   categoriaAtiva?: string;
@@ -211,7 +211,7 @@ export function VitrineCategoriaStrip({
 export function VitrineSubcategoriasSidebar({
   categorias,
   categoriaAtiva,
-  basePath = "/vitrine",
+  basePath = "/",
 }: {
   categorias: { nome: string; total: number }[];
   categoriaAtiva?: string;
