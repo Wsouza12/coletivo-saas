@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { LayoutDashboard, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -101,18 +99,6 @@ export default async function AdminAtacadoPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/admin/atacado/dashboard">
-            <Button variant="outline">
-              <LayoutDashboard className="size-4" />
-              Dashboard
-            </Button>
-          </Link>
-          <Link href="/admin/atacado/assinantes">
-            <Button variant="outline">
-              <Users className="size-4" />
-              Assinantes
-            </Button>
-          </Link>
           <DisparadorCaixasButton naoAnunciadas={countNaoAnunciadas} />
           <CriarRodadaAtacadoDialog
             produtos={produtos.map((p) => ({ ...p, custoUnitario: Number(p.custoUnitario) }))}

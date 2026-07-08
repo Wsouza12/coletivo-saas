@@ -14,12 +14,16 @@ import {
   CalendarClock,
   Radar,
   KeyRound,
+  LayoutDashboard,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
   { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2, desc: "Painel central das rodadas de compras." },
+  { href: "/admin/atacado/dashboard", label: "Dashboard", icon: LayoutDashboard, desc: "Métricas e gráficos das vendas coletivas." },
+  { href: "/admin/atacado/assinantes", label: "Assinantes", icon: Users, desc: "Gerencie os membros da comunidade." },
   { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package, desc: "Cadastre e gerencie os produtos à venda." },
   { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck, desc: "Adicione PDFs e catálogos dos fabricantes." },
   { href: "/admin/atacado/mapeamento", label: "Pesquisa por imagem", icon: Map, desc: "Encontre produtos na internet usando uma foto." },
