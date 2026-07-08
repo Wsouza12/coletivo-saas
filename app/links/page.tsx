@@ -280,10 +280,8 @@ export default function LinksPage() {
 
         <section className="links-container">
           <div className="text-center">
-            <a href="/" className="brand-logo">
-              <img width="150" src="https://app.lucasecom.com.br/assets/imgs/logo_ecom.png" alt="Marketplace na Veia" />
-            </a>
-            <h1 className="page-heading">Seja bem-vindo(a)!</h1>
+            <h1 className="page-heading" style={{ fontSize: "clamp(2.5rem, 8vw, 4rem)", marginBottom: "10px", marginTop: 0 }}>Seller Pro</h1>
+            <h2 className="text-2xl font-bold text-white mb-2">Seja bem-vindo(a)!</h2>
             <hr className="divider" />
             <p className="page-subtitle">
               Veja os links importantes da nossa plataforma abaixo e clique nas imagens para acessar os conteúdos!
@@ -294,46 +292,46 @@ export default function LinksPage() {
             <a className="link-card" href="https://lucasecom.com.br/quiz-mvo-1">
               <div className="shine"></div>
               <img
-                title="Combo 2 em 1 - Mercado Livre e Shopee. Treinamento completo"
-                alt="Combo 2 em 1 - Mercado Livre e Shopee. Treinamento completo"
+                title="MLpro - Extensão de Marketplaces"
+                alt="MLpro - Extensão de Marketplaces"
                 loading="lazy"
-                src="https://marketplacenaveia.com/storage/biolinks/Xp6v79Lwz9WSklW6iB6iicSZKugTRqr9opzsQVR9.png"
+                src="/biolinks/mlpro_card.jpg"
               />
             </a>
             <a className="link-card" href="https://lucasecom.com.br/pack-botao-inicio/">
               <div className="shine"></div>
               <img
-                title="Lista de fornecedores - Marketplace na Veia"
-                alt="Lista de fornecedores - Marketplace na Veia"
+                title="Fornecedores de Caixa Fechada"
+                alt="Fornecedores de Caixa Fechada"
                 loading="lazy"
-                src="https://app.lucasecom.com.br/storage/biolinks/BvUjVTDyjrs6SPYTShVlAKKPGJ05Z5EtH6pw46qF.png"
+                src="/biolinks/fornecedores_card.jpg"
               />
             </a>
             <a className="link-card" href="https://sellernaveia.marketplacenaveia.com/">
               <div className="shine"></div>
               <img
-                title="Seller NaVeia"
-                alt="Seller NaVeia"
+                title="Seller Pro"
+                alt="Seller Pro"
                 loading="lazy"
-                src="https://app.lucasecom.com.br/storage/biolinks/WMlqmEJGUr7ikTNGUiHyYGvp9XBUac9D9cfhV3q5.png"
+                src="/biolinks/seller_pro_card.jpg"
               />
             </a>
             <a className="link-card" href="https://tiny.com.br/ads/sistema-de-gestao?parceiro=Impellizieri">
               <div className="shine"></div>
               <img
-                title="Tiny ERP - Teste de 30 dias"
-                alt="Tiny ERP - Teste de 30 dias"
+                title="Coletivo SaaS - Seu ERP da Olist"
+                alt="Coletivo SaaS - Seu ERP da Olist"
                 loading="lazy"
-                src="https://app.lucasecom.com.br/storage/biolinks/rKOn8TZ867yg0ySWDvN9q10Uyo3zMIeCsnIT3RGg.png"
+                src="/biolinks/coletivo_saas_card.jpg"
               />
             </a>
             <a className="link-card" href="https://wa.me/5522992687704">
               <div className="shine"></div>
               <img
-                title="Fale no WhatsApp"
-                alt="Fale no WhatsApp"
+                title="Comunidade Comprando Mais Barato"
+                alt="Comunidade Comprando Mais Barato"
                 loading="lazy"
-                src="https://marketplacenaveia.com/storage/biolinks/O0Xzb7G9cPGy3tI1ZuP8mI9MuU4Y5Ihjo3Lom5yX.png" // Reusing an image from their HTML for the 5th item, since it says Mentoria, but they want it to go to whatsapp or something? Actually let's just use the exact HTML they provided
+                src="/biolinks/comunidade_card.jpg"
               />
             </a>
           </div>
