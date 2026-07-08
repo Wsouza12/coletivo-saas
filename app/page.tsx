@@ -10,6 +10,8 @@ import {
   type ProdutoAtacadoVitrine,
 } from "@/components/atacado/produto-atacado-vitrine-card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { VitrineHero } from "@/components/atacado/vitrine-hero";
+import { VitrineBenefits } from "@/components/atacado/vitrine-benefits";
 
 const PAGE_SIZE = 12;
 
@@ -136,17 +138,24 @@ export default async function VitrineAtacadoPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <span className="text-lg font-bold text-primary">{APP_NAME}</span>
-          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+      {/* Background shape that mimics Mercado Livre's top colored block */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-primary z-0" />
+      
+      <header className="relative z-10 bg-transparent">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6">
+          <span className="text-xl font-extrabold text-primary-foreground tracking-tight">{APP_NAME}</span>
+          <Link href="/login" className="text-sm font-semibold text-primary-foreground hover:opacity-90">
             Entrar
           </Link>
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mt-4">
+      <main className="relative z-10">
+        <VitrineHero />
+        <VitrineBenefits />
+
+        <section className="mx-auto max-w-6xl px-4 py-8">
+          <div className="mt-4">
           <VitrineCategoriaStrip categorias={categorias} categoriaAtiva={categoria} basePath="/" />
         </div>
 
@@ -219,8 +228,9 @@ export default async function VitrineAtacadoPage({
           </div>
         </div>
       </section>
-    </div>
-  );
+    </main>
+  </div>
+);
 }
 
 // Paginação numerada — ‹ 1 2 [3] 4 5 › estilo Google. Mostra até 5 números em
