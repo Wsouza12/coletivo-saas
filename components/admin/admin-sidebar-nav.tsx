@@ -48,9 +48,7 @@ export function AdminSidebarNav({ userEmail }: { userEmail?: string | null }) {
   return (
     <div className="flex h-full flex-col bg-sidebar">
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-        <div className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-          {APP_NAME.charAt(0).toUpperCase()}
-        </div>
+        <img src="/icon.png" alt="Logo" className="size-8 object-contain rounded-md" />
         <span className="font-semibold text-sidebar-foreground">{APP_NAME}</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">

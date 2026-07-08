@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { APP_NAME } from "@/lib/brand";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,10 +42,8 @@ export function LojistaSidebarNav({
     <div className="flex h-full flex-col bg-sidebar">
       <div className="flex h-16 flex-col justify-center gap-0.5 border-b border-sidebar-border px-6">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            D
-          </div>
-          <span className="font-semibold text-sidebar-foreground">DropyAtacado.com.br</span>
+          <img src="/icon.png" alt="Logo" className="size-8 object-contain rounded-md" />
+          <span className="font-semibold text-sidebar-foreground">{APP_NAME}</span>
         </div>
         <span className="ml-10 truncate text-xs text-muted-foreground">{storeName}</span>
       </div>
