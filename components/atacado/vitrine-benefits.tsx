@@ -26,14 +26,16 @@ export function VitrineBenefits() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 relative z-10 -mt-16">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white rounded-md p-6 shadow-sm border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white rounded-md p-4 sm:p-6 shadow-sm border border-gray-100">
         {benefits.map((benefit, i) => (
-          <div key={i} className="flex flex-col items-center text-center p-4">
-            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-blue-50 text-[#3483FA]">
-              <benefit.icon className="size-6" />
+          <div key={i} className="flex flex-row sm:flex-col items-center sm:items-center text-left sm:text-center p-2 sm:p-4 gap-4 sm:gap-0">
+            <div className="shrink-0 sm:mb-4 flex size-12 sm:size-14 items-center justify-center rounded-full bg-blue-50 text-[#3483FA]">
+              <benefit.icon className="size-5 sm:size-6" />
             </div>
-            <h3 className="font-semibold text-[#333] mb-2">{benefit.title}</h3>
-            <p className="text-sm text-gray-500">{benefit.description}</p>
+            <div>
+              <h3 className="font-semibold text-[#333] mb-1 sm:mb-2 text-sm sm:text-base">{benefit.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-500">{benefit.description}</p>
+            </div>
           </div>
         ))}
       </div>
