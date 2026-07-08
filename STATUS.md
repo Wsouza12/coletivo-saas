@@ -55,6 +55,10 @@
   - Removido todo o código relacionado a Instagram e Dropshipping antigo (ML/Shopee).
   - Adicionado campo "Margem de Segurança de Frete (%)" no painel financeiro (aplica sobre o Melhor Envio).
   - Redesign da página inicial (Catálogo) com visual premium (Hero Banner, Benefícios) substituindo a antiga "Vitrine".
+  - **Novo fluxo de Assinaturas**: 
+    - Desconto dinâmico configurável (ex: assinante paga 10% de taxa no checkout em vez de 15%).
+    - Nova rota autônoma `/assinatura` para venda manual/divulgação por link externo (gera QR Code Pix e atualiza instantaneamente).
+    - Botão "Copiar Link" incluído no painel admin em "Assinantes".
 
 ## ⏳ PENDENTE
 1. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).

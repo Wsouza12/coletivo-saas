@@ -23,6 +23,7 @@ tem a **infra dele** (Supabase, WhatsApp/Evolution, conta Mercado Pago, domínio
 ## 🎯 O QUE ESTE PRODUTO FAZ (só o coletivo)
 - **Vitrine pública principal** `/` (Catálogo premium com busca e categorias) + checkout `/atacado/[slug]` (Pix direto via Mercado Pago)
 - **Rodadas** de compra coletiva (reservas, meta, rateio, frete via Melhor Envio com margem de segurança configurável)
+- **Assinaturas** (Venda avulsa via `/assinatura` + aplicação de desconto automático no checkout para assinantes)
 - **WhatsApp (Evolution):** abrir caixa no grupo, boas-vindas por IA ao novo membro, robô/moderador,
   disparo, reserva manual (prova social)
 - **Agenda de Postagem** (Produtos / Catálogos / Mensagens / **IA** que gera gatilhos com dados reais
