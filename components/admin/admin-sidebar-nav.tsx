@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 const NAV_ITEMS = [
   { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2, desc: "Painel de caixas." },
-  { href: "/admin/atacado/dashboard", label: "Dashboard", icon: LayoutDashboard, desc: "Métricas e gráficos das vendas coletivas." },
+  { href: "/admin/atacado/dashboard", label: "Painel Financeiro", icon: LayoutDashboard, desc: "Gráficos financeiros e métricas." },
   { href: "/admin/atacado/assinantes", label: "Assinantes", icon: Users, desc: "Gerencie os membros da comunidade." },
   { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package, desc: "Cadastre e gerencie os produtos à venda." },
   { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck, desc: "Adicione PDFs e catálogos dos fabricantes." },

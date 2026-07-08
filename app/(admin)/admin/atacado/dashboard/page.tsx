@@ -51,9 +51,9 @@ export default async function AtacadoDashboardPage() {
             Voltar pra rodadas
           </Button>
         </Link>
-        <h1 className="text-xl font-bold text-foreground">Dashboard — Atacado Coletivo</h1>
+        <h1 className="text-xl font-bold text-foreground">Painel Financeiro</h1>
         <p className="text-sm text-muted-foreground">
-          Métricas de faturamento, vendas e assinaturas do grupo de compras coletivas.
+          Vendas, faturamento, fretes, assinaturas, usuários.
         </p>
       </div>
 
