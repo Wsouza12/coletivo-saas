@@ -29,6 +29,8 @@ export function Footer() {
               <li>Razão Social: <span className="font-medium text-[#333]">(Razão Social da Empresa)</span></li>
               <li>CNPJ: <span className="font-medium text-[#333]">(00.000.000/0000-00)</span></li>
               <li>Endereço: <span className="font-medium text-[#333]">(Endereço Físico Completo)</span></li>
+              <li className="pt-2"><Link href="/politica-de-reembolso" className="hover:text-[#3483FA] hover:underline">Política de Reembolso</Link></li>
+              <li><Link href="/politica-de-entregas" className="hover:text-[#3483FA] hover:underline">Política de Entregas</Link></li>
             </ul>
           </div>
           
