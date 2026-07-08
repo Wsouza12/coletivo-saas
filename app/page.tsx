@@ -9,9 +9,10 @@ import {
   ProdutoAtacadoVitrineCard,
   type ProdutoAtacadoVitrine,
 } from "@/components/atacado/produto-atacado-vitrine-card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Crown, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { VitrineHero } from "@/components/atacado/vitrine-hero";
 import { VitrineBenefits } from "@/components/atacado/vitrine-benefits";
+import { Footer } from "@/components/shared/footer";
 
 const PAGE_SIZE = 12;
 
@@ -232,10 +233,12 @@ export default async function VitrineAtacadoPage({
             )}
           </div>
         </div>
-      </section>
-    </main>
-  </div>
-);
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
 }
 
 // Paginação numerada — ‹ 1 2 [3] 4 5 › estilo Google. Mostra até 5 números em
