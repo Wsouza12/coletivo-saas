@@ -568,6 +568,8 @@ model ConfiguracaoFinanceira {
   // loopDescansoInicio e loopDescansoFim (inclusive). Ex: 23 e 6 = silêncio de 23h até 05:59h
   loopDescansoInicio        Int     @default(23) // hora local (0-23)
   loopDescansoFim           Int     @default(6)  // hora local (0-23)
+  // Margem de segurança aplicada sobre as cotações de frete do Melhor Envio
+  margemSegurancaFrete      Decimal @default(12) @db.Decimal(5, 2)
   // Instagram — OAuth token de longa duração (60 dias, renovável) e ID do usuário IG
   instagramAccessToken  String?  @db.Text
   instagramUserId       String?

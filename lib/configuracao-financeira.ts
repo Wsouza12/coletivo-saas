@@ -26,6 +26,7 @@ export async function updateConfiguracaoFinanceira(data: {
   precoListaFornecedores?: number;
   precoCatalogosSemContato?: number;
   precoUpsellComunidade?: number;
+  margemSegurancaFrete?: number;
 }) {
   await getConfiguracaoFinanceira();
   return prisma.configuracaoFinanceira.update({

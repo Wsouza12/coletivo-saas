@@ -194,6 +194,7 @@ export const configuracaoFinanceiraSchema = z.object({
   precoListaFornecedores: z.number().min(0).optional(),
   precoCatalogosSemContato: z.number().min(0).optional(),
   precoUpsellComunidade: z.number().min(0).optional(),
+  margemSegurancaFrete: z.number().min(0).max(100).optional(),
 });
 
 export const criarRodadaAtacadoSchema = z.object({

@@ -194,9 +194,8 @@ export async function listarOpcoesFrete(params: {
     recomendado: true,
   };
 
-  // Margem de segurança de 12% sobre o frete real da Melhor Envio — cobre
-  // possível variação entre a cotação e o valor cobrado de fato na postagem.
-  const MARGEM_SEGURANCA_FRETE = 1.12;
+  const config = await getConfiguracaoFinanceira();
+  const margemSegurancaFrete = 1 + Number(config.margemSegurancaFrete) / 100;
 
   return [
     retirada,
@@ -204,7 +203,7 @@ export async function listarOpcoesFrete(params: {
       id: String(o.servicoId),
       nome: o.transportadora,
       descricao: descreverServicoFrete(o.servico),
-      preco: Math.round(o.preco * MARGEM_SEGURANCA_FRETE * 100) / 100,
+      preco: Math.round(o.preco * margemSegurancaFrete * 100) / 100,
       prazoDias: o.prazoDias,
       recomendado: false,
     })),

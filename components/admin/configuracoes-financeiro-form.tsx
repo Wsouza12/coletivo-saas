@@ -27,6 +27,7 @@ export function ConfiguracoesFinanceiroForm({
   initialPrecoListaFornecedores,
   initialPrecoCatalogosSemContato,
   initialPrecoUpsellComunidade,
+  initialMargemSegurancaFrete,
 }: {
   initialMargemPadrao: number;
   initialMargemOperacional: number;
@@ -40,6 +41,7 @@ export function ConfiguracoesFinanceiroForm({
   initialPrecoListaFornecedores: number;
   initialPrecoCatalogosSemContato: number;
   initialPrecoUpsellComunidade: number;
+  initialMargemSegurancaFrete: number;
 }) {
   const [margemPadrao, setMargemPadrao] = useState(String(initialMargemPadrao));
   const [margemOperacional, setMargemOperacional] = useState(String(initialMargemOperacional));
@@ -53,6 +55,7 @@ export function ConfiguracoesFinanceiroForm({
   const [precoListaFornecedores, setPrecoListaFornecedores] = useState(String(initialPrecoListaFornecedores));
   const [precoCatalogosSemContato, setPrecoCatalogosSemContato] = useState(String(initialPrecoCatalogosSemContato));
   const [precoUpsellComunidade, setPrecoUpsellComunidade] = useState(String(initialPrecoUpsellComunidade));
+  const [margemSegurancaFrete, setMargemSegurancaFrete] = useState(String(initialMargemSegurancaFrete));
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -73,6 +76,7 @@ export function ConfiguracoesFinanceiroForm({
         precoListaFornecedores: Number(precoListaFornecedores),
         precoCatalogosSemContato: Number(precoCatalogosSemContato),
         precoUpsellComunidade: Number(precoUpsellComunidade),
+        margemSegurancaFrete: Number(margemSegurancaFrete),
         ...(cepOrigem ? { cepOrigem } : {}),
       }),
     });
@@ -137,6 +141,22 @@ export function ConfiguracoesFinanceiroForm({
         />
         <span className="text-xs text-muted-foreground">
           Usado pro cálculo real de frete (Melhor Envio) nas reservas de compra coletiva — Fase 6.
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+        <span className="text-sm font-medium text-foreground">Frete - Melhor Envio</span>
+        <Label>Margem de segurança (%)</Label>
+        <Input
+          type="number"
+          step="0.1"
+          min="0"
+          value={margemSegurancaFrete}
+          onChange={(e) => setMargemSegurancaFrete(e.target.value)}
+          required
+        />
+        <span className="text-xs text-muted-foreground">
+          Percentual adicionado ao valor da cotação real do Melhor Envio para cobrir eventuais diferenças na postagem (lucro sobre frete).
         </span>
       </div>
 

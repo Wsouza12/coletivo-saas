@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, DollarSign, Package, Truck, Percent, Users, Boxes } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/format";
+import { getConfiguracaoFinanceira } from "@/lib/configuracao-financeira";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +13,7 @@ export default async function AtacadoDashboardPage() {
     aguardando,
     assinaturas,
     rodadasPorStatus,
+    config,
   ] = await Promise.all([
     prisma.reservaAtacado.aggregate({
       where: { status: "PAGO" },
@@ -25,6 +27,7 @@ export default async function AtacadoDashboardPage() {
     }),
     prisma.assinaturaAtacado.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.rodadaAtacado.groupBy({ by: ["status"], _count: { _all: true } }),
+    getConfiguracaoFinanceira(),
   ]);
 
   const assinantesAtivos = await prisma.assinaturaAtacado.count({
@@ -41,6 +44,12 @@ export default async function AtacadoDashboardPage() {
 
   const statusRodadaMap = Object.fromEntries(rodadasPorStatus.map((r) => [r.status, r._count._all]));
   const statusAssinaturaMap = Object.fromEntries(assinaturas.map((a) => [a.status, a._count._all]));
+
+  // O valor total de frete embute a margem de segurança. Lucro = Frete - (Frete / (1 + Margem%))
+  const margemFrete = Number(config.margemSegurancaFrete);
+  const multiplicadorMargem = 1 + margemFrete / 100;
+  const custoFreteEstimado = valorFrete / multiplicadorMargem;
+  const lucroFrete = valorFrete - custoFreteEstimado;
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,7 +83,7 @@ export default async function AtacadoDashboardPage() {
           icon={Truck}
           label="Frete cobrado"
           value={formatBRL(valorFrete)}
-          sub="Repassado integralmente ao comprador"
+          sub={`Inclui ${formatBRL(lucroFrete)} de margem extra (${margemFrete}%)`}
         />
         <MetricCard
           icon={Percent}

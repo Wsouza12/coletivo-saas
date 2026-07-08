@@ -126,6 +126,7 @@ export default async function AdminConfiguracoesPage() {
                 initialPrecoListaFornecedores={Number(financeiro.precoListaFornecedores)}
                 initialPrecoCatalogosSemContato={Number(financeiro.precoCatalogosSemContato)}
                 initialPrecoUpsellComunidade={Number(financeiro.precoUpsellComunidade)}
+                initialMargemSegurancaFrete={Number(financeiro.margemSegurancaFrete)}
               />
             </CardContent>
           </Card>
