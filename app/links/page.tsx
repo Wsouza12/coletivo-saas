@@ -317,7 +317,7 @@ export default function LinksPage() {
           </div>
           
           <div className="links-grid">
-            <a className="link-card" href="https://lucasecom.com.br/quiz-mvo-1">
+            <a className="link-card" href="https://wa.me/5522992687704">
               <div className="shine"></div>
               <img
                 title="MLpro - Extensão de Marketplaces"
@@ -326,7 +326,7 @@ export default function LinksPage() {
                 src="/biolinks/mlpro_card.jpg"
               />
             </a>
-            <a className="link-card" href="https://lucasecom.com.br/pack-botao-inicio/">
+            <a className="link-card" href="https://wa.me/5522992687704">
               <div className="shine"></div>
               <img
                 title="Fornecedores de Caixa Fechada"
@@ -335,7 +335,7 @@ export default function LinksPage() {
                 src="/biolinks/fornecedores_card.jpg"
               />
             </a>
-            <a className="link-card" href="https://sellernaveia.marketplacenaveia.com/">
+            <a className="link-card" href="https://wa.me/5522992687704">
               <div className="shine"></div>
               <img
                 title="Seller Pro"
@@ -344,7 +344,7 @@ export default function LinksPage() {
                 src="/biolinks/seller_pro_card.jpg"
               />
             </a>
-            <a className="link-card" href="https://tiny.com.br/ads/sistema-de-gestao?parceiro=Impellizieri">
+            <a className="link-card" href="https://wa.me/5522992687704">
               <div className="shine"></div>
               <img
                 title="Coletivo SaaS - Seu ERP da Olist"
