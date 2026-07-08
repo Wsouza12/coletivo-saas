@@ -137,21 +137,19 @@ export default async function VitrineAtacadoPage({
   }
 
   return (
-    <div className="dark relative flex flex-col min-h-screen bg-black text-white">
-      {/* Background Radial Gradient */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(168,85,247,0.25),rgba(0,0,0,0))]" />
+    <div className="relative flex flex-col min-h-screen bg-[#EBEBEB] text-[#333333]">
+      {/* Top Yellow Block */}
+      <div className="absolute top-0 left-0 w-full h-[320px] bg-[#FFE600] z-0" />
       
       <header className="relative z-10 bg-transparent">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6">
-          <Link href="/" className="flex items-center gap-1.5 text-xl font-bold">
-            <svg className="size-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277]">
+            <svg className="size-5 text-[#2D3277]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
             </svg>
-            <span className="bg-gradient-to-r from-purple-400 to-amber-300 bg-clip-text text-transparent">
-              {APP_NAME}
-            </span>
+            <span>{APP_NAME}</span>
           </Link>
-          <Link href="/login" className="text-sm font-semibold text-white/90 hover:text-white transition">
+          <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition">
             Entrar
           </Link>
         </div>
@@ -176,12 +174,12 @@ export default async function VitrineAtacadoPage({
             name="q"
             defaultValue={q}
             placeholder="Buscar por nome ou código..."
-            className="h-10 flex-1 rounded-lg border border-white/15 bg-white/5 px-3 text-sm text-white outline-none placeholder:text-white/40 focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40"
+            className="h-10 flex-1 rounded-sm border-none bg-white px-4 text-sm text-[#333] shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3483FA]/50"
           />
           <select
             name="ordem"
             defaultValue={ordem}
-            className="h-10 rounded-lg border border-white/15 bg-black px-3 text-sm text-white outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40"
+            className="h-10 rounded-sm border-none bg-white px-3 text-sm text-[#333] shadow-sm outline-none focus:ring-2 focus:ring-[#3483FA]/50"
           >
             <option value="recentes">Mais recentes</option>
             <option value="menor-preco">Menor preço</option>
@@ -189,7 +187,7 @@ export default async function VitrineAtacadoPage({
           </select>
           <button
             type="submit"
-            className="h-10 rounded-lg bg-gradient-to-r from-purple-600 to-amber-500 px-6 text-sm font-bold text-black shadow-lg shadow-purple-900/40 transition hover:opacity-90"
+            className="h-10 rounded-sm bg-[#3483FA] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2968c8]"
           >
             Aplicar
           </button>
