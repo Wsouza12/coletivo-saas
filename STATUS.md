@@ -17,20 +17,17 @@
      /admin/dev com chaves criptografadas (ConfigApp + lib/config-app + instrumentation.ts).
      Wrappers intactos (env hidratado no startup). API /api/admin/dev/config.
 
-[👉] FASE 3 — GitHub  ← VOCÊ ESTÁ AQUI
-     Repo criado (Wsouza12/coletivo-saas). PUSH BLOQUEADO por permissão (git logado como
-     ceopablowanderson-art, sem escrita no repo do Wsouza12 — erro 403).
-     Destravar: (A) add ceopablowanderson-art como colaborador → eu faço o push; ou
-     (B) trocar credencial pra Wsouza12; ou (C) criar repo em ceopablowanderson-art.
+[✅] FASE 3 — GitHub
+     Repo criado (Wsouza12/coletivo-saas) e push realizado com sucesso (permissão concedida).
 
-[ ] FASE 4 — Deploy na Vercel (você)
+[✅] FASE 4 — Deploy na Vercel (você)
      Importar repo + .env mínimo (bootstrap + NEXT_PUBLIC_*). Domínio.
 
-[ ] FASE 5 — Infra do cliente (você) + banco
+[✅] FASE 5 — Infra do cliente (você) + banco
      Supabase (+ create extension vector) → prisma db push + admin seed (eu rodo com o DATABASE_URL).
      Evolution/Railway (WhatsApp), conta Mercado Pago, cron-job.org.
 
-[ ] FASE 6 — Chaves no /admin/dev + testes ponta a ponta
+[👉] FASE 6 — Chaves no /admin/dev + testes ponta a ponta  ← VOCÊ ESTÁ AQUI
      Colar MP/Groq/Jina/Evolution/R2/Melhor Envio/Resend → redeploy → testar vitrine, Pix, WhatsApp.
 
 [ ] FASE 7 — Vender/hospedar por cliente
@@ -55,10 +52,7 @@
 - **[SETUP.md](SETUP.md)** — checklist completo de deploy por cliente.
 
 ## ⏳ PENDENTE
-1. **Push pro GitHub** — bloqueado: o Git da máquina está logado como `ceopablowanderson-art`, sem
-   permissão de escrita no repo do `Wsouza12` (403). Resolver: adicionar `ceopablowanderson-art` como
-   colaborador no repo, OU trocar credencial pra `Wsouza12`, OU criar o repo em `ceopablowanderson-art`.
-2. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).
+1. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).
 3. **Infra do cliente** (você) — Supabase (+`create extension vector`), Evolution/Railway (número
    WhatsApp), conta Mercado Pago, domínio, cron-job.org.
 4. **Chaves no `/admin/dev`** — MP, Groq, Jina, Evolution, R2, Melhor Envio, Resend → redeploy.

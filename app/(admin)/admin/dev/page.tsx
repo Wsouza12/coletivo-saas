@@ -1,9 +1,16 @@
 import { KeyRound } from "lucide-react";
 import { DevConfigPanel } from "@/components/admin/dev-config-panel";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default function DevPanelPage() {
+export default async function DevPanelPage() {
+  const session = await auth();
+  if (session?.user?.email !== "ceopablowanderson@gmail.com") {
+    redirect("/admin/dashboard");
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>

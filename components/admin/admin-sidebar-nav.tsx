@@ -19,13 +19,12 @@ import { cn } from "@/lib/utils";
 
 // Coletivo SaaS — menu só do compras coletivas (white-label).
 const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/atacado", label: "Compras Coletivas", icon: Users2 },
-  { href: "/admin/atacado/produtos", label: "Catálogo", icon: Package },
-  { href: "/admin/atacado/fornecedores", label: "Fornecedores", icon: Truck },
-  { href: "/admin/atacado/mapeamento", label: "Mapa de Catálogos", icon: Map },
-  { href: "/admin/atacado/agenda", label: "Agenda de Postagem", icon: CalendarClock },
-  { href: "/admin/atacado/origens", label: "Origem dos Leads", icon: Radar },
+  { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2 },
+  { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package },
+  { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck },
+  { href: "/admin/atacado/mapeamento", label: "Pesquisa por imagem", icon: Map },
+  { href: "/admin/atacado/agenda", label: "Mensagens Agendadas", icon: CalendarClock },
+  { href: "/admin/atacado/origens", label: "Link para divulgação", icon: Radar },
   { href: "/admin/avisos", label: "Avisos da Comunidade", icon: Megaphone },
   { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
@@ -34,7 +33,7 @@ const NAV_ITEMS = [
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Compras Coletivas";
 
-export function AdminSidebarNav() {
+export function AdminSidebarNav({ userEmail }: { userEmail?: string | null }) {
   const pathname = usePathname();
 
   // Item ativo = o de href mais longo que casa com a rota atual, pra não acender
@@ -52,7 +51,12 @@ export function AdminSidebarNav() {
         <span className="font-semibold text-sidebar-foreground">{APP_NAME}</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => {
+          if (item.href === "/admin/dev") {
+            return userEmail === "ceopablowanderson@gmail.com";
+          }
+          return true;
+        }).map((item) => {
           const isActive = item.href === hrefAtivo;
           const Icon = item.icon;
           return (

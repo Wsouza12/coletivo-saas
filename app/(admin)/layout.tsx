@@ -16,7 +16,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-[240px] shrink-0 border-r border-sidebar-border md:block">
-        <AdminSidebarNav />
+        <AdminSidebarNav userEmail={session.user.email} />
       </aside>
       <div className="flex flex-1 flex-col">
         <AdminTopbar adminName={session.user.name ?? "Admin"} />

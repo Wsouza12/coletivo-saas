@@ -35,7 +35,7 @@ export default function LoginPage() {
     const session = await sessionRes.json();
 
     if (session?.user?.role === "ADMIN") {
-      router.push("/admin/dashboard");
+      router.push("/admin/atacado");
     } else if (session?.user?.status === "PENDING") {
       router.push("/aguardando-aprovacao");
     } else {
