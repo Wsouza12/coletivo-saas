@@ -16,19 +16,19 @@ import {
   KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Coletivo SaaS — menu só do compras coletivas (white-label).
 const NAV_ITEMS = [
-  { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2 },
-  { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package },
-  { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck },
-  { href: "/admin/atacado/mapeamento", label: "Pesquisa por imagem", icon: Map },
-  { href: "/admin/atacado/agenda", label: "Mensagens Agendadas", icon: CalendarClock },
-  { href: "/admin/atacado/origens", label: "Link para divulgação", icon: Radar },
-  { href: "/admin/avisos", label: "Avisos da Comunidade", icon: Megaphone },
-  { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
-  { href: "/admin/dev", label: "Desenvolvedor", icon: KeyRound },
+  { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2, desc: "Painel central das rodadas de compras." },
+  { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package, desc: "Cadastre e gerencie os produtos à venda." },
+  { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck, desc: "Adicione PDFs e catálogos dos fabricantes." },
+  { href: "/admin/atacado/mapeamento", label: "Pesquisa por imagem", icon: Map, desc: "Encontre produtos na internet usando uma foto." },
+  { href: "/admin/atacado/agenda", label: "Mensagens Agendadas", icon: CalendarClock, desc: "Programe envios no WhatsApp da comunidade." },
+  { href: "/admin/atacado/origens", label: "Link para divulgação", icon: Radar, desc: "Links com rastreio de UTM para campanhas." },
+  { href: "/admin/avisos", label: "Avisos da Comunidade", icon: Megaphone, desc: "Publique alertas para os assinantes." },
+  { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle, desc: "Status de conexão do robô atendente." },
+  { href: "/admin/configuracoes", label: "Configurações", icon: Settings, desc: "Ajustes gerais e regras de negócio." },
+  { href: "/admin/dev", label: "Desenvolvedor", icon: KeyRound, desc: "Configurações técnicas e chaves de API." },
 ];
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Compras Coletivas";
@@ -60,19 +60,25 @@ export function AdminSidebarNav({ userEmail }: { userEmail?: string | null }) {
           const isActive = item.href === hrefAtivo;
           const Icon = item.icon;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent"
-              )}
-            >
-              <Icon className="size-4" />
-              {item.label}
-            </Link>
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent"
+                  )}
+                >
+                  <Icon className="size-4" />
+                  {item.label}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-[200px] text-xs">
+                <p>{item.desc}</p>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </nav>
