@@ -50,6 +50,11 @@
   API `/api/admin/dev/config`. Status por chave (banco/env/faltando).
 - **Fix herdado:** categoria de produto sem vínculo cai no grupo "Produtos Disponíveis" por padrão.
 - **[SETUP.md](SETUP.md)** — checklist completo de deploy por cliente.
+- **Customizações Recentes:**
+  - Renomeado *Fornecedores* para *Catálogos* com suporte a PDF privado por produto.
+  - Removido todo o código relacionado a Instagram e Dropshipping antigo (ML/Shopee).
+  - Adicionado campo "Margem de Segurança de Frete (%)" no painel financeiro (aplica sobre o Melhor Envio).
+  - Redesign da página inicial (Catálogo) com visual premium (Hero Banner, Benefícios) substituindo a antiga "Vitrine".
 
 ## ⏳ PENDENTE
 1. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).
@@ -57,7 +62,7 @@
    WhatsApp), conta Mercado Pago, domínio, cron-job.org.
 4. **Chaves no `/admin/dev`** — MP, Groq, Jina, Evolution, R2, Melhor Envio, Resend → redeploy.
 5. **`prisma db push` + admin seed** no banco do cliente (posso rodar quando tiver o `DATABASE_URL`).
-6. **(Opcional)** deletar código morto (lojista/ML/Shopee/Lista/quiz) — não urgente, não atrapalha.
+6. **(Opcional)** deletar código morto restante (se houver resquícios).
 7. **(Opcional)** seed de dados de teste (fornecedores/produtos fake) pra validar antes de vender.
 
 ## 🔁 LIMITES (o que o assistente NÃO faz)

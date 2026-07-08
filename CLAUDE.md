@@ -21,21 +21,19 @@ tem a **infra dele** (Supabase, WhatsApp/Evolution, conta Mercado Pago, domínio
 `⏳ Fase 5 Infra cliente + banco` · `⏳ Fase 6 Chaves /admin/dev + testes` · `⏳ Fase 7 Vender`.
 
 ## 🎯 O QUE ESTE PRODUTO FAZ (só o coletivo)
-- **Vitrine pública** `/atacado` + checkout `/atacado/[slug]` (Pix direto via Mercado Pago)
-- **Rodadas** de compra coletiva (reservas, meta, rateio, frete via Melhor Envio)
+- **Vitrine pública principal** `/` (Catálogo premium com busca e categorias) + checkout `/atacado/[slug]` (Pix direto via Mercado Pago)
+- **Rodadas** de compra coletiva (reservas, meta, rateio, frete via Melhor Envio com margem de segurança configurável)
 - **WhatsApp (Evolution):** abrir caixa no grupo, boas-vindas por IA ao novo membro, robô/moderador,
   disparo, reserva manual (prova social)
 - **Agenda de Postagem** (Produtos / Catálogos / Mensagens / **IA** que gera gatilhos com dados reais
   e agenda)
 - **Cadastro de produto por IA de visão** (lê recorte da página do catálogo — Groq)
 - **Mapa de Catálogos / busca visual** por foto (Jina CLIP + pgvector)
-- **Fornecedores + catálogos PDF** (Cloudflare R2) + **rastreio de origem de leads**
+- **Catálogos (Fornecedores)** + catálogos PDF privados (Cloudflare R2) + **rastreio de origem de leads**
 - **Links rastreados** `/r/[slug]`, `/r/comunidade`
 
 ## 🚫 O QUE FOI TIRADO (não é do coletivo)
-Do **menu admin** (o código dessas rotas ainda existe, só saiu do menu — não quebra o build; deletar
-é opcional/futuro): Dropi/lojista, integrações **Mercado Livre/Shopee**, **Lista de Fornecedores**
-(infoproduto), **quiz/leads**, produtos do lojista, faturas do lojista, devoluções.
+Do **menu admin** (o código dessas rotas pode até existir em parte, mas foi tirado do menu e desativado): Dropi/lojista, integrações **Mercado Livre/Shopee**, **Lista de Fornecedores** (infoproduto), **Instagram/geração de conteúdo social**, **quiz/leads**, produtos do lojista, faturas do lojista, devoluções. A vitrine antiga de dropshipping foi substituída 100% pelo Catálogo de Atacado na raiz (`/`).
 
 ## 🏷️ WHITE-LABEL
 - Nome da marca vem de **`NEXT_PUBLIC_APP_NAME`** (via `lib/brand.ts` → `APP_NAME`). Usado na home,
