@@ -17,7 +17,6 @@ import {
 export function ConfiguracoesFinanceiroForm({
   initialMargemPadrao,
   initialMargemOperacional,
-  initialTipoVendedorShopee,
   initialCepOrigem,
   initialValorAssinaturaAtacado,
   initialTaxaServicoPadraoAtacado,
@@ -31,7 +30,6 @@ export function ConfiguracoesFinanceiroForm({
 }: {
   initialMargemPadrao: number;
   initialMargemOperacional: number;
-  initialTipoVendedorShopee: "CNPJ" | "CPF_INDIVIDUAL";
   initialCepOrigem?: string | null;
   initialValorAssinaturaAtacado: number;
   initialTaxaServicoPadraoAtacado: number;
@@ -45,7 +43,6 @@ export function ConfiguracoesFinanceiroForm({
 }) {
   const [margemPadrao, setMargemPadrao] = useState(String(initialMargemPadrao));
   const [margemOperacional, setMargemOperacional] = useState(String(initialMargemOperacional));
-  const [tipoVendedorShopee, setTipoVendedorShopee] = useState(initialTipoVendedorShopee);
   const [cepOrigem, setCepOrigem] = useState(initialCepOrigem ?? "");
   const [valorAssinaturaAtacado, setValorAssinaturaAtacado] = useState(String(initialValorAssinaturaAtacado));
   const [taxaServicoPadraoAtacado, setTaxaServicoPadraoAtacado] = useState(String(initialTaxaServicoPadraoAtacado));
@@ -67,7 +64,6 @@ export function ConfiguracoesFinanceiroForm({
       body: JSON.stringify({
         margemPadrao: Number(margemPadrao),
         margemOperacional: Number(margemOperacional),
-        tipoVendedorShopee,
         valorAssinaturaAtacado: Number(valorAssinaturaAtacado),
         taxaServicoPadraoAtacado: Number(taxaServicoPadraoAtacado),
         exigirAssinaturaAtacado,
@@ -115,21 +111,6 @@ export function ConfiguracoesFinanceiroForm({
           onChange={(e) => setMargemOperacional(e.target.value)}
           required
         />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label>Tipo de vendedor na Shopee</Label>
-        <Select value={tipoVendedorShopee} onValueChange={(v) => v && setTipoVendedorShopee(v as "CNPJ" | "CPF_INDIVIDUAL")}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="CNPJ">CNPJ (ou CPF com perfil padrão)</SelectItem>
-            <SelectItem value="CPF_INDIVIDUAL">CPF individual (abaixo de 450 pedidos/90 dias)</SelectItem>
-          </SelectContent>
-        </Select>
-        <span className="text-xs text-muted-foreground">
-          Define a tabela real de taxa da Shopee usada no cálculo de preço sugerido.
-        </span>
       </div>
       <div className="flex flex-col gap-2">
         <Label>CEP de origem (remetente)</Label>

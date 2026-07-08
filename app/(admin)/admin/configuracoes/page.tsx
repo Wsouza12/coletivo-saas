@@ -116,7 +116,6 @@ export default async function AdminConfiguracoesPage() {
               <ConfiguracoesFinanceiroForm
                 initialMargemPadrao={Number(financeiro.margemPadrao)}
                 initialMargemOperacional={Number(financeiro.margemOperacional)}
-                initialTipoVendedorShopee={financeiro.tipoVendedorShopee}
                 initialCepOrigem={financeiro.cepOrigem}
                 initialValorAssinaturaAtacado={Number(financeiro.valorAssinaturaAtacado)}
                 initialTaxaServicoPadraoAtacado={Number(financeiro.taxaServicoPadraoAtacado)}

@@ -194,8 +194,7 @@ export async function listarOpcoesFrete(params: {
     recomendado: true,
   };
 
-  const config = await getConfiguracaoFinanceira();
-  const margemSegurancaFrete = 1 + Number(config.margemSegurancaFrete) / 100;
+  const margemSegurancaFrete = 1 + Number(config?.margemSegurancaFrete ?? 12) / 100;
 
   return [
     retirada,
