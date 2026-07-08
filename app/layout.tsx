@@ -13,7 +13,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: ` — Compras Coletivas`,
+  title: {
+    template: `%s | ${APP_NAME}`,
+    default: APP_NAME,
+  },
   description: "Plataforma de dropshipping B2B2C",
   verification: {
     other: {
