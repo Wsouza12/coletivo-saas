@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AssinanteHistoricoDialog } from "@/components/admin/assinante-historico-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { BotaoCopiarLinkAssinatura } from "@/components/admin/botao-copiar-link-assinatura";
 
 export default async function AtacadoAssinantesPage() {
   const assinantes = await prisma.assinaturaAtacado.findMany({
@@ -22,10 +23,11 @@ export default async function AtacadoAssinantesPage() {
           </Button>
         </Link>
         <h1 className="text-xl font-bold text-foreground">Assinantes do grupo de Atacado Coletivo</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mt-1">
           Quem está cadastrado pra reservar nas rodadas — status da assinatura mensal e histórico
           de compras de cada um.
         </p>
+        <BotaoCopiarLinkAssinatura />
       </div>
 
       {assinantes.length === 0 ? (
