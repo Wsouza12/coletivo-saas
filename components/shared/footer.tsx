@@ -44,7 +44,7 @@ export function Footer() {
           <div className="text-xs text-gray-400 text-center md:text-right">
             <p>Desenvolvido e Licenciado por</p>
             <p className="font-bold text-[#2D3277] mt-0.5">Pablo Wanderson</p>
-            <p className="mt-0.5">Contato: <a href="https://wa.me/5522992687704" target="_blank" rel="noreferrer" className="text-[#3483FA] hover:underline font-medium">22 99268-7704</a></p>
+            <p className="mt-0.5">Contato: <Link href="/links" className="text-[#3483FA] hover:underline font-medium">22 99268-7704</Link></p>
           </div>
         </div>
       </div>
