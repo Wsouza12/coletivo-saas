@@ -1,0 +1,1120 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── USUÁRIOS ───────────────────────────────────────────────────────────────
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  role      Role       @default(LOJISTA)
+  status    UserStatus @default(PENDING) // admin aprova lojistas
+  phone     String?
+  document  String? // CNPJ ou CPF
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // relações
+  lojista  Lojista?
+  sessions Session[]
+
+  @@index([email])
+  @@index([role, status])
+}
+
+enum Role {
+  ADMIN
+  LOJISTA
+}
+
+enum UserStatus {
+  PENDING // aguarda aprovação do admin
+  ACTIVE
+  SUSPENDED
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+// ─── LOJISTA ────────────────────────────────────────────────────────────────
+
+model Lojista {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  storeName         String
+  storeUrl          String?
+  logoUrl           String?
+  razaoSocial       String?
+  inscricaoEstadual String?
+  saldoCredito      Decimal   @default(0) @db.Decimal(10, 2) // crédito de devoluções, abatido em faturas futuras
+  acessoExpiraEm    DateTime? // teste grátis (3 dias) ou assinatura paga (30 dias) — null = legado, sem cobrança
+  approvedAt        DateTime?
+  approvedBy        String? // userId do admin
+
+  user               User                @relation(fields: [userId], references: [id])
+  integracoes        Integracao[]
+  anuncios           Anuncio[]
+  pedidos            Pedido[]
+  faturas            Fatura[]
+  devolucoes         Devolucao[]
+  vendasNaoVinculadas VendaNaoVinculada[]
+  notificacoes       Notificacao[]
+  sizeCharts         AnuncioSizeChart[]
+  kits               Kit[]
+
+  @@index([userId])
+}
+
+// ─── DEVOLUÇÕES E REEMBOLSOS ────────────────────────────────────────────────
+
+model Devolucao {
+  id             String          @id @default(cuid())
+  pedidoId       String          @unique
+  lojistaId      String
+  motivo         String          @db.Text
+  status         DevolucaoStatus @default(SOLICITADA)
+  valorReembolso Decimal?        @db.Decimal(10, 2)
+  reembolsadoEm  DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id])
+  lojista Lojista @relation(fields: [lojistaId], references: [id])
+
+  @@index([lojistaId, status])
+}
+
+enum DevolucaoStatus {
+  SOLICITADA
+  EM_ANDAMENTO
+  REEMBOLSADA
+  NEGADA
+}
+
+// ─── INTEGRAÇÕES ML / SHOPEE ─────────────────────────────────────────────────
+
+model Integracao {
+  id           String     @id @default(cuid())
+  lojistaId    String
+  plataforma   Plataforma
+  accountId    String // ID da conta na plataforma
+  accountName  String
+  accessToken  String // criptografado
+  refreshToken String // criptografado
+  tokenExpiry  DateTime
+  ativa        Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  lojista Lojista @relation(fields: [lojistaId], references: [id])
+
+  @@unique([lojistaId, plataforma])
+  @@index([lojistaId])
+}
+
+enum Plataforma {
+  MERCADOLIVRE
+  SHOPEE
+}
+
+// ─── CATÁLOGO DO PABLO (ADMIN) ───────────────────────────────────────────────
+
+model Produto {
+  id            String          @id @default(cuid())
+  sku           String          @unique
+  nome          String
+  descricao     String          @db.Text
+  descricaoHtml String?         @db.Text // rich text para anúncios
+  categoria     String
+  subcategoria  String?
+  precoAtacado  Decimal         @db.Decimal(10, 2) // quanto Pablo cobra do lojista
+  custoReal     Decimal?        @db.Decimal(10, 2) // quanto Pablo paga ao fornecedor — usado pra calcular lucro líquido
+  ncm           String? // código oficial da Tabela NCM (Siscomex), escolhido via busca real
+  pesoKg        Decimal         @db.Decimal(6, 3)
+  dimensoes     Json? // { comprimento, largura, altura } em cm
+  estoque       Int             @default(0)
+  estoqueMinimo Int             @default(5)
+  imagens       ProdutoImagem[]
+  ativo         Boolean         @default(true)
+  destaque      Boolean         @default(false)
+  tags          String[]
+  atributos     Json? // { cor, tamanho, material, etc }
+  marca         String? // BRAND — exigido pela maioria das categorias do ML
+  modelo        String? // MODEL — exigido por várias categorias do ML
+  gtin          String? // GTIN/EAN/UPC do produto, quando disponível
+  mpn           String? // Manufacturer Part Number
+  condicao      String? @default("Novo") // Novo | Usado | Recondicionado
+  tipoAnuncio   String? @default("Clássico") // Clássico | Premium | Destaque (formato do anúncio no ML)
+  garantiaTipo  String? // Garantia do fabricante | Garantia do vendedor | Sem garantia
+  garantiaPrazo String? // ex: "12 meses", "90 dias"
+  garantiaCondicoes String? @db.Text
+  categoriaMlId String? // cache do category_id real do ML (evita rechamar a API a cada publish)
+  atributosMl   Json? // { [attributeId]: { value_id?, value_name? } } — atributos obrigatórios do ML já preenchidos pelo admin
+  // Quando true, Produto.estoque é a SOMA de ProdutoVariacao.estoque (recalculada a cada
+  // mudança) em vez de um valor editado direto — todo código que já lê estoque continua
+  // funcionando sem mudança. Roupa com P/M/G é o caso de uso principal.
+  temVariacoes  Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  anuncios    Anuncio[]
+  itensPedido ItemPedido[]
+  variacoes   ProdutoVariacao[]
+  kitItens    KitItem[]
+  sizeCharts  AnuncioSizeChart[]
+
+  @@index([ativo, destaque])
+  @@index([categoria])
+  @@index([sku])
+}
+
+// Uma combinação real de variação de um Produto — no ML uma variação pode juntar mais
+// de um eixo (ex: COR + TAMANHO), cada combinação é um SKU próprio com estoque e preço
+// independentes (ex: Azul/P com 5 un., Azul/M com 0 un., Preto/M com 12 un.). "cor" fica
+// vazio ("") quando o produto só varia por tamanho — unique usa string vazia em vez de
+// null pra evitar duplicidade (NULL não é comparável em índice único no Postgres).
+// Medidas físicas reais (nunca preenchidas por IA) são por tamanho, não por cor — usadas
+// pra montar o size chart do ML quando a categoria exigir (ver AnuncioSizeChart).
+model ProdutoVariacao {
+  id          String   @id @default(cuid())
+  produtoId   String
+  tamanho     String // rótulo exibido, ex: "P", "38" — enviado como SIZE value_name
+  sizeValueId String? // value_id real do atributo SIZE da categoria ML, quando usa lista fechada
+  cor         String  @default("") // rótulo exibido, ex: "Azul" — vazio quando o produto não varia por cor
+  corValueId  String? // value_id real do atributo COLOR da categoria ML, quando usa lista fechada
+  estoque     Int      @default(0)
+  precoAjuste Decimal? @db.Decimal(10, 2) // delta opcional sobre o preço base do anúncio; null = mesmo preço
+  // Medidas em cm, chaves variam por domínio ML (ex: GARMENT_WAIST_WIDTH_FROM/TO pra calça) —
+  // descobertas dinamicamente via GET /domains/{domain}/technical_specs?section=grids,
+  // nunca fixadas no schema.
+  medidas     Json?
+  ordem       Int      @default(0)
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  produto     Produto           @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  itensPedido ItemPedido[]
+  anuncioVars AnuncioVariacao[]
+
+  @@unique([produtoId, tamanho, cor])
+  @@index([produtoId])
+}
+
+model ProdutoImagem {
+  id              String  @id @default(cuid())
+  produtoId       String
+  url             String
+  alt             String?
+  ordem           Int     @default(0)
+  // capa do anúncio nos marketplaces — precisa seguir as exigências do ML/Shopee
+  // (fundo branco/neutro, sem texto/marca-d'água)
+  principal       Boolean @default(false)
+  // capa da vitrine pública — pode ser uma foto mais "de marketing", sem essas
+  // exigências, pensada pra atrair quem está navegando o catálogo
+  destacarVitrine Boolean @default(false)
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId])
+}
+
+// ─── ANÚNCIOS (lojista publica produto no ML/Shopee) ────────────────────────
+
+model Anuncio {
+  id               String        @id @default(cuid())
+  lojistaId        String
+  produtoId        String? // null quando é anúncio de Kit (kitId preenchido em vez disso)
+  kitId            String? // null quando é anúncio de produto único (produtoId preenchido em vez disso)
+  plataforma       Plataforma
+  plataformaItemId String? // ID do anúncio na plataforma (ML: MLB123, Shopee: 123)
+  titulo           String
+  precoVenda       Decimal       @db.Decimal(10, 2) // preço que lojista define
+  freteGratis      Boolean       @default(false) // melhora a qualidade/competitividade do anúncio no ML
+  status           AnuncioStatus @default(RASCUNHO)
+  url              String? // link do anúncio na plataforma
+  pausadoPor       String? // motivo de pausa
+  publicadoEm      DateTime?
+  updatedAt        DateTime      @updatedAt
+  createdAt        DateTime      @default(now())
+
+  lojista   Lojista  @relation(fields: [lojistaId], references: [id])
+  produto   Produto? @relation(fields: [produtoId], references: [id])
+  kit       Kit?     @relation(fields: [kitId], references: [id])
+  pedidos   Pedido[]
+  variacoes AnuncioVariacao[]
+
+  @@unique([lojistaId, produtoId, plataforma])
+  @@unique([lojistaId, kitId, plataforma])
+  @@index([lojistaId, status])
+  @@index([plataformaItemId])
+}
+
+// ─── KITS (lojista combina vários produtos do catálogo num anúncio só) ──────
+
+model Kit {
+  id         String   @id @default(cuid())
+  lojistaId  String
+  nome       String
+  descricao  String?
+  precoVenda Decimal? @db.Decimal(10, 2)
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lojista  Lojista   @relation(fields: [lojistaId], references: [id])
+  itens    KitItem[]
+  anuncios Anuncio[]
+
+  @@index([lojistaId])
+}
+
+model KitItem {
+  id         String @id @default(cuid())
+  kitId      String
+  produtoId  String
+  quantidade Int    @default(1)
+
+  kit     Kit     @relation(fields: [kitId], references: [id], onDelete: Cascade)
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  @@unique([kitId, produtoId])
+  @@index([kitId])
+}
+
+enum AnuncioStatus {
+  RASCUNHO
+  PUBLICADO
+  PAUSADO
+  REMOVIDO
+  ERRO
+}
+
+// Liga uma ProdutoVariacao (tamanho) à variação real publicada num Anuncio específico —
+// guarda o id que o ML retornou (variations[].id) pra sincronização de pedido/estoque por tamanho.
+model AnuncioVariacao {
+  id                    String   @id @default(cuid())
+  anuncioId             String
+  produtoVariacaoId     String
+  plataformaVariationId String? // id retornado pelo ML em variations[].id
+  precoVenda            Decimal  @db.Decimal(10, 2) // preço de venda desta variação especificamente
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  anuncio         Anuncio         @relation(fields: [anuncioId], references: [id], onDelete: Cascade)
+  produtoVariacao ProdutoVariacao @relation(fields: [produtoVariacaoId], references: [id])
+
+  @@unique([anuncioId, produtoVariacaoId])
+  @@index([anuncioId])
+  @@index([produtoVariacaoId])
+}
+
+// Cache do size chart real criado no ML (POST /catalog/charts) — charts pertencem à conta
+// do vendedor que os cria, então é por (lojista, produto), não compartilhado entre lojistas.
+model AnuncioSizeChart {
+  id            String   @id @default(cuid())
+  lojistaId     String
+  produtoId     String
+  chartId       String // id retornado por POST /catalog/charts
+  rowsByTamanho Json // { "P": "664737:1", "M": "664737:2" } — cache de "<chartId>:<rowNumber>"
+  domainId      String // domain_id usado pra criar o chart (auditoria/debug)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lojista Lojista @relation(fields: [lojistaId], references: [id])
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  @@unique([lojistaId, produtoId])
+  @@index([produtoId])
+}
+
+// ─── PEDIDOS ────────────────────────────────────────────────────────────────
+
+model Pedido {
+  id                String     @id @default(cuid())
+  lojistaId         String
+  anuncioId         String?
+  plataforma        Plataforma
+  plataformaOrderId String     @unique // ID do pedido na plataforma
+
+  // comprador (dados do cliente final — só para Pablo fazer o envio)
+  compradorNome     String
+  compradorDoc      String?
+  compradorTelefone String? // WhatsApp para notificação de rastreio
+  compradorEmail    String? // Email para notificação de rastreio
+  enderecoEntrega   Json // endereço completo estruturado
+
+  // rastreio público (sem necessidade de login)
+  rastreioToken String @unique @default(cuid())
+
+  // valores
+  valorVenda Decimal @db.Decimal(10, 2) // quanto lojista recebeu
+  valorCusto Decimal @db.Decimal(10, 2) // quanto lojista deve ao Pablo
+  frete      Decimal @default(0) @db.Decimal(10, 2)
+
+  // fulfillment
+  status             PedidoStatus @default(NOVO)
+  rastreio           String?
+  transportadora     String?
+  notaFiscal         String?
+  embalagemEm        DateTime?
+  enviadoEm          DateTime?
+  entregueEm         DateTime?
+  canceladoEm        DateTime?
+  motivoCancelamento String?
+
+  // faturamento
+  faturaId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lojista   Lojista       @relation(fields: [lojistaId], references: [id])
+  anuncio   Anuncio?      @relation(fields: [anuncioId], references: [id])
+  itens     ItemPedido[]
+  fatura    Fatura?       @relation(fields: [faturaId], references: [id])
+  etapas    EtapaPedido[]
+  devolucao Devolucao?
+
+  @@index([lojistaId, status])
+  @@index([plataformaOrderId])
+  @@index([status, enviadoEm])
+  @@index([rastreioToken])
+}
+
+// Registro interno de prova de envio (foto por etapa).
+// Bucket privado no Supabase Storage — nunca exposto ao cliente final ou lojista.
+model EtapaPedido {
+  id        String       @id @default(cuid())
+  pedidoId  String
+  etapa     PedidoStatus
+  fotoUrl   String // path interno no bucket privado "etapas-pedidos"
+  criadoEm  DateTime     @default(now())
+  criadoPor String // userId do admin que registrou
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([pedidoId])
+}
+
+enum PedidoStatus {
+  NOVO // chegou da plataforma
+  CONFIRMADO // pagamento confirmado
+  SEPARANDO // Pablo separando no estoque
+  EMBALANDO // Pablo embalando
+  AGUARDANDO_COLETA
+  ENVIADO // com rastreio
+  ENTREGUE
+  CANCELADO
+  DEVOLVIDO
+}
+
+model ItemPedido {
+  id                String  @id @default(cuid())
+  pedidoId          String
+  produtoId         String
+  produtoVariacaoId String? // tamanho vendido, quando o produto tem variações
+  quantidade        Int
+  precoUnit         Decimal @db.Decimal(10, 2) // preço de custo no momento
+
+  pedido          Pedido           @relation(fields: [pedidoId], references: [id])
+  produto         Produto          @relation(fields: [produtoId], references: [id])
+  produtoVariacao ProdutoVariacao? @relation(fields: [produtoVariacaoId], references: [id])
+
+  @@index([pedidoId])
+}
+
+// ─── FINANCEIRO ─────────────────────────────────────────────────────────────
+
+model Fatura {
+  id            String       @id @default(cuid())
+  lojistaId     String
+  numero        String       @unique // FAT-2024-0001
+  periodoInicio DateTime
+  periodoFim    DateTime
+  totalPedidos  Int
+  valorTotal    Decimal      @db.Decimal(10, 2)
+  status        FaturaStatus @default(PENDENTE)
+  vencimento    DateTime
+  pago          Boolean      @default(false)
+  pagoEm        DateTime?
+  mpPaymentId   String? // ID do pagamento no Mercado Pago
+  mpPaymentLink String? // link de pagamento (Preference init_point)
+  creditoAplicado Decimal @default(0) @db.Decimal(10, 2) // abatido do saldoCredito do lojista (devoluções)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lojista Lojista  @relation(fields: [lojistaId], references: [id])
+  pedidos Pedido[]
+
+  @@index([lojistaId, status])
+}
+
+enum FaturaStatus {
+  PENDENTE
+  ENVIADA
+  PAGA
+  VENCIDA
+  CANCELADA
+}
+
+// ─── SINCRONIZAÇÃO E NOTIFICAÇÕES ───────────────────────────────────────────
+
+// Venda recebida (webhook ou cron de fallback) de um item da plataforma que
+// não tem Anuncio correspondente no nosso banco — em vez de descartar com
+// erro, registramos aqui pra o lojista vincular manualmente a um Produto.
+// Vincular não recria o pedido histórico perdido, só corrige a sincronização
+// das próximas vendas desse item.
+model VendaNaoVinculada {
+  id                String     @id @default(cuid())
+  lojistaId         String
+  plataforma        Plataforma
+  plataformaItemId  String
+  plataformaOrderId String
+  tituloAnuncio     String?
+  resolvido         Boolean    @default(false)
+  resolvidoEm       DateTime?
+  createdAt         DateTime   @default(now())
+
+  lojista Lojista @relation(fields: [lojistaId], references: [id])
+
+  @@unique([lojistaId, plataforma, plataformaOrderId])
+  @@index([lojistaId, resolvido])
+}
+
+// Central de notificações — lida tanto pelo lojista (vínculo pendente,
+// estoque baixo dos próprios anúncios) quanto pelo admin (estoque zerado no
+// catálogo geral, falhas de sincronização). lojistaId nulo = notificação de
+// admin não específica de um lojista.
+model Notificacao {
+  id           String              @id @default(cuid())
+  destinatario NotificacaoDestino
+  lojistaId    String?
+  tipo         String // VENDA_SEM_VINCULO | ESTOQUE_ZERADO | ANUNCIO_PAUSADO_AUTOMATICO
+  titulo       String
+  mensagem     String              @db.Text
+  link         String?
+  lida         Boolean             @default(false)
+  createdAt    DateTime            @default(now())
+
+  lojista Lojista? @relation(fields: [lojistaId], references: [id])
+
+  @@index([destinatario, lojistaId, lida])
+}
+
+enum NotificacaoDestino {
+  LOJISTA
+  ADMIN
+}
+
+// ─── CONFIGURAÇÕES ──────────────────────────────────────────────────────────
+
+model Categoria {
+  id        String   @id @default(cuid())
+  nome      String   @unique
+  ativa     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Linha única (singleton) — preferências globais do admin.
+model ConfiguracaoNotificacao {
+  id                    String   @id @default(cuid())
+  emailNovoPedido       Boolean  @default(true)
+  emailLojistaAprovado  Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}
+
+// Linha única (singleton) — margens padrão usadas para sugerir precoAtacado
+// a partir do custoReal no cadastro de produto. Editável pelo admin.
+model ConfiguracaoFinanceira {
+  id                 String              @id @default(cuid())
+  margemPadrao       Decimal             @default(15) @db.Decimal(5, 2) // % sobre o custo real
+  margemOperacional  Decimal             @default(5) @db.Decimal(5, 2) // % adicional sobre o custo real
+  // Campo legado — a Shopee não tem endpoint público de taxa real, então
+  // passamos a calcular pela tabela oficial real em lib/taxas-marketplace.ts
+  // (faixas de % + fixo por tipo de vendedor) em vez desse % fixo estimado.
+  taxaEstimadaShopee Decimal             @default(14) @db.Decimal(5, 2)
+  tipoVendedorShopee TipoVendedorShopee  @default(CNPJ)
+  // CEP de origem do Pablo — necessário pro cálculo real de frete via Melhor Envio (Fase 6)
+  cepOrigem          String?
+  // Fase 6 — Atacado Coletivo: valor da assinatura mensal e taxa de serviço padrão
+  // (essa última é só o valor pré-preenchido ao criar rodada; cada rodada pode ter a sua)
+  valorAssinaturaAtacado   Decimal @default(100) @db.Decimal(10, 2)
+  taxaServicoPadraoAtacado Decimal @default(10) @db.Decimal(5, 2)
+  exigirAssinaturaAtacado  Boolean @default(true)
+  // Horário de descanso do loop: nenhuma mensagem automática é enviada entre
+  // loopDescansoInicio e loopDescansoFim (inclusive). Ex: 23 e 6 = silêncio de 23h até 05:59h
+  loopDescansoInicio        Int     @default(23) // hora local (0-23)
+  loopDescansoFim           Int     @default(6)  // hora local (0-23)
+  // Instagram — OAuth token de longa duração (60 dias, renovável) e ID do usuário IG
+  instagramAccessToken  String?  @db.Text
+  instagramUserId       String?
+  instagramUsername     String?
+  instagramTokenExpiry  DateTime?
+  // Produto "Lista de Fornecedores" — preço da lista completa vendida em /fornecedores
+  precoListaFornecedores Decimal @default(97) @db.Decimal(10, 2)
+  // Downsell — só os catálogos (PDF), sem os contatos dos vendedores
+  precoCatalogosSemContato Decimal @default(47) @db.Decimal(10, 2)
+  // Order-bump — acréscimo pra incluir acesso à comunidade (rateio) no checkout
+  precoUpsellComunidade    Decimal @default(7) @db.Decimal(10, 2)
+  updatedAt          DateTime            @updatedAt
+}
+
+// Compra da "Lista de Fornecedores" (produto separado, vendido em /fornecedores).
+// Após pagar o Pix, o comprador acessa /fornecedores/acesso/{token} — que lê os
+// fornecedores/catálogos AO VIVO (atualiza no admin = atualiza na lista).
+model CompraListaFornecedores {
+  id                String   @id @default(cuid())
+  compradorNome     String
+  compradorDoc      String   @default("") // CPF — usado no login de acesso
+  compradorTelefone String
+  compradorEmail    String?
+  valor             Decimal  @db.Decimal(10, 2)
+  tipo              String   @default("COMPLETA") // COMPLETA (contatos+catálogos) | CATALOGOS (só PDFs)
+  incluiComunidade  Boolean  @default(false) // order-bump: comprou acesso à comunidade junto
+  status            String   @default("AGUARDANDO_PAGAMENTO") // AGUARDANDO_PAGAMENTO | PAGO | CANCELADO
+  token             String   @unique // acesso à página protegida
+  mpPaymentId       String?
+  mpQrCode          String?
+  mpQrCodeBase64    String?
+  pagoEm            DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+  @@index([token])
+}
+
+enum TipoVendedorShopee {
+  CNPJ
+  CPF_INDIVIDUAL
+}
+
+// Tabela oficial de NCM (Siscomex) — carregada uma vez do arquivo oficial,
+// usada pra busca real no cadastro de produto (em vez de IA adivinhar o código).
+model NcmCodigo {
+  codigo    String @id // ex: "0101.21.00"
+  descricao String @db.Text
+
+  @@index([descricao])
+}
+
+// Histórico de envios de email (Resend) — alimenta o painel de status do sistema.
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  template  String
+  status    String // sent | failed | skipped (sem RESEND_API_KEY)
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([to])
+  @@index([createdAt])
+}
+
+// ─── FASE 6 — ATACADO COLETIVO ──────────────────────────────────────────────
+// Compras coletivas: comprador final (sem login) assina uma mensalidade pra ter
+// acesso a reservar produto nas rodadas de compra em grupo. Sem assinatura ativa,
+// ele continua vendo tudo (produto/preço/progresso da meta) — só é bloqueado na
+// hora de reservar.
+
+model AssinaturaAtacado {
+  id                 String                   @id @default(cuid())
+  compradorNome      String
+  compradorDoc       String                   @unique // CPF/CNPJ — identifica o comprador sem precisar de login
+  compradorEmail     String
+  compradorTelefone  String
+  valor              Decimal                  @default(100) @db.Decimal(10, 2) // mensalidade
+  status             AssinaturaAtacadoStatus  @default(INADIMPLENTE)
+  vencimento         DateTime
+  mpPaymentId        String?
+  mpQrCode           String? // texto copia-e-cola do Pix
+  mpQrCodeBase64     String? // imagem PNG em base64 do QR Code
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  reservas ReservaAtacado[]
+
+  @@index([status])
+}
+
+enum AssinaturaAtacadoStatus {
+  ATIVA
+  INADIMPLENTE
+  CANCELADA
+}
+
+model RodadaAtacado {
+  id                     String              @id @default(cuid())
+  produtoAtacadoId       String
+  slug                   String              @unique
+  metaUnidades           Int
+  unidadesReservadas     Int                 @default(0)
+  custoUnitario          Decimal             @db.Decimal(10, 2) // custoUnitario do ProdutoAtacado no momento da criação da rodada
+  taxaServicoPercentual  Decimal             @default(10) @db.Decimal(5, 2)
+  // Preço já com a taxa de serviço embutida — o que o comprador vê como "preço do produto"
+  // antes de somar o frete calculado por CEP no checkout.
+  precoFinalUnitario     Decimal             @db.Decimal(10, 2)
+  // Configurável por caixa — caixas pequenas (ex: 10un no total) precisam de mínimo menor que
+  // caixas grandes. Sem máximo por comprador: quem quiser pode reservar o restante da caixa todo.
+  minimoUnidadesPorReserva Int               @default(1)
+  // Unidades que o admin reserva pra própria loja. metaUnidades já é a meta do
+  // COLETIVO (total da caixa − reservadas pra loja); o custo dessas unidades é
+  // diluído no precoFinalUnitario das unidades do coletivo (saem "de graça").
+  unidadesReservadasLoja Int               @default(0)
+  status                 RodadaAtacadoStatus @default(ABERTA)
+  dataLimite             DateTime?
+  // "Abrir caixa" posta a mensagem inicial no grupo de WhatsApp da categoria do produto;
+  // guardamos o grupo usado pra continuar atualizando o progresso/fechamento no mesmo grupo
+  // mesmo que o vínculo categoria↔grupo mude depois.
+  grupoMensagemEnviada   Boolean             @default(false)
+  grupoIdUsado           String?
+  // Configuração do loop de repostagem automática no grupo
+  loopAtivo              Boolean             @default(false)
+  loopIntervaloMinutos   Int                 @default(1440)
+  ultimoLoopEnviadoEm    DateTime?
+  // Variação escolhida pra esta caixa (cor/tamanho/voltagem). Quando o produto
+  // tem variações, admin DEVE escolher uma — caixa fechada não mistura. Quando
+  // o produto não tem variações, fica null.
+  variacaoId             String?
+  codigoRastreio         String?             @unique
+  envioCodigo            String?
+  envioLink              String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  produtoAtacado ProdutoAtacado     @relation(fields: [produtoAtacadoId], references: [id])
+  variacao       ProdutoAtacadoCor? @relation(fields: [variacaoId], references: [id], onDelete: SetNull)
+  reservas       ReservaAtacado[]
+
+  @@index([status])
+  @@index([produtoAtacadoId])
+}
+
+// Vínculo categoria do catálogo do atacado ↔ grupo real de WhatsApp (Evolution API) —
+// usado pelo botão "Abrir caixa" pra saber em qual grupo postar.
+model GrupoWhatsappCategoria {
+  id          String   @id @default(cuid())
+  categoria   String   @unique
+  grupoId     String
+  grupoNome   String
+  // Link de convite público do grupo (chat.whatsapp.com/...), colado pelo admin —
+  // usado pelo botão "Entrar no grupo" da vitrine pública do atacado. É diferente
+  // do grupoId (JID interno usado pra postar mensagens via Evolution API).
+  linkConvite String?
+  // Quando true, o moderador automático age neste grupo: rastreia perguntas
+  // dos participantes e manda DM educada se mandarem 2ª pergunta sem ter
+  // recebido resposta da 1ª (admin libera respondendo via reply nativo).
+  moderadorAtivo Boolean @default(false)
+  
+  // Quando true, o Groq responde perguntas como um Assistente Virtual
+  assistenteGroqAtivo Boolean @default(false)
+  assistenteGroqPrompt String?
+
+  // Quando true, este grupo aceita solicitações de abertura de caixa:
+  // o comprador manda o código do produto e o sistema cria uma solicitação pendente
+  // que o admin aprova/rejeita no painel.
+  aceitaSolicitacoes Boolean @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Cérebro da Inteligência Artificial: salva perguntas que a IA aprendeu
+model AssistenteConhecimento {
+  id        String   @id @default(cuid())
+  pergunta  String   @db.Text
+  resposta  String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Fila de perguntas pendentes que a IA enviou pro Admin no privado e está aguardando resposta
+model AssistentePerguntaPendente {
+  id           String   @id @default(cuid())
+  grupoJid     String
+  clienteJid   String
+  mensagemId   String
+  textoCliente String   @db.Text
+  respondida   Boolean  @default(false)
+  // Última vez que avisamos o cliente "aguarde a 1ª" — pra não repetir o aviso a
+  // cada mensagem enquanto a pergunta segue pendente.
+  ultimoAvisoEm DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Solicitação de abertura de caixa feita por comprador via código de produto no WhatsApp
+model SolicitacaoAberturaCaixa {
+  id               String                      @id @default(cuid())
+  produtoAtacadoId String
+  grupoJid         String                      // JID do grupo onde foi solicitado
+  compradorJid     String                      // JID do comprador (ex: 5511999@s.whatsapp.net)
+  compradorNome    String?                     // pushName do comprador
+  compradorNumero  String                      // número limpo para @mention e 1:1
+  mensagemId       String                      // ID da mensagem original (para reply/mention)
+  codigoDigitado   String                      // código que o comprador digitou
+  status           SolicitacaoAberturaCaixaStatus @default(PENDENTE)
+  rodadaId         String?                     // preenchido ao aprovar
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  produtoAtacado ProdutoAtacado @relation(fields: [produtoAtacadoId], references: [id])
+
+  @@index([status])
+  @@index([grupoJid])
+}
+
+enum SolicitacaoAberturaCaixaStatus {
+  PENDENTE
+  APROVADA
+  REJEITADA
+}
+
+// Fila do moderador automático de grupo — uma linha por pergunta enviada por
+// participante; respondidoEm fica preenchido quando o admin responde com reply.
+model MensagemPendenteGrupo {
+  id            String    @id @default(cuid())
+  grupoJid      String
+  usuarioJid    String
+  mensagemId    String    @unique
+  texto         String?
+  criadoEm      DateTime  @default(now())
+  respondidoEm  DateTime?
+  ultimoAvisoEm DateTime?
+
+  @@index([grupoJid, usuarioJid, respondidoEm])
+}
+
+// Catálogo separado do Atacado Coletivo — não reaproveita o Produto do lojista (vendido por
+// unidade no ML/Shopee) porque o atacado vende em caixa fechada (unidadesPorCaixa). Peso e
+// dimensões próprios pra calcular frete real (Melhor Envio) sem depender do cadastro normal.
+model ProdutoAtacado {
+  id               String   @id @default(cuid())
+  // Código do produto no catálogo do fornecedor (ex: LE-519-1). Usado pra casar
+  // o produto ao subir um catálogo novo do mesmo fornecedor e atualizar preços
+  // em vez de duplicar. Matching sempre por (codigo + fornecedorId).
+  codigo           String?
+  nome             String
+  descricao        String   @db.Text
+  categoria        String
+  imagemUrl        String?
+  marca            String?
+  voltagem         String?
+  codigoAnatel     String?
+  custoUnitario    Decimal  @db.Decimal(10, 2)
+  // Preço já impresso na página do catálogo do fornecedor (referência — pode
+  // ser diferente do que o Pablo de fato paga ou vai vender).
+  precoCatalogo    Decimal? @db.Decimal(10, 2)
+  // Preço que o Pablo pretende de fato postar/vender na rodada de compra
+  // coletiva — referência/planejamento; a taxa de serviço da rodada continua
+  // sendo calculada sobre o custo, não sobre isto.
+  precoVendaSugerido Decimal? @db.Decimal(10, 2)
+  unidadesPorCaixa Int
+  // Reserva padrão pra loja — pré-preenche o campo de reserva ao criar uma rodada
+  // desse produto (a diluição do custo continua acontecendo na rodada).
+  reservaLojaPadrao Int?
+  // Prova social na vitrine pública: link da página "mais vendidos" do ML e a
+  // posição do produto nesse ranking (digitada pelo admin — o ML bloqueia leitura
+  // automática). Selo laranja "Nº MAIS VENDIDO" + popup do link na vitrine.
+  linkReferencia     String?
+  posicaoMaisVendido Int?
+  // Link de convite de grupo WhatsApp específico deste produto. Quando
+  // preenchido, o botão "Quero!" da vitrine usa este link em vez do vinculado
+  // à categoria (fallback). Permite mandar produtos de uma categoria pra grupos
+  // diferentes, sem precisar de uma categoria nova.
+  linkConviteWhatsapp String?
+  pesoKg           Decimal  @default(0.5) @db.Decimal(6, 3)
+  comprimentoCm    Int      @default(20)
+  larguraCm        Int      @default(15)
+  alturaCm         Int      @default(10)
+  // Se true, as cores do produto vêm sortidas (cliente escolhe só tamanho +
+  // quantidade). Se false (padrão), cliente pode escolher tamanho E cor.
+  coresVariadas    Boolean  @default(false)
+  ativo            Boolean  @default(true)
+  isRascunho       Boolean  @default(false)
+  fornecedorId     String?
+  // embedding vector(1024) — gerenciado via SQL (pgvector não suportado pelo Prisma)
+  embedding        Unsupported("vector(1024)")?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  rodadas         RodadaAtacado[]
+  solicitacoes    SolicitacaoAberturaCaixa[]
+  fornecedor      FornecedorAtacado?       @relation(fields: [fornecedorId], references: [id])
+  itensCatalogo   CatalogoFornecedorItem[]
+  cores           ProdutoAtacadoCor[]
+
+  @@index([ativo])
+  @@index([categoria])
+  @@index([fornecedorId])
+}
+
+// Variações informativas (cor/tamanho/voltagem) — caixa fechada do atacado vem
+// sortida, nada disso gera reserva separada. Cada variação pode ter imagem.
+model ProdutoAtacadoCor {
+  id               String   @id @default(cuid())
+  produtoAtacadoId String
+  tipo             TipoVariacaoAtacado @default(COR)
+  nome             String
+  imagemUrl        String?
+  ordem            Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  produtoAtacado   ProdutoAtacado @relation(fields: [produtoAtacadoId], references: [id], onDelete: Cascade)
+  rodadas          RodadaAtacado[]
+
+  @@index([produtoAtacadoId])
+}
+
+enum TipoVariacaoAtacado {
+  COR
+  TAMANHO
+  VOLTAGEM
+}
+
+// Pedido mínimo do fornecedor — texto livre porque varia muito (ex: "10 caixas",
+// "R$ 500", "1 fardo"). Só pro admin lembrar; nunca exposto publicamente.
+model FornecedorAtacado {
+  id        String   @id @default(cuid())
+  nome      String
+  catalogo  String?
+  telefone  String?
+  endereco  String?
+  vendedorNome       String?
+  horarioAtendimento String?
+  pedidoMinimo       String?
+  // Modelo de pedido mínimo em valor — habilita rodada agrupada por fornecedor
+  // onde o progresso é a soma de todas as reservas pagas dos produtos desse
+  // fornecedor dividida pelo pedido mínimo em R$.
+  usarModeloMinimo   Boolean  @default(false)
+  pedidoMinimoValor  Decimal? @db.Decimal(10, 2)
+  // Marcador manual — admin sinaliza fornecedores com catálogo atualizado pra
+  // se localizar na listagem (cor destacada). Default false (desatualizado).
+  atualizado         Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  produtos  ProdutoAtacado[]
+  catalogos CatalogoFornecedor[]
+}
+
+// PDF de catálogo do fornecedor + índice manual de páginas (página → código/nome
+// do produto), pra não precisar folhear o PDF inteiro procurando um item.
+model CatalogoFornecedor {
+  id           String    @id @default(cuid())
+  fornecedorId String
+  nome         String
+  arquivoUrl   String
+  data         DateTime? @db.Date
+  gridCrops    String?   @default("2x3") // layout de produtos por página: "2x2","2x3","3x3","3x4"
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  fornecedor FornecedorAtacado        @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  itens      CatalogoFornecedorItem[]
+  paginas    MapaCatalogoPagina[]
+  crops      MapaCatalogoCrop[]
+
+  @@index([fornecedorId])
+}
+
+model CatalogoFornecedorItem {
+  id              String   @id @default(cuid())
+  catalogoId      String
+  pagina          Int
+  codigo          String?
+  nomeProduto     String
+  // Quando o item é pré-cadastrado direto no índice, vincula ao produto real
+  // criado no Catálogo do Atacado (continua null pra itens só de referência).
+  produtoAtacadoId String?
+  createdAt       DateTime @default(now())
+
+  catalogo      CatalogoFornecedor @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+  produtoAtacado ProdutoAtacado?   @relation(fields: [produtoAtacadoId], references: [id], onDelete: SetNull)
+
+  @@index([catalogoId])
+  @@index([codigo])
+  @@index([nomeProduto])
+  @@index([produtoAtacadoId])
+}
+
+// Índice completo de texto extraído de cada página de cada catálogo PDF.
+// Populado pelo botão "Indexar" no Mapa de Catálogos (extração client-side
+// via pdf.js). Permite buscar qualquer produto pelo texto da página, mesmo
+// sem ter sido pré-cadastrado como ProdutoAtacado.
+model MapaCatalogoPagina {
+  id         String   @id @default(cuid())
+  catalogoId String
+  pagina     Int
+  textoOcr   String   @db.Text
+  thumbUrl   String?
+  indexadoEm DateTime @default(now())
+
+  catalogo CatalogoFornecedor @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogoId, pagina])
+  @@index([catalogoId])
+}
+
+// Recortes individuais de produto por página de catálogo PDF.
+// Cada página é dividida em um grid configurável (gridCrops do catálogo).
+// Cada célula do grid = 1 crop com embedding CLIP próprio.
+// embedding vector(1024) gerenciado via SQL (pgvector — tipo não suportado pelo Prisma).
+model MapaCatalogoCrop {
+  id         String                        @id @default(cuid())
+  catalogoId String
+  pagina     Int
+  cropIndex  Int
+  imagemUrl  String?
+  // embedding vector(1024) — gerenciado via SQL (pgvector não suportado pelo Prisma)
+  embedding  Unsupported("vector(1024)")?
+  indexadoEm DateTime                      @default(now())
+
+  catalogo CatalogoFornecedor @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogoId, pagina, cropIndex])
+  @@index([catalogoId])
+  @@index([catalogoId, pagina])
+}
+
+// Agenda de postagem — o admin monta uma postagem (produto, comparação de catálogo
+// ou mensagem livre) e agenda data/hora; o cron dispara pros grupos escolhidos.
+// `blocos` é uma lista ordenada de mensagens a enviar em sequência (cada bloco =
+// 1 mensagem no WhatsApp): { tipo: "TEXTO"|"IMAGEM"|"VIDEO", url?, legenda }.
+// Formato uniforme pras 3 abas — o disparo só itera blocos × grupos.
+model PostagemAgendada {
+  id           String    @id @default(cuid())
+  tipo         String    // "PRODUTO" | "CATALOGO" | "MENSAGEM"
+  status       String    @default("PENDENTE") // PENDENTE | ENVIANDO | ENVIADA | ERRO | CANCELADA
+  agendadoPara DateTime
+  gruposJids   String[]  // 1 ou 2 grupos de destino
+  blocos       Json      // [{ tipo, url?, legenda }]
+  titulo       String?   // rótulo interno pra listar na agenda
+  erro         String?
+  enviadoEm    DateTime?
+  criadoEm     DateTime  @default(now())
+
+  @@index([status, agendadoPara])
+}
+
+// Clique num link rastreado (/r/{slug}?o={origem}). Usado no relatório de origem.
+model CliqueLink {
+  id        String   @id @default(cuid())
+  origem    String   // código da origem (grupo/campanha) ou "direto"
+  slug      String?  // slug da rodada clicada, se houver
+  createdAt DateTime @default(now())
+
+  @@index([origem])
+  @@index([createdAt])
+}
+
+enum RodadaAtacadoStatus {
+  ABERTA
+  FECHADA
+  SEPARANDO
+  EMBALANDO
+  PRONTA_ENVIO
+  CANCELADA
+  ENVIADA
+}
+
+model ReservaAtacado {
+  id                String               @id @default(cuid())
+  rodadaId          String
+  assinaturaId       String?
+  quantidade        Int
+  compradorNome     String
+  compradorDoc      String
+  compradorEmail    String
+  compradorTelefone String
+  cep               String
+  enderecoEntrega   Json
+  valorProduto      Decimal              @db.Decimal(10, 2) // já com a taxa de serviço embutida, sem frete
+  valorTaxaServico  Decimal              @db.Decimal(10, 2) // só a parte da taxa, exibida separada pro comprador
+  valorFrete        Decimal              @db.Decimal(10, 2)
+  valorTotal        Decimal              @db.Decimal(10, 2)
+  // Nome da opção de frete escolhida pelo comprador (ex: "Retirada combinada por
+  // WhatsApp", "Correios - SEDEX") — guardado pra exibir no detalhe do pedido.
+  metodoFrete       String               @default("A combinar")
+  // Variações escolhidas pelo comprador quando o produto tem tamanhos/cores
+  // selecionáveis. Formato: [{variacaoId, quantidade}] ou
+  // [{tamId, corId, quantidade}] para escolha livre. Null = produto sem variação.
+  variacoes         Json?
+  status            ReservaAtacadoStatus @default(AGUARDANDO_PAGAMENTO)
+  origem            String?  // de onde veio (código do grupo/campanha) — rastreamento
+  mpPaymentId       String?
+  mpQrCode          String? // texto copia-e-cola do Pix
+  mpQrCodeBase64    String? // imagem PNG em base64 do QR Code
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  rodada     RodadaAtacado     @relation(fields: [rodadaId], references: [id])
+  assinatura AssinaturaAtacado? @relation(fields: [assinaturaId], references: [id])
+
+  @@index([rodadaId])
+  @@index([assinaturaId])
+  @@index([status])
+}
+
+enum ReservaAtacadoStatus {
+  AGUARDANDO_PAGAMENTO
+  PAGO
+  CANCELADO
+}
+
+// Mensagens pré-definidas pro gerenciador de Avisos da Comunidade — admin salva
+// frases prontas e reusa com 1 clique no composer.
+model AvisoModelo {
+  id        String   @id @default(cuid())
+  titulo    String
+  texto     String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+// Model para armazenar os leads capturados na página do Quiz
+model LeadQuiz {
+  id               String   @id @default(cuid())
+  nome             String
+  telefone         String
+  vendeMarketplace Boolean
+  desafioPrincipal String?
+  metaFaturamento  String?
+  entrouNoGrupo    Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([telefone])
+  @@index([createdAt])
+}
+
+// Configuração de integrações do white-label — chaves de API por instância,
+// editáveis pelo Painel do Desenvolvedor. Valor SEMPRE criptografado (AES-256-GCM
+// via lib/crypto). Resolver lê daqui e cai no process.env como fallback.
+model ConfigApp {
+  chave     String   @id
+  valor     String   @db.Text // criptografado
+  updatedAt DateTime @updatedAt
+}

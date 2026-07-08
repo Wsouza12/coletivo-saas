@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="tabs">
+        <button class="tab-btn active" data-target="extract">Extrair</button>
+        <button class="tab-btn" data-target="send">CRM (Enviar)</button>
+    </div>
+
+    <div id="extract" class="tab-content active">
+        <p>1. Abra um grupo</p>
+        <p>2. Abra o painel "Dados do grupo"</p>
+        <p>3. Role a lista de participantes</p>
+        <label style="display:flex; align-items:center; gap:5px; margin-bottom: 5px; cursor: pointer;">
+            <input type="checkbox" id="ignoreAdmins" checked> Ignorar Administradores
+        </label>
+        <button id="extractBtn">Extrair Contatos</button>
+    </div>
+
+    <div id="send" class="tab-content">
+        <label>Números (cole a coluna do Excel):</label>
+        <textarea id="numbersList" placeholder="Ex: 5511999999999&#10;5511888888888"></textarea>
+        
+        <label>Sua Mensagem e Link:</label>
+        <textarea id="messageText" placeholder="Oi! Criei um grupo, entra aqui: https://chat.whatsapp.com/..."></textarea>
+        
+        <label>Delay (segundos de pausa):</label>
+        <input type="number" id="delaySecs" value="15" min="5">
+        
+        <button id="sendBtn">Iniciar Envios na Fila</button>
+    </div>
+    
+    <div id="status"></div>
+    <script src="popup.js"></script>
+</body>
+</html>

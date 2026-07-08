@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Group CRM Extractor & Sender",
+  "version": "2.0",
+  "description": "Extrai contatos e envia mensagens em massa com delays para evitar banimentos.",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": ["https://web.whatsapp.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "WhatsApp CRM"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
