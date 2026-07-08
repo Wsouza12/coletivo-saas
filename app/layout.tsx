@@ -4,8 +4,8 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Suspense } from "react";
-
 import { FacebookPixel } from "@/components/shared/facebook-pixel";
+import { CookieBanner } from "@/components/shared/cookie-banner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -35,6 +35,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <FacebookPixel />
         </Suspense>
+        <CookieBanner />
       </body>
     </html>
   );
