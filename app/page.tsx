@@ -1,167 +1,294 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { APP_NAME } from "@/lib/brand";
 import { prisma } from "@/lib/prisma";
-import { calcularPrecoVendaComTaxa, getConfiguracaoFinanceira } from "@/lib/configuracao-financeira";
-import { ProdutoVitrineCard } from "@/components/shared/produto-vitrine-card";
-import { VitrineCategoriaStrip } from "@/components/shared/vitrine-categoria-strip";
+import {
+  VitrineCategoriaStrip,
+  VitrineSubcategoriasSidebar,
+} from "@/components/shared/vitrine-categoria-strip";
+import {
+  ProdutoAtacadoVitrineCard,
+  type ProdutoAtacadoVitrine,
+} from "@/components/atacado/produto-atacado-vitrine-card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 12;
 
-export default async function VitrinePage({
+export default async function VitrineAtacadoPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
   const categoria = sp.categoria;
+  const q = sp.q?.trim() ?? "";
+  const ordem = sp.ordem ?? "recentes";
+  const pagina = Math.max(1, Number(sp.pagina) || 1);
 
-  const where = { ativo: true, ...(categoria ? { categoria } : {}) };
+  // Categoria com subcategorias usa convenção "Pai › Filha" (separador U+203A).
+  // Se o usuário clica num PAI puro ("Casa"), trazemos tudo: o próprio pai +
+  // todas as filhas ("Casa › Cozinha", "Casa › Banheiro"). Se clica numa
+  // filha completa ("Casa › Cozinha"), trazemos só essa exata.
+  const SEP_CAT = " › ";
+  const categoriaFiltro = categoria
+    ? categoria.includes(SEP_CAT)
+      ? { categoria }
+      : { OR: [{ categoria }, { categoria: { startsWith: `${categoria}${SEP_CAT}` } }] }
+    : {};
 
-  const [produtos, categoriasAgrupadas, config] = await Promise.all([
-    prisma.produto.findMany({
+  const where = {
+    ativo: true,
+    ...categoriaFiltro,
+    ...(q ? {
+      OR: [
+        { nome: { contains: q, mode: "insensitive" as const } },
+        { codigo: { contains: q, mode: "insensitive" as const } }
+      ]
+    } : {}),
+  };
+
+  // Buscamos TODOS os ids ordenados por createdAt (mais simples pra paginar
+  // mesmo com ordenação por preço, que é feita em memória). Pra catálogos
+  // até alguns milhares isso é OK; acima disso precisaria de paginação real.
+  const [total, produtos, categoriasAgrupadas, vinculos] = await Promise.all([
+    prisma.produtoAtacado.count({ where }),
+    prisma.produtoAtacado.findMany({
       where,
       select: {
         id: true,
+        codigo: true,
         nome: true,
         categoria: true,
-        precoAtacado: true,
-        categoriaMlId: true,
-        imagens: {
-          where: { OR: [{ destacarVitrine: true }, { principal: true }] },
-          orderBy: { destacarVitrine: "desc" },
-          take: 1,
-          select: { url: true, alt: true },
+        descricao: true,
+        imagemUrl: true,
+        voltagem: true,
+        codigoAnatel: true,
+        unidadesPorCaixa: true,
+        precoVendaSugerido: true,
+        precoCatalogo: true,
+        linkReferencia: true,
+        posicaoMaisVendido: true,
+        cores: {
+          select: { id: true, tipo: true, nome: true, imagemUrl: true },
+          orderBy: [{ ordem: "asc" }, { createdAt: "asc" }],
         },
       },
-      orderBy: { destaque: "desc" },
+      orderBy:
+        ordem === "menor-preco"
+          ? { precoCatalogo: "asc" }
+          : ordem === "maior-preco"
+            ? { precoCatalogo: "desc" }
+            : { createdAt: "desc" },
+      skip: (pagina - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
-    prisma.produto.groupBy({ by: ["categoria"], where: { ativo: true }, _count: { _all: true } }),
-    getConfiguracaoFinanceira(),
+    prisma.produtoAtacado.groupBy({ by: ["categoria"], where: { ativo: true }, _count: { _all: true } }),
+    prisma.grupoWhatsappCategoria.findMany({ select: { categoria: true, linkConvite: true } }),
   ]);
 
-  const seteDiasAtras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const vendidos = await prisma.itemPedido.groupBy({
-    by: ["produtoId"],
-    where: { produtoId: { in: produtos.map((p) => p.id) }, pedido: { createdAt: { gte: seteDiasAtras } } },
-    _sum: { quantidade: true },
-  });
-  const maisVendidosIds = new Set(
-    vendidos
-      .filter((v) => (v._sum.quantidade ?? 0) > 0)
-      .sort((a, b) => (b._sum.quantidade ?? 0) - (a._sum.quantidade ?? 0))
-      .slice(0, 5)
-      .map((v) => v.produtoId)
-  );
+  const linkPorCategoria = new Map(vinculos.map((v) => [v.categoria, v.linkConvite]));
 
-  const margemDesejada = Number(config.margemPadrao);
-
-  // Sugestão de preço calculada com taxa real de cada plataforma (não chutada) —
-  // ML faz 1 chamada à API oficial por produto, Shopee é cálculo local instantâneo.
-  const produtosComPreco = await Promise.all(
-    produtos.map(async (produto) => {
-      const custoReal = Number(produto.precoAtacado);
-      const shopee = await calcularPrecoVendaComTaxa({
-        custoReal,
-        margemDesejada,
-        plataforma: "SHOPEE",
-      });
-      let precoSugeridoMl: number | null = null;
-      if (produto.categoriaMlId) {
-        try {
-          const ml = await calcularPrecoVendaComTaxa({
-            custoReal,
-            margemDesejada,
-            plataforma: "MERCADOLIVRE",
-            categoriaMlId: produto.categoriaMlId,
-          });
-          precoSugeridoMl = ml.precoSugerido;
-        } catch {
-          precoSugeridoMl = null;
-        }
-      }
-      return {
-        id: produto.id,
-        nome: produto.nome,
-        categoria: produto.categoria,
-        precoAtacado: custoReal,
-        precoSugeridoMl,
-        precoSugeridoShopee: shopee.precoSugerido,
-        maisVendido: maisVendidosIds.has(produto.id),
-        imagens: produto.imagens,
-      };
-    })
-  );
+  const produtosVitrine: ProdutoAtacadoVitrine[] = produtos.map((p) => ({
+    id: p.id,
+    codigo: p.codigo,
+    nome: p.nome,
+    categoria: p.categoria,
+    descricao: p.descricao,
+    imagemUrl: p.imagemUrl,
+    voltagem: p.voltagem,
+    codigoAnatel: p.codigoAnatel,
+    unidadesPorCaixa: p.unidadesPorCaixa,
+    // Preço público = preço de catálogo (o "real" que o usuário quer mostrar na
+    // vitrine), com fallback na venda sugerida. Nunca expõe o custo de aquisição
+    // (custoUnitario).
+    preco: p.precoCatalogo
+      ? Number(p.precoCatalogo)
+      : p.precoVendaSugerido
+        ? Number(p.precoVendaSugerido)
+        : null,
+    linkConvite: linkPorCategoria.get(p.categoria) ?? null,
+    linkReferencia: p.linkReferencia,
+    posicaoMaisVendido: p.posicaoMaisVendido,
+    cores: p.cores,
+  }));
 
   const categorias = categoriasAgrupadas
     .map((c) => ({ nome: c.categoria, total: c._count._all }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
+  // Sidebar de subcategorias só aparece se o pai ativo tiver filhas.
+  const paiAtivo = categoria ? categoria.split(SEP_CAT)[0] : null;
+  const temSidebar = !!(
+    paiAtivo &&
+    categorias.some((c) => c.nome.startsWith(`${paiAtivo}${SEP_CAT}`))
+  );
+
+  const totalPaginas = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  function urlPagina(p: number): string {
+    const params = new URLSearchParams();
+    if (categoria) params.set("categoria", categoria);
+    if (q) params.set("q", q);
+    if (ordem !== "recentes") params.set("ordem", ordem);
+    if (p > 1) params.set("pagina", String(p));
+    const s = params.toString();
+    return s ? `/?${s}` : "/";
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <span className="text-lg font-bold text-primary">DropyAtacado</span>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
-              Entrar
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
-            >
-              Quero revender
-            </Link>
-          </div>
+          <span className="text-lg font-bold text-primary">{APP_NAME}</span>
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+            Entrar
+          </Link>
         </div>
       </header>
 
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          OFERTAS PARA REVENDER AGORA!
-        </h1>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
-          Lojistas cadastrados publicam estes produtos no Mercado Livre e na Shopee com 1
-          clique, definem sua própria margem, e nós cuidamos da embalagem e do envio.
-        </p>
-
-        <div className="mt-8">
-          <VitrineCategoriaStrip categorias={categorias} categoriaAtiva={categoria} />
+        <div className="mt-4">
+          <VitrineCategoriaStrip categorias={categorias} categoriaAtiva={categoria} basePath="/" />
         </div>
 
-        <h2 className="mt-8 text-sm font-bold tracking-wide text-foreground uppercase">
-          Melhores ofertas pra revender
-        </h2>
-
-        {produtosComPreco.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-muted-foreground">
-            Nenhum produto disponível nessa categoria.
-          </p>
-        ) : (
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {produtosComPreco.map((produto) => (
-              <ProdutoVitrineCard key={produto.id} produto={produto} />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-            Quer revender estes produtos na sua loja?
-          </h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Cadastro gratuito. Você escolhe os produtos do nosso catálogo, define o preço e
-            fica com a margem — o resto é com a gente.
-          </p>
-          <Link
-            href="/register"
-            className="mt-1 flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-bold text-primary-foreground transition hover:opacity-90"
+        <form
+          method="get"
+          className="mx-auto mt-6 flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center"
+        >
+          {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Buscar por nome ou código..."
+            className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
+          />
+          <select
+            name="ordem"
+            defaultValue={ordem}
+            className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
           >
-            Criar minha conta de lojista
-            <ArrowRight className="size-4" />
-          </Link>
+            <option value="recentes">Mais recentes</option>
+            <option value="menor-preco">Menor preço</option>
+            <option value="maior-preco">Maior preço</option>
+          </select>
+          <button
+            type="submit"
+            className="h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          >
+            Aplicar
+          </button>
+        </form>
+
+        {/* Sidebar de subcategorias só aparece se o pai ativo tiver filhas;
+            caso contrário, o grid usa a largura total. */}
+        <div
+          className={`mt-8 grid gap-6 ${
+            temSidebar ? "grid-cols-1 md:grid-cols-[220px_1fr]" : "grid-cols-1"
+          }`}
+        >
+          {temSidebar ? (
+            <div className="md:sticky md:top-4 md:self-start">
+              <VitrineSubcategoriasSidebar
+                categorias={categorias}
+                categoriaAtiva={categoria}
+                basePath="/"
+              />
+            </div>
+          ) : null}
+
+          <div>
+            {produtosVitrine.length === 0 ? (
+              <p className="mt-10 text-center text-sm text-muted-foreground">
+                Nenhum produto disponível nessa categoria.
+              </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {produtosVitrine.map((produto) => (
+                    <ProdutoAtacadoVitrineCard key={produto.id} produto={produto} />
+                  ))}
+                </div>
+
+                <Paginacao
+                  paginaAtual={pagina}
+                  totalPaginas={totalPaginas}
+                  urlPagina={urlPagina}
+                />
+              </>
+            )}
+          </div>
         </div>
       </section>
     </div>
+  );
+}
+
+// Paginação numerada — ‹ 1 2 [3] 4 5 › estilo Google. Mostra até 5 números em
+// volta da página ativa; ... quando há gap; «»/« » nas pontas.
+function Paginacao({
+  paginaAtual,
+  totalPaginas,
+  urlPagina,
+}: {
+  paginaAtual: number;
+  totalPaginas: number;
+  urlPagina: (p: number) => string;
+}) {
+  if (totalPaginas <= 1) return null;
+
+  // Calcula janela de páginas pra mostrar: até 5 ao redor da atual.
+  const janela = 2;
+  const inicio = Math.max(1, paginaAtual - janela);
+  const fim = Math.min(totalPaginas, paginaAtual + janela);
+  const numeros: number[] = [];
+  for (let i = inicio; i <= fim; i++) numeros.push(i);
+
+  const cls = (ativo: boolean) =>
+    `flex size-9 items-center justify-center rounded-md text-sm font-medium transition ${
+      ativo ? "bg-primary text-primary-foreground" : "border border-border bg-card hover:bg-muted"
+    }`;
+
+  return (
+    <nav className="mt-8 flex flex-wrap items-center justify-center gap-1">
+      <Link
+        href={urlPagina(Math.max(1, paginaAtual - 1))}
+        aria-disabled={paginaAtual === 1}
+        className={`${cls(false)} ${paginaAtual === 1 ? "pointer-events-none opacity-40" : ""}`}
+      >
+        <ChevronLeft className="size-4" />
+      </Link>
+
+      {inicio > 1 ? (
+        <>
+          <Link href={urlPagina(1)} className={cls(false)}>
+            1
+          </Link>
+          {inicio > 2 ? <span className="px-1 text-muted-foreground">…</span> : null}
+        </>
+      ) : null}
+
+      {numeros.map((n) => (
+        <Link key={n} href={urlPagina(n)} className={cls(n === paginaAtual)}>
+          {n}
+        </Link>
+      ))}
+
+      {fim < totalPaginas ? (
+        <>
+          {fim < totalPaginas - 1 ? <span className="px-1 text-muted-foreground">…</span> : null}
+          <Link href={urlPagina(totalPaginas)} className={cls(false)}>
+            {totalPaginas}
+          </Link>
+        </>
+      ) : null}
+
+      <Link
+        href={urlPagina(Math.min(totalPaginas, paginaAtual + 1))}
+        aria-disabled={paginaAtual === totalPaginas}
+        className={`${cls(false)} ${paginaAtual === totalPaginas ? "pointer-events-none opacity-40" : ""}`}
+      >
+        <ChevronRight className="size-4" />
+      </Link>
+    </nav>
   );
 }

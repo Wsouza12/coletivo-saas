@@ -200,7 +200,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
       const cleanJid = participante.replace(/:\d+/, "");
 
       if (intent.tipo === "categoria" && intent.termo) {
-        const linkCategoria = `${process.env.NEXT_PUBLIC_APP_URL || "https://drop-sync.vercel.app"}/atacado?categoria=${encodeURIComponent(intent.termo)}`;
+        const linkCategoria = `${process.env.NEXT_PUBLIC_APP_URL || "https://drop-sync.vercel.app"}/?categoria=${encodeURIComponent(intent.termo)}`;
         const resposta = `Ah, você está procurando por produtos de ${intent.termo}! Para ver todos os itens dessa categoria que já temos na loja, acesse a vitrine aqui:\n${linkCategoria}`;
         await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${resposta}`, mensagemId, [cleanJid]);
         return NextResponse.json({ ok: true });

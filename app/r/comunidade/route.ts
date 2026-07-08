@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
   // Destino = convite do grupo da comunidade (AVISOS_COMUNIDADE), ou o 1º grupo
   // que tenha link de convite cadastrado. Sem convite → cai na vitrine pública.
-  let destino = `${origin}/atacado`;
+  let destino = `${origin}/`;
   try {
     const comunidade =
       (await prisma.grupoWhatsappCategoria.findFirst({
