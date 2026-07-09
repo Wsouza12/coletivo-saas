@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getConfig } from "@/lib/evolution";
 import { auth } from "@/lib/auth";
 
 // Rota temporária de diagnóstico — REMOVER após resolver o bug do sendMedia.
@@ -12,11 +13,13 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const { grupoId, imagemUrl } = body as { grupoId?: string; imagemUrl?: string };
 
-  const baseUrl = process.env.EVOLUTION_API_URL?.replace(/\/$/, "");
-  const instance = process.env.EVOLUTION_INSTANCE;
-  const apiKey = process.env.EVOLUTION_API_KEY;
+  const config = await getConfig();
+  if (!config) {
+    return NextResponse.json({ ok: false, error: "Credenciais da Evolution não configuradas no painel" });
+  }
+  const { baseUrl, instance, apiKey } = config;
 
-  if (!baseUrl || !instance || !apiKey) {
+  if (false) {
     return NextResponse.json({ error: "Evolution API não configurada" }, { status: 500 });
   }
 

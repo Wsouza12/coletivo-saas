@@ -19,13 +19,7 @@ Aqui está um guia rápido dos nossos grupos 👇
 
 ❓ *Dúvidas?* É só chamar aqui no grupo. 😊`;
 
-function getEvolutionConfig() {
-  const baseUrl = process.env.EVOLUTION_API_URL?.replace(/\/$/, "");
-  const instance = process.env.EVOLUTION_INSTANCE;
-  const apiKey = process.env.EVOLUTION_API_KEY;
-  if (!baseUrl || !instance || !apiKey) return null;
-  return { baseUrl, instance, apiKey };
-}
+import { getConfig as getEvolutionConfig } from "@/lib/evolution";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -35,7 +29,7 @@ export async function POST(req: Request) {
   const { grupoJid } = await req.json();
   if (!grupoJid) return NextResponse.json({ error: { code: "VALIDATION", message: "grupoJid obrigatório" } }, { status: 422 });
 
-  const config = getEvolutionConfig();
+  const config = await getEvolutionConfig();
   if (!config) return NextResponse.json({ error: { code: "EVOLUTION_NAO_CONFIGURADA" } }, { status: 422 });
 
   // 1. Envia a mensagem

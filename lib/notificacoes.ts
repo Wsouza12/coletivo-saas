@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { getConfig } from "./evolution";
 import type { PedidoStatus } from "@prisma/client";
 
 const FROM = "DropSync <onboarding@resend.dev>";
@@ -44,17 +45,18 @@ export async function notificarCliente(telefone: string | null | undefined, etap
   const texto = montarTexto(etapa, pedido);
   if (!texto) return;
 
-  if (!process.env.EVOLUTION_API_URL || !process.env.EVOLUTION_INSTANCE || !process.env.EVOLUTION_API_KEY) {
+  const config = await getConfig();
+  if (!config) {
     console.warn("Evolution API não configurada — notificação WhatsApp não enviada.");
     return;
   }
 
   try {
-    await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
+    await fetch(`${config.baseUrl}/message/sendText/${config.instance}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: process.env.EVOLUTION_API_KEY,
+        apikey: config.apiKey,
       },
       body: JSON.stringify({ number: telefone, text: texto }),
     });

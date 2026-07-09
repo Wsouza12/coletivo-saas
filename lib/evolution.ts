@@ -31,7 +31,7 @@ async function prepararImagemParaWhatsApp(
 
 import { getConfig as getDbConfig } from "./config-app";
 
-async function getConfig() {
+export async function getConfig() {
   const baseUrl = await getDbConfig("EVOLUTION_API_URL");
   const instance = await getDbConfig("EVOLUTION_INSTANCE");
   const apiKey = await getDbConfig("EVOLUTION_API_KEY");

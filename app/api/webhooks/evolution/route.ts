@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getConfig } from "@/lib/evolution";
 import { prisma } from "@/lib/prisma";
 import { enviarMensagemGrupo, enviarMensagemIndividual } from "@/lib/evolution";
 import Groq from "groq-sdk";
@@ -430,9 +431,11 @@ REGRAS:
           // reply nessa mensagem e a IA aprende.
           const msgTexto = `@${arrobaPessoa} já já te respondo certinho — deixa eu confirmar isso com a equipe! 🙂`;
 
-          const res = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
+          const config = await getConfig();
+          if (!config) return;
+          const res = await fetch(`${config.baseUrl}/message/sendText/${config.instance}`, {
             method: "POST",
-            headers: { apikey: process.env.EVOLUTION_API_KEY as string, "Content-Type": "application/json" },
+            headers: { apikey: config.apiKey, "Content-Type": "application/json" },
             body: JSON.stringify({
               number: remoteJid,
               text: msgTexto,

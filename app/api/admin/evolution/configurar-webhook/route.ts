@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getConfig } from "@/lib/evolution";
 import { auth } from "@/lib/auth";
 
 // Configura o webhook do Evolution API pra apontar pra /api/webhooks/evolution.
@@ -8,9 +9,9 @@ export async function POST() {
   if (!session?.user) return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
   if (session.user.role !== "ADMIN") return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
 
-  const baseUrl = process.env.EVOLUTION_API_URL;
-  const instance = process.env.EVOLUTION_INSTANCE;
-  const apiKey = process.env.EVOLUTION_API_KEY;
+  const config = await getConfig();
+  if (!config) return NextResponse.json({ error: { message: "API não configurada" } }, { status: 422 });
+  const { baseUrl, instance, apiKey } = config;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!baseUrl || !instance || !apiKey || !appUrl) {
     return NextResponse.json(
