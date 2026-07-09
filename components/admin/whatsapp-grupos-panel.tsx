@@ -11,7 +11,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue, SelectGroup, SelectLabel,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -480,7 +480,7 @@ function VincularGrupoControle({
 
   return (
     <div className="flex flex-col gap-1">
-      <Select onValueChange={(id: string) => onVincular(id)}>
+      <Select onValueChange={(id: string | null) => { if (id) onVincular(id) }}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Vincular grupo..." />
         </SelectTrigger>
