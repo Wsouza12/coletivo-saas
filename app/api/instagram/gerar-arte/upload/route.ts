@@ -11,7 +11,9 @@ export async function POST(req: Request) {
   const imagem = formData.get("imagem") as File | null;
   if (!imagem) return NextResponse.json({ error: { code: "VALIDATION", message: "Imagem obrigatória" } }, { status: 422 });
 
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/['"]/g, '').trim()!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY?.replace(/['"]/g, '').trim()!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
   // Supabase Storage rejeita keys com acento/espaço/parênteses ("Invalid key").
   // Mantém só a extensão do nome original e usa um nome aleatório sanitizado.
   const ext = (imagem.name?.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";

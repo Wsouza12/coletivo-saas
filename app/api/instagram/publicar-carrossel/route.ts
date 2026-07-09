@@ -5,7 +5,9 @@ import { publicarCarrosselInstagram } from "@/lib/instagram";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabase() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/['"]/g, '').trim()!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY?.replace(/['"]/g, '').trim()!;
+  return createClient(supabaseUrl, supabaseKey);
 }
 
 async function uploadTemp(blob: Blob, nome: string): Promise<string> {

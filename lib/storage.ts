@@ -6,8 +6,8 @@ const BUCKET_ETAPAS = "etapas-pedidos"; // bucket privado — prova interna de e
 // O plano Free da Supabase Storage limita uploads a ~50MB, insuficiente pra esses arquivos.
 
 function getClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_KEY?.trim();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/['"]/g, '').trim();
+  const key = process.env.SUPABASE_SERVICE_KEY?.replace(/['"]/g, '').trim();
   if (!url || !key) {
     throw new Error("Supabase Storage não configurado (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_KEY)");
   }
