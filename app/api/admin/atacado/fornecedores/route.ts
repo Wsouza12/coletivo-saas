@@ -8,7 +8,17 @@ export async function GET() {
   if (!session?.user) return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
   if (session.user.role !== "ADMIN") return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
 
-  const fornecedores = await prisma.fornecedorAtacado.findMany({ orderBy: { nome: "asc" } });
+  let fornecedores = await prisma.fornecedorAtacado.findMany({ orderBy: { nome: "asc" } });
+
+  // Garantir que o fornecedor virtual de Estoque Próprio exista
+  const temEstoqueProprio = fornecedores.some(f => f.isEstoqueProprio);
+  if (!temEstoqueProprio) {
+    const f = await prisma.fornecedorAtacado.create({
+      data: { nome: "📦 ESTOQUE PRÓPRIO (MEU CATÁLOGO)", isEstoqueProprio: true, telefone: "" },
+    });
+    fornecedores = [f, ...fornecedores];
+  }
+
   return NextResponse.json({ data: fornecedores }, { status: 200 });
 }
 

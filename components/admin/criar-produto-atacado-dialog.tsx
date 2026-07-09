@@ -50,6 +50,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
   const [larguraCm, setLarguraCm] = useState("");
   const [alturaCm, setAlturaCm] = useState("");
   const [fornecedorId, setFornecedorId] = useState("");
+  const [isEstoqueProprio, setIsEstoqueProprio] = useState(false);
   const [sugerindoMedidas, setSugerindoMedidas] = useState(false);
 
   async function sugerirMedidas() {
@@ -129,7 +130,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
           comprimentoCm: Number(comprimentoCm),
           larguraCm: Number(larguraCm),
           alturaCm: Number(alturaCm),
-          fornecedorId: fornecedorId || undefined,
+          fornecedorId: isEstoqueProprio ? "ESTOQUE_PROPRIO" : (fornecedorId || undefined),
         }),
       });
       const json = await res.json();
@@ -148,6 +149,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
       setCodigoAnatel("");
       setCustoUnitario("");
       setPrecoCatalogo("");
+      setIsEstoqueProprio(false);
       setPrecoVendaSugerido("");
       setLinkReferencia("");
       setPosicaoMaisVendido("");
@@ -293,19 +295,41 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
               &quot;Nº mais vendido&quot; na vitrine.
             </span>
 
-            <Label>Fornecedor (uso interno, opcional)</Label>
-            <Select value={fornecedorId} onValueChange={(v) => setFornecedorId(v ?? "")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Nenhum" />
-              </SelectTrigger>
-              <SelectContent>
-                {fornecedores.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  checked={isEstoqueProprio}
+                  onChange={(e) => {
+                    setIsEstoqueProprio(e.target.checked);
+                    if (e.target.checked) setFornecedorId("");
+                  }}
+                  className="rounded border-input text-primary focus:ring-primary"
+                />
+                📦 Este produto é do meu Estoque Próprio
+              </label>
+              <span className="text-xs text-muted-foreground ml-6">
+                Ele será adicionado automaticamente ao Catálogo de Estoque Próprio.
+              </span>
+            </div>
+
+            {!isEstoqueProprio && (
+              <>
+                <Label>Fornecedor (uso interno, opcional)</Label>
+                <Select value={fornecedorId} onValueChange={(v) => setFornecedorId(v ?? "")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fornecedores.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
 
             <div className="flex items-center justify-between">
               <Label>Peso e dimensões da embalagem individual (obrigatório — pra calcular frete real)</Label>

@@ -918,6 +918,9 @@ model FornecedorAtacado {
   // Marcador manual — admin sinaliza fornecedores com catálogo atualizado pra
   // se localizar na listagem (cor destacada). Default false (desatualizado).
   atualizado         Boolean  @default(false)
+  
+  isEstoqueProprio   Boolean  @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

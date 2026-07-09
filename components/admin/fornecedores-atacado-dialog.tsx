@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Trash2, Upload, Pencil, Check, X, Truck, FileText, Phone, MapPin, User, Clock, Search, CheckCircle2, Circle, ShoppingBag } from "lucide-react";
+import { Plus, Trash2, Upload, Pencil, Check, X, Truck, FileText, Phone, MapPin, User, Clock, Search, CheckCircle2, Circle, ShoppingBag, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { CatalogoFornecedorViewerDialog } from "@/components/admin/catalogo-fornecedor-viewer-dialog";
 import { mascararTelefone } from "@/lib/format";
+import { gerarCatalogoPdf, ProdutoCatalogoPDF } from "@/lib/pdf-generator";
 
 type Fornecedor = {
   id: string;
@@ -28,6 +29,7 @@ type Fornecedor = {
   usarModeloMinimo: boolean;
   pedidoMinimoValor: number | null;
   atualizado: boolean;
+  isEstoqueProprio?: boolean;
 };
 
 type CatalogoPdf = { id: string; nome: string; arquivoUrl: string; data: string | null; _count: { itens: number } };
@@ -63,6 +65,63 @@ export function FornecedoresAtacadoPanel() {
     if (res.ok) setFornecedores(json.data);
   }
 
+  async function handleGerarCatalogoProprio(fornecedorId: string) {
+    const loadingId = toast.loading("Buscando produtos...");
+    try {
+      const res = await fetch(`/api/admin/atacado/produtos?fornecedorId=${fornecedorId}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error("Erro ao buscar produtos");
+      
+      const produtos: ProdutoCatalogoPDF[] = json.data;
+      if (produtos.length === 0) {
+        toast.error("Nenhum produto cadastrado no Estoque Próprio.", { id: loadingId });
+        return;
+      }
+      
+      toast.loading("Desenhando PDF...", { id: loadingId });
+      const file = await gerarCatalogoPdf(produtos);
+      
+      toast.loading("Enviando PDF gerado...", { id: loadingId });
+      
+      // Get upload URL
+      const urlRes = await fetch(`/api/admin/atacado/fornecedores/${fornecedorId}/catalogos/upload-url`, {
+        method: "POST",
+      });
+      const urlJson = await urlRes.json();
+      if (!urlRes.ok) throw new Error(urlJson.error?.message ?? "Erro ao preparar upload");
+      
+      const { signedUrl, publicUrl } = urlJson.data;
+
+      // Upload directly to S3/R2
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/pdf" },
+        body: file,
+      });
+      
+      if (!uploadRes.ok) throw new Error("Erro ao enviar o arquivo PDF");
+
+      // Save catalog entry
+      const catRes = await fetch(`/api/admin/atacado/fornecedores/${fornecedorId}/catalogos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: "Catálogo Estoque Próprio",
+          arquivoUrl: publicUrl,
+          data: new Date().toISOString().slice(0, 10),
+        }),
+      });
+      
+      if (!catRes.ok) throw new Error("Erro ao registrar catálogo");
+      
+      toast.success("Catálogo de Estoque Próprio gerado e publicado!", { id: loadingId });
+      carregar(); // Refresh everything
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Erro inesperado", { id: loadingId });
+    }
+  }
+
   useEffect(() => {
     carregar();
   }, []);
@@ -88,6 +147,11 @@ export function FornecedoresAtacadoPanel() {
         if (norm(f.nome).includes(termo)) return true;
         const cats = catalogosTodos[f.id] ?? [];
         return cats.some((c) => norm(c.nome).includes(termo));
+      })
+      .sort((a, b) => {
+        if (a.isEstoqueProprio && !b.isEstoqueProprio) return -1;
+        if (!a.isEstoqueProprio && b.isEstoqueProprio) return 1;
+        return 0;
       });
 
   return (
@@ -148,6 +212,7 @@ export function FornecedoresAtacadoPanel() {
               onRemover={() => remover(f.id)}
               onAtualizado={carregar}
               onCatalogosCarregados={(lista) => registrarCatalogos(f.id, lista)}
+              onGerarCatalogoProprio={() => handleGerarCatalogoProprio(f.id)}
             />
           ))}
         </div>
@@ -161,11 +226,13 @@ function FornecedorCard({
   onRemover,
   onAtualizado,
   onCatalogosCarregados,
+  onGerarCatalogoProprio,
 }: {
   fornecedor: Fornecedor;
   onRemover: () => void;
   onAtualizado: () => void;
   onCatalogosCarregados?: (lista: CatalogoPdf[]) => void;
+  onGerarCatalogoProprio?: () => void;
 }) {
   const [catalogos, setCatalogos] = useState<CatalogoPdf[] | null>(null);
   const [editando, setEditando] = useState(false);
@@ -279,7 +346,9 @@ function FornecedorCard({
     <>
       <div
         className={`flex aspect-[9/16] flex-col overflow-hidden rounded-xl border-2 shadow-sm transition ${
-          fornecedor.atualizado
+          fornecedor.isEstoqueProprio
+            ? "border-primary bg-primary/5"
+            : fornecedor.atualizado
             ? "border-success bg-success/5"
             : "border-border bg-card opacity-90"
         }`}
@@ -287,7 +356,11 @@ function FornecedorCard({
         {/* Header com nome + ações */}
         <div
           className={`flex items-start justify-between gap-1 border-b p-2.5 ${
-            fornecedor.atualizado ? "border-success/30 bg-success/10" : "border-border bg-muted/40"
+            fornecedor.isEstoqueProprio
+              ? "border-primary/30 bg-primary/10"
+              : fornecedor.atualizado 
+              ? "border-success/30 bg-success/10" 
+              : "border-border bg-muted/40"
           }`}
         >
           <div className="flex min-w-0 items-center gap-1.5">
@@ -308,17 +381,18 @@ function FornecedorCard({
               {fornecedor.nome}
             </span>
           </div>
-          <div className="flex shrink-0 items-center gap-0.5">
-            <button type="button" onClick={() => setEditando(true)} className="rounded p-1 hover:bg-muted" title="Editar">
-              <Pencil className="size-3.5 text-muted-foreground" />
-            </button>
-            <button type="button" onClick={onRemover} className="rounded p-1 hover:bg-muted" title="Excluir">
-              <Trash2 className="size-3.5 text-destructive" />
-            </button>
-          </div>
+          {!fornecedor.isEstoqueProprio && (
+            <div className="flex shrink-0 items-center gap-0.5">
+              <button type="button" onClick={() => setEditando(true)} className="rounded p-1 hover:bg-muted" title="Editar">
+                <Pencil className="size-3.5 text-muted-foreground" />
+              </button>
+              <button type="button" onClick={onRemover} className="rounded p-1 hover:bg-muted" title="Excluir">
+                <Trash2 className="size-3.5 text-destructive" />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Info compacta */}
         <div className="flex flex-col gap-1 border-b border-border p-2.5 text-xs">
           {fornecedor.telefone ? (
             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -357,7 +431,6 @@ function FornecedorCard({
           ) : null}
         </div>
 
-        {/* Catálogos PDF — ocupam o resto, com scroll interno se passar */}
         <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto p-2.5">
           <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <FileText className="size-3" />
@@ -389,36 +462,53 @@ function FornecedorCard({
               </div>
             ))
           )}
+          {fornecedor.isEstoqueProprio && (
+            <div className="mt-4 p-3 border-t border-primary/20 bg-primary/5 rounded-lg flex flex-col items-center gap-2 text-center">
+              <ShoppingBag className="size-6 text-primary" />
+              <p className="text-xs text-muted-foreground">
+                Catálogo gerado automaticamente com base nos seus produtos cadastrados como <b>Estoque Próprio</b>.
+              </p>
+              <Button 
+                size="sm" 
+                className="w-full mt-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={onGerarCatalogoProprio}
+              >
+                <Sparkles className="size-3.5 mr-1" />
+                Gerar Catálogo PDF
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Upload de PDF — fica fixo no rodapé */}
-        <div className="flex flex-col gap-1 border-t border-border p-2">
-          <Input
-            value={nomeCatalogo}
-            onChange={(e) => setNomeCatalogo(e.target.value)}
-            placeholder="Nome do novo catálogo"
-            className="h-7 text-[11px]"
-          />
-          <Input
-            type="date"
-            value={dataCatalogo}
-            onChange={(e) => setDataCatalogo(e.target.value)}
-            className="h-7 text-[11px]"
-            title="Data de referência do catálogo (opcional)"
-          />
-          <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={handleUpload} />
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            disabled={uploading || !nomeCatalogo.trim()}
-            onClick={() => inputRef.current?.click()}
-            className="h-7 w-full text-[11px]"
-          >
-            <Upload className="size-3" />
-            {uploading ? "Enviando..." : "Enviar PDF"}
-          </Button>
-        </div>
+        {!fornecedor.isEstoqueProprio && (
+          <div className="flex flex-col gap-1 border-t border-border p-2">
+            <Input
+              value={nomeCatalogo}
+              onChange={(e) => setNomeCatalogo(e.target.value)}
+              placeholder="Nome do novo catálogo"
+              className="h-7 text-[11px]"
+            />
+            <Input
+              type="date"
+              value={dataCatalogo}
+              onChange={(e) => setDataCatalogo(e.target.value)}
+              className="h-7 text-[11px]"
+              title="Data de referência do catálogo (opcional)"
+            />
+            <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={handleUpload} />
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={uploading || !nomeCatalogo.trim()}
+              onClick={() => inputRef.current?.click()}
+              className="h-7 w-full text-[11px]"
+            >
+              <Upload className="size-3" />
+              {uploading ? "Enviando..." : "Enviar PDF"}
+            </Button>
+          </div>
+        )}
       </div>
 
       {editandoCatalogo ? (
@@ -469,7 +559,6 @@ function FornecedorCard({
   );
 }
 
-// Modal pra editar título/data do catálogo PDF e opcionalmente substituir o arquivo.
 function EditarCatalogoDialog({
   catalogo,
   fornecedorId,

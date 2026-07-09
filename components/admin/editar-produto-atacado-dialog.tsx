@@ -89,6 +89,8 @@ export function EditarProdutoAtacadoDialog({
   const [larguraCm, setLarguraCm] = useState(String(produto.larguraCm));
   const [alturaCm, setAlturaCm] = useState(String(produto.alturaCm));
   const [fornecedorId, setFornecedorId] = useState(produto.fornecedor?.id ?? "");
+  const ehEstoqueProprioInicial = produto.fornecedor?.nome?.includes("ESTOQUE PRÓPRIO") ?? false;
+  const [isEstoqueProprio, setIsEstoqueProprio] = useState(ehEstoqueProprioInicial);
   const [coresVariadas, setCoresVariadas] = useState(produto.coresVariadas ?? false);
 
   async function gerarDescricao() {
@@ -141,7 +143,7 @@ export function EditarProdutoAtacadoDialog({
           comprimentoCm: Number(comprimentoCm),
           larguraCm: Number(larguraCm),
           alturaCm: Number(alturaCm),
-          fornecedorId: fornecedorId || undefined,
+          fornecedorId: isEstoqueProprio ? "ESTOQUE_PROPRIO" : (fornecedorId || undefined),
           coresVariadas,
         }),
       });
@@ -280,21 +282,40 @@ export function EditarProdutoAtacadoDialog({
               vendido&quot; na vitrine.
             </span>
 
-            <Label>Fornecedor (uso interno, opcional)</Label>
-            <Select value={fornecedorId} onValueChange={(v) => setFornecedorId(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Nenhum">
-                  {() => fornecedores.find((f) => f.id === fornecedorId)?.nome ?? "Nenhum"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {fornecedores.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  checked={isEstoqueProprio}
+                  onChange={(e) => {
+                    setIsEstoqueProprio(e.target.checked);
+                    if (e.target.checked) setFornecedorId("");
+                  }}
+                  className="rounded border-input text-primary focus:ring-primary"
+                />
+                📦 Este produto é do meu Estoque Próprio
+              </label>
+            </div>
+
+            {!isEstoqueProprio && (
+              <>
+                <Label>Fornecedor (uso interno, opcional)</Label>
+                <Select value={fornecedorId} onValueChange={(v) => setFornecedorId(v ?? "")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Nenhum">
+                      {() => fornecedores.find((f) => f.id === fornecedorId)?.nome ?? "Nenhum"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fornecedores.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
 
             <Label>Peso e dimensões (pra calcular frete real)</Label>
             <div className="grid grid-cols-4 gap-2">
