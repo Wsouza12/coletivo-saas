@@ -474,37 +474,60 @@ function VincularGrupoControle({
     );
   }
 
+  const parentGroups = grupos.filter((g: any) => g.isCommunity);
+  const childGroups = grupos.filter((g: any) => g.linkedParent);
+  const standaloneGroups = grupos.filter((g: any) => !g.isCommunity && !g.linkedParent);
+
   return (
-    <div className="flex flex-1 flex-col gap-1">
-      <select
-        defaultValue=""
-        onChange={(e) => {
-          const v = e.target.value;
-          if (v) {
-            onVincular(v);
-            e.target.value = "";
-          }
-        }}
-        className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
-      >
-        <option value="">Vincular grupo...</option>
-        {grupos.map((g) => (
-          <option key={g.id} value={g.id}>
-            {g.nome} ({g.tamanho})
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-1">
+      <Select onValueChange={(id) => onVincular(id)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Vincular grupo..." />
+        </SelectTrigger>
+        <SelectContent>
+          {parentGroups.map(parent => {
+            const children = childGroups.filter((c: any) => c.linkedParent === parent.id);
+            return (
+              <SelectGroup key={parent.id}>
+                <SelectLabel className="font-bold text-primary px-2 py-1.5 text-xs bg-muted/30">
+                  📁 Comunidade: {parent.nome}
+                </SelectLabel>
+                <SelectItem value={parent.id} className="pl-6">
+                  📢 {parent.nome} (Avisos/Geral)
+                </SelectItem>
+                {children.map(child => (
+                  <SelectItem key={child.id} value={child.id} className="pl-6">
+                    ↳ {child.nome} ({child.tamanho} membros)
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            );
+          })}
+          
+          {standaloneGroups.length > 0 && (
+            <SelectGroup>
+              <SelectLabel className="font-bold text-primary px-2 py-1.5 text-xs bg-muted/30">
+                {parentGroups.length > 0 ? "Outros Grupos" : "Todos os Grupos"}
+              </SelectLabel>
+              {standaloneGroups.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  {g.nome} ({g.tamanho} membros)
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          )}
+        </SelectContent>
+      </Select>
       <button
         type="button"
         onClick={() => setManual(true)}
-        className="self-start text-[10px] text-primary hover:underline"
+        className="w-fit text-[10px] text-muted-foreground hover:text-foreground transition-colors"
       >
         + vincular manualmente (JID)
       </button>
     </div>
   );
 }
-
 function FixarTutorialButton({ grupoJid }: { grupoJid: string }) {
   const [loading, setLoading] = useState(false);
 

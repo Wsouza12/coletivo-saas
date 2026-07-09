@@ -3,7 +3,7 @@
 // GET /group/fetchAllGroups/{instance} retornou os grupos reais (inclusive os de categoria
 // dentro da comunidade "Compras Coletivas 2"), confirmando suporte a grupo, não só 1:1.
 
-type GrupoWhatsapp = { id: string; nome: string; tamanho: number };
+type GrupoWhatsapp = { id: string; nome: string; tamanho: number; isCommunity?: boolean; linkedParent?: string; };
 
 // WhatsApp não aceita WebP como imagem normal (só como sticker). Buscamos a
 // imagem do Supabase e convertemos para JPEG via sharp antes de enviar.
@@ -49,8 +49,14 @@ export async function listarGruposWhatsapp(): Promise<GrupoWhatsapp[]> {
   );
   if (!res.ok) throw new Error(`Evolution API: falha ao listar grupos (${res.status})`);
 
-  const grupos: Array<{ id: string; subject: string; size: number }> = await res.json();
-  return grupos.map((g) => ({ id: g.id, nome: g.subject, tamanho: g.size }));
+  const grupos: Array<{ id: string; subject: string; size: number; isCommunity?: boolean; linkedParent?: string }> = await res.json();
+  return grupos.map((g) => ({ 
+    id: g.id, 
+    nome: g.subject, 
+    tamanho: g.size,
+    isCommunity: g.isCommunity,
+    linkedParent: g.linkedParent
+  }));
 }
 
 // Lista os grupos que pertencem a uma comunidade (campo linkedParent presente),
