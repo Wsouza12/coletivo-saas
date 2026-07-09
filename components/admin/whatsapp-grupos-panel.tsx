@@ -480,7 +480,7 @@ function VincularGrupoControle({
 
   return (
     <div className="flex flex-col gap-1">
-      <Select onValueChange={(id) => onVincular(id)}>
+      <Select onValueChange={(id: string) => onVincular(id)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Vincular grupo..." />
         </SelectTrigger>
