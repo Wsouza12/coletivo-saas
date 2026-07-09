@@ -29,16 +29,18 @@ async function prepararImagemParaWhatsApp(
   return { base64: jpeg.toString("base64"), mimetype: "image/jpeg", fileName: "imagem.jpg" };
 }
 
-function getConfig() {
-  const baseUrl = process.env.EVOLUTION_API_URL;
-  const instance = process.env.EVOLUTION_INSTANCE;
-  const apiKey = process.env.EVOLUTION_API_KEY;
+import { getConfig as getDbConfig } from "./config-app";
+
+async function getConfig() {
+  const baseUrl = await getDbConfig("EVOLUTION_API_URL");
+  const instance = await getDbConfig("EVOLUTION_INSTANCE");
+  const apiKey = await getDbConfig("EVOLUTION_API_KEY");
   if (!baseUrl || !instance || !apiKey) return null;
   return { baseUrl: baseUrl.replace(/\/$/, ""), instance, apiKey };
 }
 
 export async function listarGruposWhatsapp(): Promise<GrupoWhatsapp[]> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return [];
 
   const res = await fetch(
@@ -58,7 +60,7 @@ export async function listarGruposWhatsapp(): Promise<GrupoWhatsapp[]> {
 export async function listarGruposComunidade(): Promise<
   { id: string; nome: string; linkConvite: string | null }[]
 > {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return [];
 
   const res = await fetch(
@@ -91,7 +93,7 @@ export async function listarGruposComunidade(): Promise<
 // WhatsApp exige pelo menos 1 participante pra criar grupo — telefone no formato
 // internacional sem símbolos (ex: 5511999999999).
 export async function criarGrupoWhatsapp(nome: string, telefoneParticipante: string): Promise<GrupoWhatsapp> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) throw new Error("Evolution API não configurada");
 
   const res = await fetch(`${config.baseUrl}/group/create/${config.instance}`, {
@@ -111,7 +113,7 @@ export async function enviarMensagemGrupo(
   quotedMsgId?: string,
   mentions?: string[]
 ): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return;
 
   const payload: any = { number: grupoId, text: texto };
@@ -144,7 +146,7 @@ export async function enviarImagemGrupo(
   legenda: string,
   mentions?: string[]
 ): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return;
 
   // WhatsApp rejeita WebP como imagem normal — convertemos sempre para JPEG via
@@ -184,7 +186,7 @@ export async function enviarVideoGrupo(
   videoUrl: string,
   legenda: string
 ): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return;
 
   const res = await fetch(`${config.baseUrl}/message/sendMedia/${config.instance}`, {
@@ -212,7 +214,7 @@ export async function enviarImagemMassa(
   imagemUrl: string,
   legenda: string
 ): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config || grupoJids.length === 0) return;
 
   // Baixa e converte a imagem UMA ÚNICA VEZ
@@ -252,7 +254,7 @@ export async function enviarImagemMassaComLegendas(
   itens: { jid: string; legenda: string }[],
   imagemUrl: string
 ): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config || itens.length === 0) return;
 
   const imagem = await prepararImagemParaWhatsApp(imagemUrl);
@@ -292,7 +294,7 @@ function normalizarTelefoneBR(telefone: string): string {
 // Mensagens 1:1 — mesmos endpoints dos grupos, só troca o destino (telefone em
 // vez de JID de grupo).
 export async function enviarMensagemIndividual(telefone: string, texto: string): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return;
 
   const res = await fetch(`${config.baseUrl}/message/sendText/${config.instance}`, {
@@ -310,7 +312,7 @@ export async function enviarMensagemIndividual(telefone: string, texto: string):
 }
 
 export async function enviarImagemIndividual(telefone: string, imagemUrl: string, legenda: string): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) return;
 
   // Mesmo padrão — converte para JPEG antes de enviar.
@@ -336,7 +338,7 @@ export async function enviarImagemIndividual(telefone: string, imagemUrl: string
 }
 
 export async function getConnectionState(): Promise<{ state: string }> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) throw new Error("Configurações da Evolution API não encontradas");
 
   const res = await fetch(`${config.baseUrl}/instance/connectionState/${config.instance}`, {
@@ -348,7 +350,7 @@ export async function getConnectionState(): Promise<{ state: string }> {
 }
 
 export async function getConnectQrCode(): Promise<{ base64: string | null }> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) throw new Error("Configurações da Evolution API não encontradas");
 
   const res = await fetch(`${config.baseUrl}/instance/connect/${config.instance}`, {
@@ -360,7 +362,7 @@ export async function getConnectQrCode(): Promise<{ base64: string | null }> {
 }
 
 export async function logoutInstance(): Promise<void> {
-  const config = getConfig();
+  const config = await getConfig();
   if (!config) throw new Error("Configurações da Evolution API não encontradas");
 
   const res = await fetch(`${config.baseUrl}/instance/logout/${config.instance}`, {
