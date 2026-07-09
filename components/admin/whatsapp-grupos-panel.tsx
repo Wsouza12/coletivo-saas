@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type Grupo = { id: string; nome: string; tamanho: number };
 type Vinculo = {
@@ -426,106 +434,151 @@ function VincularGrupoControle({
   const [manual, setManual] = useState(false);
   const [grupoId, setGrupoId] = useState("");
   const [grupoNome, setGrupoNome] = useState("");
+  const [open, setOpen] = useState(false);
 
-  if (manual || grupos.length === 0) {
-    return (
-      <div className="flex flex-1 flex-col gap-1">
-        <div className="flex items-center gap-1">
-          <Input
-            value={grupoId}
-            onChange={(e) => setGrupoId(e.target.value)}
-            placeholder="JID (ex: 123456789@g.us)"
-            className="h-8 flex-1 text-xs"
-          />
-          <Input
-            value={grupoNome}
-            onChange={(e) => setGrupoNome(e.target.value)}
-            placeholder="Nome do grupo"
-            className="h-8 flex-1 text-xs"
-          />
-          <Button
-            type="button"
-            size="sm"
-            className="h-8"
-            disabled={!grupoId.trim() || !grupoNome.trim()}
-            onClick={() => {
-              onVincularManual(grupoId, grupoNome);
-              setGrupoId("");
-              setGrupoNome("");
-            }}
-          >
-            <Plus className="size-3" />
-          </Button>
-        </div>
-        {grupos.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => setManual(false)}
-            className="self-start text-[10px] text-primary hover:underline"
-          >
-            ← usar lista da Evolution
-          </button>
-        ) : (
-          <span className="text-[10px] text-muted-foreground">
-            Evolution sem grupos visíveis — vincula manual com o JID que aparece no link de convite.
-          </span>
-        )}
-      </div>
-    );
-  }
+  const handleVincular = (id: string) => {
+    onVincular(id);
+    setOpen(false);
+  };
+
+  const handleVincularManual = () => {
+    onVincularManual(grupoId, grupoNome);
+    setGrupoId("");
+    setGrupoNome("");
+    setManual(false);
+    setOpen(false);
+  };
 
   const parentGroups = grupos.filter((g: any) => g.isCommunity);
   const childGroups = grupos.filter((g: any) => g.linkedParent);
   const standaloneGroups = grupos.filter((g: any) => !g.isCommunity && !g.linkedParent);
 
   return (
-    <div className="flex flex-col gap-1">
-      <Select onValueChange={(id: string | null) => { if (id) onVincular(id) }}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Vincular grupo..." />
-        </SelectTrigger>
-        <SelectContent>
-          {parentGroups.map(parent => {
-            const children = childGroups.filter((c: any) => c.linkedParent === parent.id);
-            return (
-              <SelectGroup key={parent.id}>
-                <SelectLabel className="font-bold text-primary px-2 py-1.5 text-xs bg-muted/30">
-                  📁 Comunidade: {parent.nome}
-                </SelectLabel>
-                <SelectItem value={parent.id} className="pl-6">
-                  📢 {parent.nome} (Avisos/Geral)
-                </SelectItem>
-                {children.map(child => (
-                  <SelectItem key={child.id} value={child.id} className="pl-6">
-                    ↳ {child.nome} ({child.tamanho} membros)
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            );
-          })}
-          
-          {standaloneGroups.length > 0 && (
-            <SelectGroup>
-              <SelectLabel className="font-bold text-primary px-2 py-1.5 text-xs bg-muted/30">
-                {parentGroups.length > 0 ? "Outros Grupos" : "Todos os Grupos"}
-              </SelectLabel>
-              {standaloneGroups.map((g) => (
-                <SelectItem key={g.id} value={g.id}>
-                  {g.nome} ({g.tamanho} membros)
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
-        </SelectContent>
-      </Select>
-      <button
-        type="button"
-        onClick={() => setManual(true)}
-        className="w-fit text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-      >
-        + vincular manualmente (JID)
-      </button>
-    </div>
+    <>
+      <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={() => setOpen(true)}>
+        <Link2 className="size-3 mr-1.5" />
+        Vincular grupo
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Vincular Grupo do WhatsApp</DialogTitle>
+          <DialogDescription>
+            Selecione o grupo abaixo ou faça o vínculo manual se a Evolution API não estiver sincronizando.
+          </DialogDescription>
+        </DialogHeader>
+
+        {manual || grupos.length === 0 ? (
+          <div className="flex flex-col gap-3 py-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs">JID do Grupo (ex: 123456789@g.us)</Label>
+              <Input
+                value={grupoId}
+                onChange={(e) => setGrupoId(e.target.value)}
+                placeholder="123456789@g.us"
+                className="text-xs"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs">Nome de Exibição</Label>
+              <Input
+                value={grupoNome}
+                onChange={(e) => setGrupoNome(e.target.value)}
+                placeholder="Ex: Grupo Vip"
+                className="text-xs"
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              {grupos.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setManual(false)}
+                >
+                  Voltar pra lista
+                </Button>
+              )}
+              <Button
+                type="button"
+                size="sm"
+                className="flex-1"
+                disabled={!grupoId.trim() || !grupoNome.trim()}
+                onClick={handleVincularManual}
+              >
+                Salvar Vínculo Manual
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 py-2">
+            {parentGroups.map((parent) => {
+              const children = childGroups.filter((c: any) => c.linkedParent === parent.id);
+              return (
+                <div key={parent.id} className="flex flex-col gap-1 border rounded-lg overflow-hidden">
+                  <div className="bg-muted/50 px-3 py-2 border-b">
+                    <span className="text-xs font-semibold text-primary">📁 Comunidade: {parent.nome}</span>
+                  </div>
+                  <div className="flex flex-col p-1">
+                    <button
+                      type="button"
+                      onClick={() => handleVincular(parent.id)}
+                      className="flex items-center text-left px-3 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                    >
+                      <span className="mr-2">📢</span> {parent.nome} (Avisos/Geral)
+                    </button>
+                    {children.map((child) => (
+                      <button
+                        type="button"
+                        key={child.id}
+                        onClick={() => handleVincular(child.id)}
+                        className="flex items-center text-left pl-8 pr-3 py-2 text-sm hover:bg-muted rounded-md transition-colors text-muted-foreground"
+                      >
+                        ↳ <span className="ml-1.5 text-foreground">{child.nome} ({child.tamanho} membros)</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {standaloneGroups.length > 0 && (
+              <div className="flex flex-col gap-1 border rounded-lg overflow-hidden">
+                <div className="bg-muted/50 px-3 py-2 border-b">
+                  <span className="text-xs font-semibold text-primary">
+                    {parentGroups.length > 0 ? "Outros Grupos" : "Todos os Grupos"}
+                  </span>
+                </div>
+                <div className="flex flex-col p-1">
+                  {standaloneGroups.map((g) => (
+                    <button
+                      type="button"
+                      key={g.id}
+                      onClick={() => handleVincular(g.id)}
+                      className="text-left px-3 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                    >
+                      {g.nome} <span className="text-xs text-muted-foreground ml-1">({g.tamanho} membros)</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setManual(true)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+              >
+                + vincular manualmente (JID)
+              </button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 function FixarTutorialButton({ grupoJid }: { grupoJid: string }) {
