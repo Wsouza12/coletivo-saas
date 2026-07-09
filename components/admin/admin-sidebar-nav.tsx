@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { WhatsAppStatusIndicator } from "./whatsapp-status-indicator";
 
 const NAV_ITEMS = [
   { href: "/admin/atacado", label: "Todas as Caixas", icon: Users2, desc: "Painel de caixas." },
@@ -51,6 +52,7 @@ export function AdminSidebarNav({ userEmail }: { userEmail?: string | null }) {
         <img src="/icon.png" alt="Logo" className="size-8 object-contain rounded-md" />
         <span className="font-semibold text-sidebar-foreground">{APP_NAME}</span>
       </div>
+      <WhatsAppStatusIndicator />
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {NAV_ITEMS.filter((item) => {
           if (item.href === "/admin/dev") {
