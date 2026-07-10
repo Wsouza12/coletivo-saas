@@ -1,39 +1,59 @@
-@page {
-  size: A5 landscape;
-  margin: 5mm;
-}
-
 body {
   background-color: #f3f4f6;
   margin: 0;
   padding: 0;
 }
 
-.print-page {
+/* Ficha de Separação - Ocupa a largura total e cresce conforme necessário */
+.page-ficha {
   background-color: white;
-  width: 100%;
-  max-width: 210mm;
-  min-height: 148mm; /* A5 Landscape */
-  padding: 5mm;
+  width: 210mm; /* A4 Portrait Width */
+  min-height: 297mm; /* A4 Portrait Height */
+  padding: 10mm;
   margin: 0 auto 10mm auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   page-break-after: always;
-  overflow: hidden;
   box-sizing: border-box;
+}
+
+/* Etiqueta + Declaração - Exatamente tamanho de A5 Paisagem */
+.page-etiqueta {
+  background-color: white;
+  width: 210mm;
+  height: 148.5mm; /* A5 Landscape Height */
+  padding: 5mm;
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  page-break-inside: avoid;
+  box-sizing: border-box;
+  border-bottom: 1px dashed #ccc; /* Linha de corte horizontal se impresso em A4 */
 }
 
 @media print {
   body {
     background-color: white;
   }
-  .print-page {
-    width: 210mm;
-    height: 148mm;
-    max-width: none;
+  
+  @page {
+    margin: 0;
+  }
+
+  .page-ficha {
+    width: 100%;
     min-height: 0;
     margin: 0;
+    padding: 10mm;
     box-shadow: none;
+    border: none;
   }
+
+  .page-etiqueta {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+    /* A altura permanece 148.5mm para empilhar 2 por folha A4 */
+  }
+
   .no-print {
     display: none !important;
   }

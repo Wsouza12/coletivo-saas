@@ -65,9 +65,9 @@ export default async function ImprimirCaixaPage({
         </div>
       </div>
 
-      {/* 1. FICHA DE SEPARAÇÃO (1 página) */}
-      <div className="print-page">
-        <div className="border-2 border-black p-4 h-full flex flex-col">
+      {/* 1. FICHA DE SEPARAÇÃO GERAL */}
+      <div className="page-ficha flex flex-col">
+        <div className="border-2 border-black p-4 flex-1 flex flex-col">
           <div className="text-center mb-6 border-b-2 border-black pb-4">
             <h1 className="text-lg font-bold uppercase">Ficha de Separação Geral</h1>
             <h2 className="text-sm mt-2">Produto: {produtoNomeCompleto}</h2>
@@ -150,7 +150,7 @@ export default async function ImprimirCaixaPage({
           }
           
           return (
-            <div key={`doc-${reserva.id}`} className="print-page flex flex-row relative">
+            <div key={`doc-${reserva.id}`} className="page-etiqueta flex flex-row relative">
               {/* Linha de corte no meio */}
               <div className="absolute left-1/2 top-4 bottom-4 border-l border-dashed border-gray-400"></div>
 
