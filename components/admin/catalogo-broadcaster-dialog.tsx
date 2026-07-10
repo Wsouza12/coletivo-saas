@@ -143,9 +143,14 @@ export function CatalogoBroadcasterDialog({
     const resGrupos = await fetch(`/api/admin/atacado/whatsapp/grupos`);
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      // Remove o filtro para permitir selecionar qualquer grupo vinculado no sistema
-      // Combine todos os grupos (vinculados ou não) e deduplicate por grupoId
-      const allGroups = [...jsonGrupos.data.grupos, ...jsonGrupos.data.vinculos];
+      // Normaliza grupos da Evolution API (id/nome) para formato do componente (grupoId/grupoNome)
+      const gruposNormalizados = (jsonGrupos.data.grupos || []).map((g: any) => ({
+        grupoId: g.id,
+        grupoNome: g.nome || g.subject || g.id,
+        categoria: "",
+      }));
+      // Combina todos os grupos (da API + vinculados no banco) e deduplica por grupoId
+      const allGroups = [...gruposNormalizados, ...jsonGrupos.data.vinculos];
       const destinos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
       setGrupos(destinos);
       const grupoAvisos = destinos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
