@@ -117,6 +117,9 @@ export default async function AdminConfiguracoesPage() {
                 initialMargemPadrao={Number(financeiro.margemPadrao)}
                 initialMargemOperacional={Number(financeiro.margemOperacional)}
                 initialCepOrigem={financeiro.cepOrigem}
+                initialNomeRemetente={financeiro.nomeRemetente}
+                initialDocRemetente={financeiro.docRemetente}
+                initialEnderecoRemetente={financeiro.enderecoRemetente}
                 initialValorAssinaturaAtacado={Number(financeiro.valorAssinaturaAtacado)}
                 initialTaxaServicoPadraoAtacado={Number(financeiro.taxaServicoPadraoAtacado)}
                 initialTaxaServicoAssinanteAtacado={Number(financeiro.taxaServicoAssinanteAtacado)}

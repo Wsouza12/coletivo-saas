@@ -28,6 +28,9 @@ export function ConfiguracoesFinanceiroForm({
   initialPrecoCatalogosSemContato,
   initialPrecoUpsellComunidade,
   initialMargemSegurancaFrete,
+  initialNomeRemetente,
+  initialDocRemetente,
+  initialEnderecoRemetente,
 }: {
   initialMargemPadrao: number;
   initialMargemOperacional: number;
@@ -42,6 +45,9 @@ export function ConfiguracoesFinanceiroForm({
   initialPrecoCatalogosSemContato: number;
   initialPrecoUpsellComunidade: number;
   initialMargemSegurancaFrete: number;
+  initialNomeRemetente?: string | null;
+  initialDocRemetente?: string | null;
+  initialEnderecoRemetente?: string | null;
 }) {
   const [margemPadrao, setMargemPadrao] = useState(String(initialMargemPadrao));
   const [margemOperacional, setMargemOperacional] = useState(String(initialMargemOperacional));
@@ -56,6 +62,9 @@ export function ConfiguracoesFinanceiroForm({
   const [precoCatalogosSemContato, setPrecoCatalogosSemContato] = useState(String(initialPrecoCatalogosSemContato));
   const [precoUpsellComunidade, setPrecoUpsellComunidade] = useState(String(initialPrecoUpsellComunidade));
   const [margemSegurancaFrete, setMargemSegurancaFrete] = useState(String(initialMargemSegurancaFrete));
+  const [nomeRemetente, setNomeRemetente] = useState(initialNomeRemetente ?? "");
+  const [docRemetente, setDocRemetente] = useState(initialDocRemetente ?? "");
+  const [enderecoRemetente, setEnderecoRemetente] = useState(initialEnderecoRemetente ?? "");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -78,6 +87,9 @@ export function ConfiguracoesFinanceiroForm({
         precoUpsellComunidade: Number(precoUpsellComunidade),
         margemSegurancaFrete: Number(margemSegurancaFrete),
         ...(cepOrigem ? { cepOrigem } : {}),
+        ...(nomeRemetente ? { nomeRemetente } : {}),
+        ...(docRemetente ? { docRemetente } : {}),
+        ...(enderecoRemetente ? { enderecoRemetente } : {}),
       }),
     });
     setLoading(false);
@@ -129,6 +141,36 @@ export function ConfiguracoesFinanceiroForm({
         </span>
       </div>
 
+      <div className="flex flex-col gap-4 rounded-lg border border-border p-3">
+        <span className="text-sm font-medium text-foreground">Dados do Remetente (Impressão)</span>
+        <span className="text-xs text-muted-foreground -mt-3">
+          Usados na impressão das Etiquetas de Envio e Declarações de Conteúdo das caixas fechadas.
+        </span>
+        <div className="flex flex-col gap-2">
+          <Label>Nome do Remetente</Label>
+          <Input
+            value={nomeRemetente}
+            onChange={(e) => setNomeRemetente(e.target.value)}
+            placeholder="Ex: Compras Coletivas JN"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Documento (CPF/CNPJ)</Label>
+          <Input
+            value={docRemetente}
+            onChange={(e) => setDocRemetente(e.target.value)}
+            placeholder="Ex: 00.000.000/0001-00"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Endereço Completo</Label>
+          <Input
+            value={enderecoRemetente}
+            onChange={(e) => setEnderecoRemetente(e.target.value)}
+            placeholder="Rua Exemplo, 123 - Bairro, Cidade/UF"
+          />
+        </div>
+      </div>
       <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
         <span className="text-sm font-medium text-foreground">Frete - Melhor Envio</span>
         <Label>Margem de segurança (%)</Label>

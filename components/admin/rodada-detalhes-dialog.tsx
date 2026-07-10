@@ -68,8 +68,11 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-full max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-2xl sm:max-h-[80vh]">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between mt-2 pr-6">
             <DialogTitle>Compradores dessa caixa</DialogTitle>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/admin/atacado/imprimir/${rodadaId}`, '_blank')}>
+              🖨️ Imprimir Docs
+            </Button>
           </DialogHeader>
 
           {reservas && pendentesCount > 0 && (

@@ -1,0 +1,53 @@
+@page {
+  size: A5;
+  margin: 10mm;
+}
+
+body {
+  background-color: #f3f4f6;
+  margin: 0;
+  padding: 0;
+}
+
+.print-page {
+  background-color: white;
+  width: 148mm;
+  height: 210mm; /* A5 */
+  padding: 10mm;
+  margin: 0 auto 10mm auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  page-break-after: always;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.print-page-half {
+  background-color: white;
+  width: 148mm;
+  height: 105mm; /* Meia página A5 */
+  padding: 10mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+  page-break-inside: avoid;
+  border-bottom: 1px dashed #ccc;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.print-page-half:nth-child(even) {
+  border-bottom: none;
+  page-break-after: always;
+  margin-bottom: 10mm;
+}
+
+@media print {
+  body {
+    background-color: white;
+  }
+  .print-page, .print-page-half {
+    margin: 0;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

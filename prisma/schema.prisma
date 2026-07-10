@@ -559,6 +559,10 @@ model ConfiguracaoFinanceira {
   tipoVendedorShopee TipoVendedorShopee  @default(CNPJ)
   // CEP de origem do Pablo — necessário pro cálculo real de frete via Melhor Envio (Fase 6)
   cepOrigem          String?
+  // Dados do remetente para as etiquetas de envio das caixas fechadas
+  nomeRemetente      String?
+  docRemetente       String?
+  enderecoRemetente  String?
   // Fase 6 — Atacado Coletivo: valor da assinatura mensal e taxa de serviço padrão
   // (essa última é só o valor pré-preenchido ao criar rodada; cada rodada pode ter a sua)
   valorAssinaturaAtacado      Decimal @default(100) @db.Decimal(10, 2)
