@@ -89,6 +89,24 @@ export function DevConfigPanel() {
         <p>Build-time (marca/URLs públicas): <code>NEXT_PUBLIC_APP_NAME</code>, <code>NEXT_PUBLIC_APP_URL</code>, <code>NEXT_PUBLIC_SUPABASE_URL</code></p>
         <p className="mt-1">As chaves acima são salvas <b>criptografadas</b> (AES-256-GCM) e aplicadas no próximo restart do servidor.</p>
       </div>
+
+      <div className="rounded-xl border bg-card p-4 flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-primary flex items-center gap-2">
+          🤖 Tarefas Automáticas (Cron Jobs)
+        </h2>
+        <div className="text-xs text-muted-foreground">
+          <p>Para o envio automático do Loop e das Postagens Agendadas funcionarem (se você não tiver plano pago da Vercel), crie duas chamadas GET a cada 5 minutos no <a href="https://cron-job.org" target="_blank" rel="noreferrer" className="underline text-blue-500">cron-job.org</a> para as URLs abaixo:</p>
+          <ul className="list-disc ml-4 mt-2 space-y-1">
+            <li><code>{typeof window !== "undefined" ? window.location.origin : ""}/api/cron/atacado/loop</code></li>
+            <li><code>{typeof window !== "undefined" ? window.location.origin : ""}/api/cron/postagens-agendadas</code></li>
+          </ul>
+          <p className="mt-2 font-medium text-foreground">Importante: Na aba Advanced do cron-job.org, adicione o Header:</p>
+          <code className="block mt-1 bg-muted p-2 rounded">
+            Key: Authorization<br/>
+            Value: Bearer (coloque-aqui-o-seu-CRON_SECRET-da-Vercel)
+          </code>
+        </div>
+      </div>
     </div>
   );
 }
