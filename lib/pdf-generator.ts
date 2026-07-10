@@ -56,8 +56,8 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
     
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("CATÁLOGO DE ESTOQUE PRÓPRIO", margin, 16);
+    doc.setFontSize(16);
+    doc.text("CATÁLOGO PRONTA ENTREGA", margin, 16);
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -66,7 +66,35 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
   }
 
   const itemsPerPage = 6;
-  const totalPages = Math.ceil(produtos.length / itemsPerPage) || 1;
+  const contentPages = Math.ceil(produtos.length / itemsPerPage) || 1;
+  const totalPages = contentPages + 1; // Capa + Conteúdo
+
+  // --- CAPA (Página 1) ---
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+  
+  try {
+    const logoUrl = window.location.origin + "/logo-jn.png.jpeg";
+    const base64Logo = await getBase64ImageFromUrl(logoUrl);
+    const logoSize = 80;
+    doc.addImage(base64Logo, "JPEG", (pageWidth - logoSize) / 2, pageHeight / 2 - 70, logoSize, logoSize);
+  } catch (e) {
+    console.error("Erro ao carregar logo para a capa", e);
+  }
+  
+  doc.setTextColor(15, 23, 42);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(28);
+  doc.text("CATÁLOGO", pageWidth / 2, pageHeight / 2 + 30, { align: "center" });
+  
+  doc.setTextColor(22, 163, 74);
+  doc.setFontSize(24);
+  doc.text("PRONTA ENTREGA", pageWidth / 2, pageHeight / 2 + 45, { align: "center" });
+  
+  doc.setTextColor(100, 100, 100);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(`Atualizado em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, pageHeight / 2 + 65, { align: "center" });
 
   for (let i = 0; i < produtos.length; i++) {
     const p = produtos[i];
@@ -76,8 +104,8 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
     const col = itemIndexOnPage % 2;
 
     if (itemIndexOnPage === 0) {
-      if (i > 0) doc.addPage();
-      drawHeader(pageIndex + 1, totalPages);
+      doc.addPage();
+      drawHeader(pageIndex + 2, totalPages); // +2 pq a capa é a pág 1
     }
 
     currentX = margin + col * (colWidth + margin);
@@ -91,7 +119,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
     // Imagem (se houver)
     const imgSize = 50;
     const imgX = currentX + (colWidth - imgSize) / 2;
-    let imgY = currentY + 5;
+    let imgY = currentY + 3;
 
     if (p.imagemUrl) {
       try {
@@ -99,7 +127,6 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
         doc.addImage(base64Img, "JPEG", imgX, imgY, imgSize, imgSize);
       } catch (e) {
         console.error("Erro ao baixar imagem", p.imagemUrl, e);
-        // Fallback rect
         doc.setDrawColor(220, 220, 220);
         doc.rect(imgX, imgY, imgSize, imgSize);
         doc.setFont("helvetica", "italic");
@@ -117,43 +144,44 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
     }
 
     // Informações textuais
-    let textY = imgY + imgSize + 6;
+    let textY = imgY + imgSize + 5;
     
     // Título
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(30, 30, 30);
-    
-    // Limita o nome para não estourar
-    const maxTitleLen = 45;
-    let title = p.nome;
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    const maxTitleLen = 42;
+    let title = p.nome.toUpperCase();
     if (title.length > maxTitleLen) title = title.substring(0, maxTitleLen) + "...";
     doc.text(title, currentX + colWidth / 2, textY, { align: "center" });
-    textY += 5;
+    textY += 4.5;
 
-    // Código
+    // Código e Caixa
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     doc.setTextColor(100, 100, 100);
-    doc.text(`CÓD: ${p.codigo || "S/CÓD"} | CX: ${p.unidadesPorCaixa} un`, currentX + colWidth / 2, textY, { align: "center" });
-    textY += 8;
+    doc.text(`CÓD: ${p.codigo || "S/CÓD"}  •  CX: ${p.unidadesPorCaixa} un`, currentX + colWidth / 2, textY, { align: "center" });
+    textY += 7;
 
     // Preços
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(16);
     doc.setTextColor(22, 163, 74); // green-600
-    doc.text(formatBRL(p.custoUnitario), currentX + 5, textY);
+    doc.text(formatBRL(p.custoUnitario), currentX + colWidth / 2, textY, { align: "center" });
     
     if (p.precoVendaSugerido) {
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Sugestão: ${formatBRL(p.precoVendaSugerido)}`, currentX + colWidth - 5, textY, { align: "right" });
+      textY += 4;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(120, 120, 120);
+      doc.text(`Sugestão revenda: ${formatBRL(p.precoVendaSugerido)}`, currentX + colWidth / 2, textY, { align: "center" });
     }
   }
 
   // Caso não haja produtos
   if (produtos.length === 0) {
-    drawHeader(1, 1);
+    doc.addPage();
+    drawHeader(2, 2);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);

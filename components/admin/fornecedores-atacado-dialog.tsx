@@ -101,12 +101,18 @@ export function FornecedoresAtacadoPanel() {
       
       if (!uploadRes.ok) throw new Error("Erro ao enviar o arquivo PDF");
 
+      // Excluir catálogos antigos do Estoque Próprio para manter apenas o mais atual
+      const catalogosAntigos = catalogosTodos[fornecedorId] || [];
+      for (const cat of catalogosAntigos) {
+        await fetch(`/api/admin/atacado/catalogos/${cat.id}`, { method: "DELETE" }).catch(e => console.error("Erro ao excluir catálogo antigo:", e));
+      }
+
       // Save catalog entry
       const catRes = await fetch(`/api/admin/atacado/fornecedores/${fornecedorId}/catalogos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nome: "Catálogo Estoque Próprio",
+          nome: "Catálogo Pronta Entrega",
           arquivoUrl: publicUrl,
           data: new Date().toISOString().slice(0, 10),
         }),
@@ -204,7 +210,7 @@ export function FornecedoresAtacadoPanel() {
           Nenhum resultado pra &quot;{busca}&quot;.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
           {fornecedoresFiltrados!.map((f) => (
             <FornecedorCard
               key={f.id}
@@ -345,7 +351,7 @@ function FornecedorCard({
   return (
     <>
       <div
-        className={`flex aspect-[9/16] flex-col overflow-hidden rounded-xl border-2 shadow-sm transition ${
+        className={`flex h-[450px] flex-col overflow-hidden rounded-xl border-2 shadow-sm transition ${
           fornecedor.isEstoqueProprio
             ? "border-primary bg-primary/5"
             : fornecedor.atualizado
