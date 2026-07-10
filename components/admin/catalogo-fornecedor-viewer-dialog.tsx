@@ -33,10 +33,12 @@ export function CatalogoFornecedorViewerDialog({
   catalogoId,
   nome,
   iconeApenas = false,
+  isEstoqueProprio,
 }: {
   catalogoId: string;
   nome: string;
   iconeApenas?: boolean;
+  isEstoqueProprio?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
@@ -544,17 +546,19 @@ export function CatalogoFornecedorViewerDialog({
                     </Button>
                   ) : null}
                   <div className="flex-1 min-w-[20px]"></div>
-                  <Button 
-                    type="button" 
-                    size="sm" 
-                    variant="secondary" 
-                    className="gap-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 shadow-sm"
-                    onClick={handleExtrairLote}
-                    disabled={extraindoLote}
-                  >
-                    {extraindoLote ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
-                    Extrair Todos (IA)
-                  </Button>
+                  {!isEstoqueProprio && (
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      variant="secondary" 
+                      className="gap-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 shadow-sm"
+                      onClick={handleExtrairLote}
+                      disabled={extraindoLote}
+                    >
+                      {extraindoLote ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
+                      Extrair Todos (IA)
+                    </Button>
+                  )}
                 </div>
                 <PdfPageViewer
                   ref={pdfViewerRef}
@@ -742,8 +746,9 @@ export function CatalogoFornecedorViewerDialog({
                   </div>
                 )}
 
-                <form onSubmit={preCadastrar} className="flex flex-col gap-1.5 border-t border-border pt-3">
-                  <span className="text-xs font-medium text-foreground">Pré-cadastrar produto desta página</span>
+                {!isEstoqueProprio && (
+                  <form onSubmit={preCadastrar} className="flex flex-col gap-1.5 border-t border-border pt-3">
+                    <span className="text-xs font-medium text-foreground">Pré-cadastrar produto desta página</span>
 
                   <div className="flex gap-1.5">
                     <Input value={pagina} disabled className="w-16 text-xs" />
@@ -1003,7 +1008,6 @@ export function CatalogoFornecedorViewerDialog({
                     pra preencher os campos. <strong>Recortar imagem</strong>: arraste só na foto limpa do
                     produto pra definir a imagem. Confira sempre antes de salvar.
                   </p>
-
                   <Button
                     type="submit"
                     size="sm"
@@ -1023,8 +1027,7 @@ export function CatalogoFornecedorViewerDialog({
                     {salvando ? "Salvando..." : "Pré-cadastrar"}
                   </Button>
                 </form>
-
-
+              )}
               </div>
             </div>
           )}

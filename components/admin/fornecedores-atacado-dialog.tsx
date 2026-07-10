@@ -219,7 +219,6 @@ export function FornecedoresAtacadoPanel() {
               onRemover={() => remover(f.id)}
               onAtualizado={carregar}
               onCatalogosCarregados={(lista) => registrarCatalogos(f.id, lista)}
-              catalogos={catalogosTodos[f.id]}
               onGerarCatalogoProprio={(logo) => handleGerarCatalogoProprio(f.id, logo)}
             />
           ))}
@@ -472,7 +471,12 @@ function FornecedorCard({
                     {c.data ? ` · ${new Date(c.data).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })}` : ""}
                   </span>
                   <div className="flex shrink-0 items-center">
-                    <CatalogoFornecedorViewerDialog catalogoId={c.id} nome={c.nome} iconeApenas />
+                    <CatalogoFornecedorViewerDialog 
+                      catalogoId={c.id} 
+                      nome={c.nome} 
+                      iconeApenas 
+                      isEstoqueProprio={fornecedor.isEstoqueProprio} 
+                    />
                     <button type="button" onClick={() => setEditandoCatalogo(c)} className="rounded p-1 hover:bg-background" title="Editar">
                       <Pencil className="size-3 text-muted-foreground" />
                     </button>
