@@ -60,8 +60,8 @@ export default async function ImprimirCaixaPage({
     <div className="min-h-screen bg-gray-100 py-8 print:py-0 print:bg-white text-black font-sans">
       <div className="max-w-3xl mx-auto no-print mb-8 bg-white p-4 rounded-lg shadow flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold">Impressão de Documentos</h1>
-          <p className="text-sm text-gray-500">Caixa: {produtoNomeCompleto}</p>
+          <h1 className="text-base font-bold">Impressão de Documentos</h1>
+          <p className="text-xs text-gray-500">Caixa: {produtoNomeCompleto}</p>
         </div>
       </div>
 
@@ -69,9 +69,9 @@ export default async function ImprimirCaixaPage({
       <div className="print-page">
         <div className="border-2 border-black p-4 h-full flex flex-col">
           <div className="text-center mb-6 border-b-2 border-black pb-4">
-            <h1 className="text-2xl font-bold uppercase">Ficha de Separação Geral</h1>
-            <h2 className="text-lg mt-2">Produto: {produtoNomeCompleto}</h2>
-            <p className="mt-1">
+            <h1 className="text-lg font-bold uppercase">Ficha de Separação Geral</h1>
+            <h2 className="text-sm mt-2">Produto: {produtoNomeCompleto}</h2>
+            <p className="mt-1 text-xs">
               <strong>Total a separar:</strong> {totalUnidades} unidades |{" "}
               <strong>Participantes:</strong> {reservasPagas.length}
             </p>
@@ -108,12 +108,12 @@ export default async function ImprimirCaixaPage({
 
                 return (
                   <tr key={reserva.id} className="border-b border-gray-300">
-                    <td className="py-2">{idx + 1}</td>
-                    <td className="py-2 font-semibold">{reserva.compradorNome}</td>
-                    <td className="py-2 font-bold text-lg">{reserva.quantidade}</td>
-                    <td className="py-2 text-xs">{varsStr}</td>
-                    <td className="py-2">{reserva.metodoFrete}</td>
-                    <td className="py-2">{reserva.cep}</td>
+                    <td className="py-2 text-xs">{idx + 1}</td>
+                    <td className="py-2 font-semibold text-sm">{reserva.compradorNome}</td>
+                    <td className="py-2 font-bold text-base">{reserva.quantidade}</td>
+                    <td className="py-2 text-[10px]">{varsStr}</td>
+                    <td className="py-2 text-xs">{reserva.metodoFrete}</td>
+                    <td className="py-2 text-xs">{reserva.cep}</td>
                   </tr>
                 );
               })}
@@ -121,10 +121,10 @@ export default async function ImprimirCaixaPage({
           </table>
 
           <div className="mt-auto pt-8 flex justify-between items-end">
-            <p>
+            <p className="text-xs">
               Data: {format(new Date(), "dd/MM/yyyy")}
             </p>
-            <div className="w-64 border-t border-black text-center pt-2">
+            <div className="w-48 border-t border-black text-center pt-1 text-xs">
               Assinatura do Separador
             </div>
           </div>
@@ -144,33 +144,33 @@ export default async function ImprimirCaixaPage({
               <div className="border-2 border-black p-4 h-full flex flex-col justify-between">
                 
                 {/* Remetente */}
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <h3 className="font-bold text-sm mb-1 uppercase">Remetente</h3>
-                  <p className="font-semibold">{remetenteNome}</p>
-                  <p className="text-sm">{remetenteEnd}</p>
-                  <p className="text-sm">CEP: {remetenteCep}</p>
+                <div className="border-b-2 border-black pb-2 mb-2">
+                  <h3 className="font-bold text-xs mb-1 uppercase">Remetente</h3>
+                  <p className="font-semibold text-sm">{remetenteNome}</p>
+                  <p className="text-xs">{remetenteEnd}</p>
+                  <p className="text-xs">CEP: {remetenteCep}</p>
                 </div>
 
                 {/* Destinatário */}
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 uppercase">Destinatário</h3>
-                  <p className="text-xl font-bold mb-1">{reserva.compradorNome}</p>
-                  <p className="text-sm mb-2">CPF: {reserva.compradorDoc}</p>
+                  <h3 className="font-bold text-sm mb-1 uppercase">Destinatário</h3>
+                  <p className="text-lg font-bold mb-1 leading-tight">{reserva.compradorNome}</p>
+                  <p className="text-xs mb-2">CPF: {reserva.compradorDoc}</p>
                   
-                  <p className="text-lg">
+                  <p className="text-sm leading-tight">
                     {end.logradouro}, {end.numero}
                     {end.complemento && ` - ${end.complemento}`}
                   </p>
-                  <p className="text-lg">
+                  <p className="text-sm leading-tight">
                     {end.bairro}
                   </p>
-                  <p className="text-lg font-semibold mt-1">
+                  <p className="text-sm font-semibold mt-1">
                     {end.cidade} / {end.uf}
                   </p>
-                  <p className="text-xl font-bold mt-2">
+                  <p className="text-lg font-bold mt-2">
                     CEP: {reserva.cep}
                   </p>
-                  <p className="mt-2 text-sm">Tel: {reserva.compradorTelefone}</p>
+                  <p className="mt-1 text-xs">Tel: {reserva.compradorTelefone}</p>
                 </div>
                 
                 {/* Nota do User: NÃO mostrar produto e qtd na etiqueta */}
@@ -206,23 +206,23 @@ export default async function ImprimirCaixaPage({
           <div key={`dec-${reserva.id}`} className="print-page">
             <div className="border border-black p-4 h-full flex flex-col text-[13px] leading-tight relative">
               
-              <div className="absolute top-2 right-2 border-2 border-dashed border-red-500 text-red-500 font-bold p-2 text-xs uppercase transform rotate-12">
+              <div className="absolute top-2 right-2 border-2 border-dashed border-red-500 text-red-500 font-bold p-1 text-[10px] uppercase transform rotate-12">
                 Deixar DENTRO<br/>da caixa
               </div>
 
-              <div className="text-center font-bold text-lg mb-4 border-b border-black pb-2">
+              <div className="text-center font-bold text-base mb-2 border-b border-black pb-1">
                 DECLARAÇÃO DE CONTEÚDO
               </div>
               
-              <div className="grid grid-cols-2 gap-4 border-b border-black pb-4 mb-4">
-                <div>
+              <div className="grid grid-cols-2 gap-2 border-b border-black pb-2 mb-2">
+                <div className="text-xs">
                   <h3 className="font-bold underline mb-1">REMETENTE</h3>
                   <p>Nome: {remetenteNome}</p>
                   <p>CPF/CNPJ: {remetenteDoc}</p>
                   <p>Endereço: {remetenteEnd}</p>
                   <p>CEP: {remetenteCep}</p>
                 </div>
-                <div>
+                <div className="text-xs">
                   <h3 className="font-bold underline mb-1">DESTINATÁRIO</h3>
                   <p>Nome: {reserva.compradorNome}</p>
                   <p>CPF/CNPJ: {reserva.compradorDoc}</p>
@@ -268,9 +268,9 @@ export default async function ImprimirCaixaPage({
                 </tbody>
               </table>
 
-              <div className="flex-1 text-justify mb-4">
-                <h3 className="font-bold mb-2">DECLARAÇÃO</h3>
-                <p>
+              <div className="flex-1 text-justify mb-2 text-xs">
+                <h3 className="font-bold mb-1">DECLARAÇÃO</h3>
+                <p className="leading-tight">
                   Declaro que não me enquadro no conceito de contribuinte previsto no art. 4º da
                   Lei Complementar nº 87/1996, uma vez que não realizo, com habitualidade ou em
                   volume que caracterize intuito comercial, operações de circulação de mercadoria,
@@ -278,14 +278,14 @@ export default async function ImprimirCaixaPage({
                   por força da legislação tributária vigente, responsabilizando-me, nos termos da
                   lei e a quem de direito, por informações inverídicas.
                 </p>
-                <p className="mt-2">
+                <p className="mt-1 leading-tight">
                   Declaro ainda que não estou postando conteúdo inflamável, explosivo, causador
                   de incêndio, ou qualquer outro item cujo transporte seja proibido pelos Correios
                   ou transportadoras.
                 </p>
               </div>
 
-              <div className="flex justify-between items-end border-t border-black pt-4">
+              <div className="flex justify-between items-end border-t border-black pt-2 text-xs">
                 <div>
                   _________________________, ____ de _________________ de ______<br/>
                   <span className="text-xs text-gray-500">(Local e Data)</span>

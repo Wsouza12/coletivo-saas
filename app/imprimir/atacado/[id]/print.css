@@ -11,8 +11,9 @@ body {
 
 .print-page {
   background-color: white;
-  width: 148mm;
-  height: 210mm; /* A5 */
+  width: 100%;
+  max-width: 148mm;
+  min-height: 210mm; /* A5 */
   padding: 10mm;
   margin: 0 auto 10mm auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -23,8 +24,9 @@ body {
 
 .print-page-half {
   background-color: white;
-  width: 148mm;
-  height: 105mm; /* Meia página A5 */
+  width: 100%;
+  max-width: 148mm;
+  min-height: 105mm; /* Meia página A5 */
   padding: 10mm;
   margin: 0 auto;
   box-sizing: border-box;
@@ -43,7 +45,19 @@ body {
   body {
     background-color: white;
   }
-  .print-page, .print-page-half {
+  .print-page {
+    width: 148mm;
+    height: 210mm;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  .print-page-half {
+    width: 148mm;
+    height: 105mm;
+    max-width: none;
+    min-height: 0;
     margin: 0;
     box-shadow: none;
   }
