@@ -859,6 +859,8 @@ model ProdutoAtacado {
   coresVariadas    Boolean  @default(false)
   ativo            Boolean  @default(true)
   isRascunho       Boolean  @default(false)
+  esgotado         Boolean  @default(false)
+  estoque          Int?
   fornecedorId     String?
   // embedding vector(1024) — gerenciado via SQL (pgvector não suportado pelo Prisma)
   embedding        Unsupported("vector(1024)")?
@@ -920,6 +922,7 @@ model FornecedorAtacado {
   atualizado         Boolean  @default(false)
   
   isEstoqueProprio   Boolean  @default(false)
+  catalogoDesatualizado Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

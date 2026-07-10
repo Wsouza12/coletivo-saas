@@ -1,0 +1,67 @@
+import Link from "next/link";
+import { ArrowLeft, PackageSearch } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
+import { ProdutoAtacadoList } from "@/components/admin/produto-atacado-list";
+import { CriarProdutoAtacadoDialog } from "@/components/admin/criar-produto-atacado-dialog";
+import { getConfiguracaoFinanceira } from "@/lib/configuracao-financeira";
+
+export default async function AdminEstoqueProprioPage() {
+  const [produtos, fornecedores, config] = await Promise.all([
+    prisma.produtoAtacado.findMany({
+      where: {
+        fornecedor: {
+          isEstoqueProprio: true
+        }
+      },
+      include: {
+        fornecedor: { select: { id: true, nome: true } },
+        itensCatalogo: { select: { pagina: true, catalogo: { select: { nome: true } } }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.fornecedorAtacado.findMany({ select: { id: true, nome: true }, orderBy: { nome: "asc" } }),
+    getConfiguracaoFinanceira(),
+  ]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <Link href="/admin/atacado/fornecedores">
+            <Button variant="ghost" size="sm" className="mb-2 -ml-2">
+              <ArrowLeft className="size-4" />
+              Voltar para Fornecedores
+            </Button>
+          </Link>
+          <div className="flex items-center gap-2">
+            <PackageSearch className="size-5 text-primary" />
+            <h1 className="text-xl font-bold text-foreground">Estoque Próprio</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gerencie seus próprios produtos. Ative ou desative na vitrine e controle se estão esgotados.
+          </p>
+        </div>
+        <CriarProdutoAtacadoDialog fornecedores={fornecedores} />
+      </div>
+
+      <ProdutoAtacadoList
+        produtos={produtos.map((p) => ({
+          ...p,
+          custoUnitario: Number(p.custoUnitario),
+          precoCatalogo: p.precoCatalogo ? Number(p.precoCatalogo) : null,
+          precoVendaSugerido: p.precoVendaSugerido ? Number(p.precoVendaSugerido) : null,
+          pesoKg: Number(p.pesoKg),
+          comprimentoCm: p.comprimentoCm,
+          larguraCm: p.larguraCm,
+          alturaCm: p.alturaCm,
+          catalogoOrigem: p.itensCatalogo[0]
+            ? { nome: p.itensCatalogo[0].catalogo.nome, pagina: p.itensCatalogo[0].pagina }
+            : null,
+        }))}
+        fornecedores={fornecedores}
+        taxaServicoPadrao={Number(config.taxaServicoPadraoAtacado)}
+      />
+    </div>
+  );
+}

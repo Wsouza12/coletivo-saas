@@ -235,6 +235,8 @@ export const criarProdutoAtacadoSchema = z.object({
   coresVariadas: z.boolean().optional().default(false),
   tamanhosInput: z.string().optional(),
   coresInput: z.string().optional(),
+  esgotado: z.boolean().optional().default(false),
+  estoque: z.coerce.number().int().optional(),
 });
 
 export const updateProdutoAtacadoSchema = criarProdutoAtacadoSchema.partial().extend({

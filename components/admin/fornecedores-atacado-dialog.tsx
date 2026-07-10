@@ -401,6 +401,11 @@ function FornecedorCard({
             <span className="truncate text-sm font-bold text-foreground" title={fornecedor.nome}>
               {fornecedor.nome}
             </span>
+            {fornecedor.isEstoqueProprio && (fornecedor as any).catalogoDesatualizado && (
+              <span className="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+                Catálogo desatualizado!
+              </span>
+            )}
           </div>
           {!fornecedor.isEstoqueProprio && (
             <div className="flex shrink-0 items-center gap-0.5">

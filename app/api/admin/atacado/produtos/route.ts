@@ -73,5 +73,15 @@ export async function POST(req: Request) {
     });
   }
 
+  if (fornecedorId) {
+    const f = await prisma.fornecedorAtacado.findUnique({ where: { id: fornecedorId } });
+    if (f?.isEstoqueProprio) {
+      await prisma.fornecedorAtacado.update({
+        where: { id: fornecedorId },
+        data: { catalogoDesatualizado: true },
+      });
+    }
+  }
+
   return NextResponse.json({ data: produto }, { status: 201 });
 }

@@ -15,6 +15,7 @@ import {
   Radar,
   KeyRound,
   Users,
+  PackageSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/admin/atacado/assinantes", label: "Assinantes", icon: Users, desc: "Gerencie os membros da comunidade." },
   { href: "/admin/atacado/produtos", label: "Loja (vitrine)", icon: Package, desc: "Cadastre e gerencie os produtos à venda." },
   { href: "/admin/atacado/fornecedores", label: "Catálogos", icon: Truck, desc: "Adicione PDFs e catálogos dos fabricantes." },
+  { href: "/admin/estoque-proprio", label: "Estoque Próprio", icon: PackageSearch, desc: "Gerencie seus próprios produtos para venda rápida." },
   { href: "/admin/atacado/mapeamento", label: "Pesquisa por imagem", icon: Map, desc: "Encontre produtos na internet usando uma foto." },
   { href: "/admin/atacado/agenda", label: "Mensagens Agendadas", icon: CalendarClock, desc: "Programe envios no WhatsApp da comunidade." },
   { href: "/admin/atacado/origens", label: "Link para divulgação", icon: Radar, desc: "Links com rastreio de UTM para campanhas." },

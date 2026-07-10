@@ -71,6 +71,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
+  if (fornecedorId) {
+    const f = await prisma.fornecedorAtacado.findUnique({ where: { id: fornecedorId } });
+    if (f?.isEstoqueProprio) {
+      await prisma.fornecedorAtacado.update({
+        where: { id: fornecedorId },
+        data: { catalogoDesatualizado: true },
+      });
+    }
+  }
+
   return NextResponse.json({ data: produto }, { status: 200 });
 }
 
@@ -98,6 +108,17 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   // Sem isso, o código continua "ocupado" no catálogo e o re-cadastro falha com
   // DUPLICADO mesmo após o produto ter sido excluído.
   await prisma.catalogoFornecedorItem.deleteMany({ where: { produtoAtacadoId: id } });
+  
+  if (produto?.fornecedorId) {
+    const f = await prisma.fornecedorAtacado.findUnique({ where: { id: produto.fornecedorId } });
+    if (f?.isEstoqueProprio) {
+      await prisma.fornecedorAtacado.update({
+        where: { id: produto.fornecedorId },
+        data: { catalogoDesatualizado: true },
+      });
+    }
+  }
+
   await prisma.produtoAtacado.delete({ where: { id } });
   return NextResponse.json({ data: { ok: true } }, { status: 200 });
 }

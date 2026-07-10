@@ -41,5 +41,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const catalogo = await prisma.catalogoFornecedor.create({
     data: { fornecedorId: id, nome, arquivoUrl, data: dataStr ? new Date(dataStr) : null },
   });
+
+  if (fornecedor.isEstoqueProprio) {
+    await prisma.fornecedorAtacado.update({
+      where: { id },
+      data: { catalogoDesatualizado: false },
+    });
+  }
+
   return NextResponse.json({ data: catalogo }, { status: 201 });
 }

@@ -11,6 +11,7 @@ export type ProdutoCatalogoPDF = {
   precoVendaSugerido?: number | null;
   unidadesPorCaixa: number;
   categoria?: string;
+  esgotado?: boolean;
 };
 
 function getBase64ImageFromUrl(imageUrl: string): Promise<string> {
@@ -45,7 +46,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 10;
   const colWidth = (pageWidth - margin * 3) / 2;
-  const rowHeight = (pageHeight - margin * 4 - 30) / 3; // 30mm for header
+  const rowHeight = (pageHeight - margin * 3 - 30) / 2; // 30mm for header
   
   let currentX = margin;
   let currentY = margin + 30; // start below header
@@ -56,7 +57,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.text("CATÁLOGO PRONTA ENTREGA", margin, 16);
     
     doc.setFont("helvetica", "normal");
@@ -65,7 +66,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     doc.text(`Atualizado em ${dateStr} - Pág ${page}/${total}`, pageWidth - margin, 16, { align: "right" });
   }
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 4;
   const contentPages = Math.ceil(produtos.length / itemsPerPage) || 1;
   const totalPages = contentPages + 1; // Capa + Conteúdo
 
@@ -99,7 +100,10 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
   doc.setTextColor(100, 100, 100);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
-  doc.text(`Atualizado em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, pageHeight / 2 + 65, { align: "center" });
+  doc.text("Todos os produtos aqui listados estão disponíveis para envio imediato.", pageWidth / 2, pageHeight / 2 + 58, { align: "center" });
+  
+  doc.setFontSize(10);
+  doc.text(`Atualizado em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, pageHeight / 2 + 70, { align: "center" });
 
   for (let i = 0; i < produtos.length; i++) {
     const p = produtos[i];
@@ -122,7 +126,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     doc.roundedRect(currentX, currentY, colWidth, rowHeight, 3, 3, "FD");
 
     // Imagem (se houver)
-    const imgSize = 50;
+    const imgSize = 75;
     const imgX = currentX + (colWidth - imgSize) / 2;
     let imgY = currentY + 3;
 
@@ -149,37 +153,53 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     }
 
     // Informações textuais
-    let textY = imgY + imgSize + 5;
+    let textY = imgY + imgSize + 8;
     
     // Título
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(14);
     doc.setTextColor(15, 23, 42);
     const maxTitleLen = 42;
     let title = p.nome.toUpperCase();
     if (title.length > maxTitleLen) title = title.substring(0, maxTitleLen) + "...";
-    doc.text(title, currentX + colWidth / 2, textY, { align: "center" });
-    textY += 4.5;
+    
+    // Escrever o texto com quebra de linha se for muito longo
+    const textLines = doc.splitTextToSize(title, colWidth - 10);
+    doc.text(textLines, currentX + colWidth / 2, textY, { align: "center" });
+    textY += (textLines.length * 6) + 2;
 
     // Código e Caixa
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(`CÓD: ${p.codigo || "S/CÓD"}  •  CX: ${p.unidadesPorCaixa} un`, currentX + colWidth / 2, textY, { align: "center" });
-    textY += 7;
+    textY += 10;
 
     // Preços
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
+    doc.setFontSize(22);
     doc.setTextColor(22, 163, 74); // green-600
     doc.text(formatBRL(p.custoUnitario), currentX + colWidth / 2, textY, { align: "center" });
     
     if (p.precoVendaSugerido) {
-      textY += 4;
+      textY += 6;
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.5);
+      doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
       doc.text(`Sugestão revenda: ${formatBRL(p.precoVendaSugerido)}`, currentX + colWidth / 2, textY, { align: "center" });
+    }
+
+    // Carimbo de Esgotado
+    if (p.esgotado) {
+      doc.setDrawColor(220, 38, 38); // red-600
+      doc.setFillColor(254, 226, 226); // red-100
+      doc.setLineWidth(1.5);
+      doc.rect(currentX + (colWidth - 50) / 2, imgY + (imgSize - 15) / 2, 50, 15, "FD");
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(220, 38, 38);
+      doc.text("ESGOTADO", currentX + colWidth / 2, imgY + (imgSize - 15) / 2 + 10.5, { align: "center" });
     }
   }
 

@@ -45,7 +45,7 @@ export function ProdutoAtacadoList({
   fornecedores = [],
   taxaServicoPadrao = 10,
 }: {
-  produtos: ProdutoAtacado[];
+  produtos: (ProdutoAtacado & { esgotado?: boolean })[];
   fornecedores?: Fornecedor[];
   taxaServicoPadrao?: number;
 }) {
@@ -110,7 +110,7 @@ function ProdutoAtacadoCard({
   taxaServicoPadrao,
   onChange,
 }: {
-  produto: ProdutoAtacado;
+  produto: ProdutoAtacado & { esgotado?: boolean };
   fornecedores: Fornecedor[];
   taxaServicoPadrao: number;
   onChange: () => void;
@@ -150,6 +150,19 @@ function ProdutoAtacadoCard({
     });
     if (!res.ok) {
       toast.error("Erro ao atualizar");
+      return;
+    }
+    onChange();
+  }
+
+  async function toggleEsgotado() {
+    const res = await fetch(`/api/admin/atacado/produtos/${produto.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ esgotado: !produto.esgotado }),
+    });
+    if (!res.ok) {
+      toast.error("Erro ao atualizar status de esgotado");
       return;
     }
     onChange();
@@ -230,20 +243,39 @@ function ProdutoAtacadoCard({
         ) : null}
 
         <div className="mt-1 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={toggleAtivo}
-            aria-pressed={produto.ativo}
-            className={`inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-              produto.ativo ? "bg-primary" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
-                produto.ativo ? "translate-x-3" : ""
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleAtivo}
+              title={produto.ativo ? "Ativo na vitrine" : "Oculto na vitrine"}
+              aria-pressed={produto.ativo}
+              className={`inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                produto.ativo ? "bg-primary" : "bg-muted"
               }`}
-            />
-          </button>
+            >
+              <span
+                className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
+                  produto.ativo ? "translate-x-3" : ""
+                }`}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={toggleEsgotado}
+              title={produto.esgotado ? "Produto esgotado" : "Em estoque"}
+              aria-pressed={produto.esgotado}
+              className={`inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                produto.esgotado ? "bg-destructive" : "bg-muted"
+              }`}
+            >
+              <span
+                className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
+                  produto.esgotado ? "translate-x-3" : ""
+                }`}
+              />
+            </button>
+            {produto.esgotado && <span className="text-[10px] font-bold text-destructive leading-none uppercase tracking-tighter">Esgotado</span>}
+          </div>
           <div className="flex items-center gap-0.5">
             <CriarRodadaAtacadoDialog
               produtos={[]}
