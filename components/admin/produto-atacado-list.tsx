@@ -242,41 +242,49 @@ function ProdutoAtacadoCard({
           </span>
         ) : null}
 
-        <div className="mt-1 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleAtivo}
-              title={produto.ativo ? "Ativo na vitrine" : "Oculto na vitrine"}
-              aria-pressed={produto.ativo}
-              className={`inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-                produto.ativo ? "bg-primary" : "bg-muted"
-              }`}
-            >
-              <span
-                className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
-                  produto.ativo ? "translate-x-3" : ""
+        <div className="mt-2 flex flex-col gap-2 border-t border-border/50 pt-2">
+          {/* Toggles */}
+          <div className="flex items-center justify-between">
+            <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={toggleAtivo}
+                title={produto.ativo ? "Ativo na vitrine" : "Oculto na vitrine"}
+                aria-pressed={produto.ativo}
+                className={`inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
+                  produto.ativo ? "bg-primary" : "bg-muted"
                 }`}
-              />
-            </button>
-            <button
-              type="button"
-              onClick={toggleEsgotado}
-              title={produto.esgotado ? "Produto esgotado" : "Em estoque"}
-              aria-pressed={produto.esgotado}
-              className={`inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-                produto.esgotado ? "bg-destructive" : "bg-muted"
-              }`}
-            >
-              <span
-                className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
-                  produto.esgotado ? "translate-x-3" : ""
+              >
+                <span
+                  className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
+                    produto.ativo ? "translate-x-3" : ""
+                  }`}
+                />
+              </button>
+              Vitrine
+            </label>
+            <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={toggleEsgotado}
+                title={produto.esgotado ? "Produto esgotado" : "Em estoque"}
+                aria-pressed={produto.esgotado}
+                className={`inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
+                  produto.esgotado ? "bg-destructive" : "bg-muted"
                 }`}
-              />
-            </button>
-            {produto.esgotado && <span className="text-[10px] font-bold text-destructive leading-none uppercase tracking-tighter">Esgotado</span>}
+              >
+                <span
+                  className={`inline-block size-3 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
+                    produto.esgotado ? "translate-x-3" : ""
+                  }`}
+                />
+              </button>
+              <span className={produto.esgotado ? "text-destructive font-bold uppercase tracking-tighter text-[10px]" : ""}>Esgotado</span>
+            </label>
           </div>
-          <div className="flex items-center gap-0.5">
+          
+          {/* Actions */}
+          <div className="flex items-center justify-between gap-1 mt-0.5 rounded bg-muted/30 p-1">
             <CriarRodadaAtacadoDialog
               produtos={[]}
               taxaServicoPadrao={taxaServicoPadrao}
@@ -291,16 +299,19 @@ function ProdutoAtacadoCard({
                 cores: produto.cores,
               }}
               trigger={
-                <Button type="button" size="sm" variant="ghost" className="h-7 px-1.5" title="Enviar pra rodada">
-                  <Send className="size-3.5" />
+                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px] font-medium bg-background border-border">
+                  <Send className="mr-1 size-3 text-primary" />
+                  Rodada
                 </Button>
               }
             />
-            <DetalhesProdutoAtacadoDialog produto={produto} />
-            <EditarProdutoAtacadoDialog produto={produto} fornecedores={fornecedores} onChange={onChange} />
-            <Button type="button" size="sm" variant="ghost" className="h-7 px-1.5" disabled={deleting} onClick={excluir}>
-              <Trash2 className="size-3.5 text-destructive" />
-            </Button>
+            <div className="flex items-center gap-0.5">
+              <DetalhesProdutoAtacadoDialog produto={produto} />
+              <EditarProdutoAtacadoDialog produto={produto} fornecedores={fornecedores} onChange={onChange} />
+              <Button type="button" size="sm" variant="ghost" className="h-7 px-1.5 hover:bg-destructive/10" disabled={deleting} onClick={excluir} title="Excluir produto">
+                <Trash2 className="size-3.5 text-destructive" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
