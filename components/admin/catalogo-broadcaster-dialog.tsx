@@ -144,7 +144,9 @@ export function CatalogoBroadcasterDialog({
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
       // Remove o filtro para permitir selecionar qualquer grupo vinculado no sistema
-      const destinos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
+      // Combine todos os grupos (vinculados ou não) e deduplicate por grupoId
+      const allGroups = [...jsonGrupos.data.grupos, ...jsonGrupos.data.vinculos];
+      const destinos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
       setGrupos(destinos);
       const grupoAvisos = destinos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
       const grupoPedidos = destinos.find(g => g.categoria === "SOLICITACOES")?.grupoId || "none";
