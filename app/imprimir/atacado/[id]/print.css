@@ -1,6 +1,6 @@
 @page {
-  size: A5;
-  margin: 10mm;
+  size: A5 landscape;
+  margin: 5mm;
 }
 
 body {
@@ -12,9 +12,9 @@ body {
 .print-page {
   background-color: white;
   width: 100%;
-  max-width: 148mm;
-  min-height: 210mm; /* A5 */
-  padding: 10mm;
+  max-width: 210mm;
+  min-height: 148mm; /* A5 Landscape */
+  padding: 5mm;
   margin: 0 auto 10mm auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   page-break-after: always;
@@ -22,40 +22,13 @@ body {
   box-sizing: border-box;
 }
 
-.print-page-half {
-  background-color: white;
-  width: 100%;
-  max-width: 148mm;
-  min-height: 105mm; /* Meia página A5 */
-  padding: 10mm;
-  margin: 0 auto;
-  box-sizing: border-box;
-  page-break-inside: avoid;
-  border-bottom: 1px dashed #ccc;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.print-page-half:nth-child(even) {
-  border-bottom: none;
-  page-break-after: always;
-  margin-bottom: 10mm;
-}
-
 @media print {
   body {
     background-color: white;
   }
   .print-page {
-    width: 148mm;
-    height: 210mm;
-    max-width: none;
-    min-height: 0;
-    margin: 0;
-    box-shadow: none;
-  }
-  .print-page-half {
-    width: 148mm;
-    height: 105mm;
+    width: 210mm;
+    height: 148mm;
     max-width: none;
     min-height: 0;
     margin: 0;

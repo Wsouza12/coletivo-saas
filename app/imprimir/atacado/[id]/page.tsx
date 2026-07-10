@@ -131,7 +131,7 @@ export default async function ImprimirCaixaPage({
         </div>
       </div>
 
-      {/* 2. ETIQUETAS DE ENVIO (Meia página por destinatário = 2 por folha) */}
+      {/* 2. ETIQUETA E DECLARAÇÃO (Mesma página A5 Paisagem, cortada ao meio) */}
       <div className="bg-white">
         {reservasPagas.map((reserva) => {
           let end = reserva.enderecoEntrega as any;
@@ -139,166 +139,148 @@ export default async function ImprimirCaixaPage({
              end = { logradouro: "", numero: "", bairro: "", cidade: "", uf: "" };
           }
           
+          let varsStr = "";
+          if (reserva.variacoes) {
+            try {
+              const parsed = typeof reserva.variacoes === 'string' ? JSON.parse(reserva.variacoes) : reserva.variacoes;
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                 varsStr = " (Cores/Tamanhos Variados)";
+              }
+            } catch(e) {}
+          }
+          
           return (
-            <div key={`etiqueta-${reserva.id}`} className="print-page-half">
-              <div className="border-2 border-black p-4 h-full flex flex-col justify-between">
-                
-                {/* Remetente */}
-                <div className="border-b-2 border-black pb-2 mb-2">
-                  <h3 className="font-bold text-xs mb-1 uppercase">Remetente</h3>
-                  <p className="font-semibold text-sm">{remetenteNome}</p>
-                  <p className="text-xs">{remetenteEnd}</p>
-                  <p className="text-xs">CEP: {remetenteCep}</p>
-                </div>
+            <div key={`doc-${reserva.id}`} className="print-page flex flex-row relative">
+              {/* Linha de corte no meio */}
+              <div className="absolute left-1/2 top-4 bottom-4 border-l border-dashed border-gray-400"></div>
 
-                {/* Destinatário */}
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm mb-1 uppercase">Destinatário</h3>
-                  <p className="text-lg font-bold mb-1 leading-tight">{reserva.compradorNome}</p>
-                  <p className="text-xs mb-2">CPF: {reserva.compradorDoc}</p>
-                  
-                  <p className="text-sm leading-tight">
-                    {end.logradouro}, {end.numero}
-                    {end.complemento && ` - ${end.complemento}`}
-                  </p>
-                  <p className="text-sm leading-tight">
-                    {end.bairro}
-                  </p>
-                  <p className="text-sm font-semibold mt-1">
-                    {end.cidade} / {end.uf}
-                  </p>
-                  <p className="text-lg font-bold mt-2">
-                    CEP: {reserva.cep}
-                  </p>
-                  <p className="mt-1 text-xs">Tel: {reserva.compradorTelefone}</p>
+              {/* METADE ESQUERDA: ETIQUETA (Colar na Caixa) */}
+              <div className="w-1/2 pr-6 pl-2 py-2 flex flex-col justify-center">
+                <div className="border-2 border-black p-4 h-full flex flex-col justify-between">
+                  {/* Remetente */}
+                  <div className="border-b-2 border-black pb-2 mb-2">
+                    <h3 className="font-bold text-xs mb-1 uppercase">Remetente</h3>
+                    <p className="font-semibold text-sm">{remetenteNome}</p>
+                    <p className="text-xs">{remetenteEnd}</p>
+                    <p className="text-xs">CEP: {remetenteCep}</p>
+                  </div>
+
+                  {/* Destinatário */}
+                  <div className="flex-1">
+                    <h3 className="font-bold text-sm mb-1 uppercase">Destinatário</h3>
+                    <p className="text-lg font-bold mb-1 leading-tight">{reserva.compradorNome}</p>
+                    <p className="text-xs mb-2">CPF: {reserva.compradorDoc}</p>
+                    
+                    <p className="text-sm leading-tight">
+                      {end.logradouro}, {end.numero}
+                      {end.complemento && ` - ${end.complemento}`}
+                    </p>
+                    <p className="text-sm leading-tight">
+                      {end.bairro}
+                    </p>
+                    <p className="text-sm font-semibold mt-1">
+                      {end.cidade} / {end.uf}
+                    </p>
+                    <p className="text-lg font-bold mt-2">
+                      CEP: {reserva.cep}
+                    </p>
+                    <p className="mt-1 text-xs">Tel: {reserva.compradorTelefone}</p>
+                  </div>
                 </div>
-                
-                {/* Nota do User: NÃO mostrar produto e qtd na etiqueta */}
-                {/* A etiqueta de envio pura, limpa */}
+              </div>
+
+              {/* METADE DIREITA: DECLARAÇÃO (Dentro da Caixa) */}
+              <div className="w-1/2 pl-6 pr-2 py-2 flex flex-col text-[11px] leading-tight relative">
+                <div className="border border-black p-3 h-full flex flex-col">
+                  
+                  <div className="absolute top-4 right-4 border-2 border-dashed border-red-500 text-red-500 font-bold p-1 text-[9px] uppercase transform rotate-12 bg-white">
+                    Deixar DENTRO<br/>da caixa
+                  </div>
+
+                  <div className="text-center font-bold text-sm mb-2 border-b border-black pb-1">
+                    DECLARAÇÃO DE CONTEÚDO
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 border-b border-black pb-2 mb-2">
+                    <div className="text-[10px]">
+                      <h3 className="font-bold underline mb-1">REMETENTE</h3>
+                      <p>Nome: {remetenteNome}</p>
+                      <p>CPF/CNPJ: {remetenteDoc}</p>
+                      <p>Endereço: {remetenteEnd}</p>
+                      <p>CEP: {remetenteCep}</p>
+                    </div>
+                    <div className="text-[10px]">
+                      <h3 className="font-bold underline mb-1">DESTINATÁRIO</h3>
+                      <p>Nome: {reserva.compradorNome}</p>
+                      <p>CPF/CNPJ: {reserva.compradorDoc}</p>
+                      <p>
+                        Endereço: {end.logradouro}, {end.numero} {end.complemento}
+                      </p>
+                      <p>{end.bairro} - {end.cidade}/{end.uf}</p>
+                      <p>CEP: {reserva.cep}</p>
+                    </div>
+                  </div>
+
+                  <h3 className="font-bold mb-1 text-[10px]">IDENTIFICAÇÃO DOS BENS</h3>
+                  <table className="w-full border-collapse border border-black mb-2 text-[9px]">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-black p-1 text-left w-6">Item</th>
+                        <th className="border border-black p-1 text-left">Conteúdo</th>
+                        <th className="border border-black p-1 text-center w-8">Qtd</th>
+                        <th className="border border-black p-1 text-right w-16">V. Unit.</th>
+                        <th className="border border-black p-1 text-right w-16">V. Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-black p-1 text-center">1</td>
+                        <td className="border border-black p-1">
+                          {produtoNomeCompleto}{varsStr}
+                        </td>
+                        <td className="border border-black p-1 text-center">{reserva.quantidade}</td>
+                        <td className="border border-black p-1 text-right">
+                          {formatCurrency(Number(reserva.valorProduto) / reserva.quantidade)}
+                        </td>
+                        <td className="border border-black p-1 text-right">
+                          {formatCurrency(Number(reserva.valorProduto))}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={4} className="border border-black p-1 text-right font-bold">TOTAIS</td>
+                        <td className="border border-black p-1 text-right font-bold">
+                          {formatCurrency(Number(reserva.valorProduto))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="flex-1 text-justify mb-1 text-[9px]">
+                    <h3 className="font-bold mb-1">DECLARAÇÃO</h3>
+                    <p className="leading-tight">
+                      Declaro que não me enquadro no conceito de contribuinte previsto no art. 4º da Lei Complementar nº 87/1996, uma vez que não realizo, com habitualidade ou em volume que caracterize intuito comercial, operações de circulação de mercadoria, responsabilizando-me, nos termos da lei e a quem de direito, por informações inverídicas.
+                    </p>
+                    <p className="mt-1 leading-tight">
+                      Declaro ainda que não estou postando conteúdo inflamável, explosivo, causador de incêndio, ou qualquer outro item cujo transporte seja proibido pelos Correios ou transportadoras.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-end border-t border-black pt-1 text-[9px]">
+                    <div>
+                      ________________, ____ de ___________ de ______<br/>
+                      <span className="text-[8px] text-gray-500">(Local e Data)</span>
+                    </div>
+                    <div className="text-center w-24">
+                      _________________________<br/>
+                      <span className="text-[8px] text-gray-500">Assinatura</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* 3. DECLARAÇÃO DE CONTEÚDO (1 página inteira por destinatário) */}
-      {reservasPagas.map((reserva) => {
-        let end = reserva.enderecoEntrega as any;
-        if (!end || typeof end !== "object") {
-            end = { logradouro: "", numero: "", bairro: "", cidade: "", uf: "" };
-        }
-
-        // Recuperar variações bonitinhas se houver
-        let varsStr = "";
-        if (reserva.variacoes) {
-          try {
-            const parsed = typeof reserva.variacoes === 'string' ? JSON.parse(reserva.variacoes) : reserva.variacoes;
-            if (Array.isArray(parsed) && parsed.length > 0) {
-               // Em caixas fechadas com variações mistas, teríamos o ID. 
-               // Como não temos o nome da cor fácil aqui sem carregar, apenas mostramos "Variado".
-               // Se a caixa inteira tem UMA variação, já tá no produtoNomeCompleto.
-               varsStr = " (Cores/Tamanhos Variados)";
-            }
-          } catch(e) {}
-        }
-        
-        return (
-          <div key={`dec-${reserva.id}`} className="print-page">
-            <div className="border border-black p-4 h-full flex flex-col text-[13px] leading-tight relative">
-              
-              <div className="absolute top-2 right-2 border-2 border-dashed border-red-500 text-red-500 font-bold p-1 text-[10px] uppercase transform rotate-12">
-                Deixar DENTRO<br/>da caixa
-              </div>
-
-              <div className="text-center font-bold text-base mb-2 border-b border-black pb-1">
-                DECLARAÇÃO DE CONTEÚDO
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2 border-b border-black pb-2 mb-2">
-                <div className="text-xs">
-                  <h3 className="font-bold underline mb-1">REMETENTE</h3>
-                  <p>Nome: {remetenteNome}</p>
-                  <p>CPF/CNPJ: {remetenteDoc}</p>
-                  <p>Endereço: {remetenteEnd}</p>
-                  <p>CEP: {remetenteCep}</p>
-                </div>
-                <div className="text-xs">
-                  <h3 className="font-bold underline mb-1">DESTINATÁRIO</h3>
-                  <p>Nome: {reserva.compradorNome}</p>
-                  <p>CPF/CNPJ: {reserva.compradorDoc}</p>
-                  <p>
-                    Endereço: {end.logradouro}, {end.numero} {end.complemento}
-                  </p>
-                  <p>{end.bairro} - {end.cidade}/{end.uf}</p>
-                  <p>CEP: {reserva.cep}</p>
-                </div>
-              </div>
-
-              <h3 className="font-bold mb-2">IDENTIFICAÇÃO DOS BENS</h3>
-              <table className="w-full border-collapse border border-black mb-4">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-black p-1 text-left w-12">Item</th>
-                    <th className="border border-black p-1 text-left">Conteúdo</th>
-                    <th className="border border-black p-1 text-center w-16">Qtd</th>
-                    <th className="border border-black p-1 text-right w-24">Valor Unit.</th>
-                    <th className="border border-black p-1 text-right w-24">Valor Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border border-black p-1 text-center">1</td>
-                    <td className="border border-black p-1">
-                      {produtoNomeCompleto}{varsStr}
-                    </td>
-                    <td className="border border-black p-1 text-center">{reserva.quantidade}</td>
-                    <td className="border border-black p-1 text-right">
-                      {formatCurrency(Number(reserva.valorProduto) / reserva.quantidade)}
-                    </td>
-                    <td className="border border-black p-1 text-right">
-                      {formatCurrency(Number(reserva.valorProduto))}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4} className="border border-black p-1 text-right font-bold">TOTAIS</td>
-                    <td className="border border-black p-1 text-right font-bold">
-                      {formatCurrency(Number(reserva.valorProduto))}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="flex-1 text-justify mb-2 text-xs">
-                <h3 className="font-bold mb-1">DECLARAÇÃO</h3>
-                <p className="leading-tight">
-                  Declaro que não me enquadro no conceito de contribuinte previsto no art. 4º da
-                  Lei Complementar nº 87/1996, uma vez que não realizo, com habitualidade ou em
-                  volume que caracterize intuito comercial, operações de circulação de mercadoria,
-                  ainda que se iniciem no exterior, ou estou dispensado da emissão da nota fiscal
-                  por força da legislação tributária vigente, responsabilizando-me, nos termos da
-                  lei e a quem de direito, por informações inverídicas.
-                </p>
-                <p className="mt-1 leading-tight">
-                  Declaro ainda que não estou postando conteúdo inflamável, explosivo, causador
-                  de incêndio, ou qualquer outro item cujo transporte seja proibido pelos Correios
-                  ou transportadoras.
-                </p>
-              </div>
-
-              <div className="flex justify-between items-end border-t border-black pt-2 text-xs">
-                <div>
-                  _________________________, ____ de _________________ de ______<br/>
-                  <span className="text-xs text-gray-500">(Local e Data)</span>
-                </div>
-                <div className="text-center">
-                  __________________________________________________<br/>
-                  <span className="text-xs">Assinatura do Remetente</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
       
     </div>
   );
