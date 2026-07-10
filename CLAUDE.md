@@ -17,8 +17,8 @@ tem a **infra dele** (Supabase, WhatsApp/Evolution, conta Mercado Pago, domínio
 
 ## 🗺️ ETAPAS / ONDE ESTAMOS (resumo — detalhe em [STATUS.md](STATUS.md))
 `✅ Fase 0 Extração` · `✅ Fase 1 Enxugar+White-label` · `✅ Fase 2 Painel Dev` ·
-`👉 Fase 3 GitHub (push bloqueado por permissão)` · `⏳ Fase 4 Deploy Vercel` ·
-`⏳ Fase 5 Infra cliente + banco` · `⏳ Fase 6 Chaves /admin/dev + testes` · `⏳ Fase 7 Vender`.
+`✅ Fase 3 GitHub` · `✅ Fase 4 Deploy Vercel` · `✅ Fase 5 Infra cliente + banco` ·
+`✅ Fase 6 Chaves /admin/dev + Cron-Job configurado` · `👉 Fase 7 Operação e Vendas`.
 
 ## 🎯 O QUE ESTE PRODUTO FAZ (só o coletivo)
 - **Vitrine pública principal** `/` (Catálogo premium com busca e categorias) + checkout `/atacado/[slug]` (Pix direto via Mercado Pago)

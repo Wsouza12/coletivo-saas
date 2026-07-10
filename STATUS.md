@@ -18,20 +18,19 @@
      Wrappers intactos (env hidratado no startup). API /api/admin/dev/config.
 
 [✅] FASE 3 — GitHub
-     Repo criado (Wsouza12/coletivo-saas) e push realizado com sucesso (permissão concedida).
+     Repo criado (Wsouza12/coletivo-saas) e pushs realizados com sucesso.
 
 [✅] FASE 4 — Deploy na Vercel (você)
-     Importar repo + .env mínimo (bootstrap + NEXT_PUBLIC_*). Domínio.
+     Projeto importado + .env configurado + deploy no ar.
 
 [✅] FASE 5 — Infra do cliente (você) + banco
-     Supabase (+ create extension vector) → prisma db push + admin seed (eu rodo com o DATABASE_URL).
-     Evolution/Railway (WhatsApp), conta Mercado Pago, cron-job.org.
+     Supabase ativo, Evolution/Railway (WhatsApp) online, cron-job.org configurado.
 
-[👉] FASE 6 — Chaves no /admin/dev + testes ponta a ponta  ← VOCÊ ESTÁ AQUI
-     Colar MP/Groq/Jina/Evolution/R2/Melhor Envio/Resend → redeploy → testar vitrine, Pix, WhatsApp.
+[✅] FASE 6 — Chaves no /admin/dev + testes ponta a ponta
+     Integrações MP, IA, R2, Cron, Resend testadas e validadas em produção.
 
-[ ] FASE 7 — Vender/hospedar por cliente
-     Repetir Fases 4-6 por cliente (código único). Cobrar mensalidade.
+[👉] FASE 7 — Operação e Vendas  ← VOCÊ ESTÁ AQUI
+     Sistema 100% pronto. Monitorar primeiros usos reais. Vender novas instâncias.
 
 [ ] OPCIONAIS — deletar código morto (lojista/ML/Shopee/Lista/quiz) · seed de dados de teste.
 ```
@@ -60,6 +59,9 @@
     - Nova rota autônoma `/assinatura` para venda manual/divulgação por link externo (gera QR Code Pix e atualiza instantaneamente).
     - Botão "Copiar Link" incluído no painel admin em "Assinantes".
   - **PDF do Estoque Próprio (Catálogo Pronta Entrega)**: Refatorado para incluir capa com logo da marca, layout de cards otimizado (foco no preço), e exclusão automática do PDF antigo ao regerar, garantindo apenas um catálogo atualizado. Layout da grid do painel admin otimizada para os cards.
+  - **Cadastro de Estoque Próprio Refatorado**: Regras rígidas (Preço de Custo, Preço de Venda, Pesos e Medidas obrigatórios). Geração de SKU automático de 5 dígitos (ex: RF-123). Auto-categorização por IA. A Prova Social de Vendas agora é opcional.
+  - **Impressão de Documentos (Caixas Fechadas)**: Refatoração completa da impressão. Geração inteligente: Ficha de Separação em folha A4 cheia, e Etiquetas + Declaração de Conteúdo dimensionadas para A5 Paisagem, de forma que o Chrome empilha duas unidades perfeitas em uma folha A4 (economizando papel). Botão "🖨️ Imprimir" movido direto para o card principal.
+  - **Automatização (Cron Jobs)**: Painel de Desenvolvedor atualizado com instruções e URLs prontas para configurar no Cron-Job.org (bypassando limite do plano free da Vercel). Loop de mensagens do atacado e Postagens Agendadas 100% ativos via requisições externas com autenticação `CRON_SECRET`.
 
 ## ⚠️ ERROS MAPEADOS E RESOLVIDOS (Guia Rápido)
 - **Supabase e Chaves JWT**: A lib `@supabase/supabase-js` (versões antigas ou uso direto local) frequentemente falha em decodificar JWS compacto com as novas chaves `sb_...` opacas geradas pelo Supabase ("Invalid Compact JWS" / "signature verification failed"). Use as chaves *Legacy anon, service_role API keys* (formato `eyJ...`).
@@ -67,13 +69,8 @@
 - **Duplo Push (Deploy Vercel)**: A base local possui os remotes `origin` (código base) e `vercelrepo` (conectado à Vercel do cliente). Ao empurrar atualizações para disparar deploy, lembre-se sempre de fazer `git push vercelrepo main`, caso contrário a atualização não sobe!
 
 ## ⏳ PENDENTE
-1. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).
-3. **Infra do cliente** (você) — Supabase (+`create extension vector`), Evolution/Railway (número
-   WhatsApp), conta Mercado Pago, domínio, cron-job.org.
-4. **Chaves no `/admin/dev`** — MP, Groq, Jina, Evolution, R2, Melhor Envio, Resend → redeploy.
-5. **`prisma db push` + admin seed** no banco do cliente (posso rodar quando tiver o `DATABASE_URL`).
-6. **(Opcional)** deletar código morto restante (se houver resquícios).
-7. **(Opcional)** seed de dados de teste (fornecedores/produtos fake) pra validar antes de vender.
+1. **(Opcional)** deletar código morto restante (se houver resquícios).
+2. **(Opcional)** seed de dados de teste (fornecedores/produtos fake) pra validar antes de vender para novos clientes.
 
 ## 🔁 LIMITES (o que o assistente NÃO faz)
 Não cria contas, não digita chaves/senhas, não faz login/deploy em serviços externos por você
