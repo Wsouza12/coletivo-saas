@@ -88,7 +88,7 @@ export function ProdutoAtacadoList({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {produtosFiltrados.map((produto) => (
             <ProdutoAtacadoCard
               key={produto.id}
@@ -208,36 +208,36 @@ function ProdutoAtacadoCard({
           </Button>
         </div>
 
-        <span className="truncate text-sm font-semibold text-foreground" title={produto.nome}>
+        <span className="truncate text-base font-bold text-foreground" title={produto.nome}>
           {produto.nome}
         </span>
         {produto.codigo ? (
-          <span className="text-xs font-mono text-muted-foreground">Cód: {produto.codigo}</span>
+          <span className="text-sm font-mono text-muted-foreground">Cód: {produto.codigo}</span>
         ) : null}
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {produto.categoria}
           {produto.marca ? ` — ${produto.marca}` : ""}
           {produto.voltagem ? ` — ${produto.voltagem}` : ""}
         </span>
-        <span className="text-xs">
+        <span className="text-sm font-medium">
           {formatBRL(produto.custoUnitario)}/un — {produto.unidadesPorCaixa}un/caixa
         </span>
         {produto.codigoAnatel ? (
-          <span className="text-xs text-muted-foreground">Anatel: {produto.codigoAnatel}</span>
+          <span className="text-sm text-muted-foreground">Anatel: {produto.codigoAnatel}</span>
         ) : null}
         {produto.precoCatalogo ? (
-          <span className="text-xs text-muted-foreground">Preço no catálogo: {formatBRL(produto.precoCatalogo)}</span>
+          <span className="text-sm text-muted-foreground">Preço no catálogo: {formatBRL(produto.precoCatalogo)}</span>
         ) : null}
         {produto.precoVendaSugerido ? (
-          <span className="text-xs text-muted-foreground">Venda sugerida: {formatBRL(produto.precoVendaSugerido)}</span>
+          <span className="text-sm text-muted-foreground">Venda sugerida: {formatBRL(produto.precoVendaSugerido)}</span>
         ) : null}
         {produto.fornecedor ? (
-          <span className="truncate text-xs text-muted-foreground" title={produto.fornecedor.nome}>
+          <span className="truncate text-sm text-muted-foreground" title={produto.fornecedor.nome}>
             Fornecedor: {produto.fornecedor.nome}
           </span>
         ) : null}
         {produto.catalogoOrigem ? (
-          <span className="truncate text-xs text-muted-foreground" title={produto.catalogoOrigem.nome}>
+          <span className="truncate text-sm text-muted-foreground" title={produto.catalogoOrigem.nome}>
             Catálogo: {produto.catalogoOrigem.nome} — pág. {produto.catalogoOrigem.pagina}
           </span>
         ) : null}
