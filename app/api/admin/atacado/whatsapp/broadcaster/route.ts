@@ -12,11 +12,10 @@ export async function POST(req: Request) {
   const formData = await req.formData();
   const imagem = formData.get("imagem");
   const fornecedorId = formData.get("fornecedorId") as string;
-  const grupoJidsRaw = formData.get("grupoJids") as string;
+  const grupoAvisosId = formData.get("grupoAvisosId") as string | null;
+  const grupoPedidosId = formData.get("grupoPedidosId") as string | null;
   const texto = formData.get("texto") as string;
   const dadosRaw = formData.get("dados") as string;
-
-  const grupoJids = grupoJidsRaw ? JSON.parse(grupoJidsRaw) : [];
 
   if (!imagem || !(imagem instanceof File)) {
     return NextResponse.json({ error: { code: "VALIDATION", message: "Imagem ausente" } }, { status: 422 });
@@ -86,19 +85,21 @@ export async function POST(req: Request) {
     //    - Avisos da Comunidade → texto + link do grupo de Pedidos (lá ninguém
     //      responde, então leva o link pra pessoa ir mandar o código).
     //    - Pedidos (Solicitações) → só o texto/código (a pessoa já está no grupo).
-    const gruposParaDisparar = Array.isArray(grupoJids) ? (grupoJids as string[]) : [];
+    const gruposParaDisparar = [grupoAvisosId, grupoPedidosId].filter(Boolean) as string[];
 
     const vinculos = await prisma.grupoWhatsappCategoria.findMany({
       where: { grupoId: { in: gruposParaDisparar } },
     });
-    const linkPedidos = vinculos.find((v) => v.categoria === "SOLICITACOES")?.linkConvite;
+    const linkPedidos = vinculos.find((v) => v.grupoId === grupoPedidosId)?.linkConvite;
 
-    const itens = gruposParaDisparar.map((jid) => {
-      const vinc = vinculos.find((v) => v.grupoId === jid);
-      const ehAvisos = vinc?.categoria === "AVISOS_COMUNIDADE";
+    // Garante unicidade caso o usuário selecione o mesmo grupo nos dois dropdowns
+    const jidsUnicos = Array.from(new Set(gruposParaDisparar));
+
+    const itens = jidsUnicos.map((jid) => {
+      const ehAvisos = jid === grupoAvisosId;
       const legenda =
         ehAvisos && linkPedidos
-          ? `${texto}\n\n👉 Entre no grupo de pedidos e envie o código:\n${linkPedidos}`
+          ? `${texto}\n\n👉 *Link para pedir:* ${linkPedidos}`
           : texto;
       return { jid, legenda };
     });

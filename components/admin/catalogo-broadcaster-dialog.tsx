@@ -88,7 +88,8 @@ export function CatalogoBroadcasterDialog({
   const [alturaCm, setAlturaCm] = useState("");
   const [sugerindoMedidas, setSugerindoMedidas] = useState(false);
 
-  const [gruposSelecionados, setGruposSelecionados] = useState<string[]>([]);
+  const [grupoAvisosId, setGrupoAvisosId] = useState<string>("none");
+  const [grupoPedidosId, setGrupoPedidosId] = useState<string>("none");
   const [mensagemPersonalizada, setMensagemPersonalizada] = useState("");
 
   // Instagram
@@ -150,9 +151,10 @@ export function CatalogoBroadcasterDialog({
       // Remove o filtro para permitir selecionar qualquer grupo vinculado no sistema
       const destinos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
       setGrupos(destinos);
-      // Já marca todos os grupos de destino por padrão — o disparo normalmente vai
-      // pros dois (Pedidos + Avisos da Comunidade). Admin pode desmarcar se quiser.
-      setGruposSelecionados(destinos.map((v: { grupoId: string }) => v.grupoId));
+      const grupoAvisos = destinos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
+      const grupoPedidos = destinos.find(g => g.categoria === "SOLICITACOES")?.grupoId || "none";
+      setGrupoAvisosId(grupoAvisos);
+      setGrupoPedidosId(grupoPedidos);
     }
   }
 
@@ -250,7 +252,7 @@ export function CatalogoBroadcasterDialog({
       toast.error("Recorte uma imagem do PDF primeiro!");
       return;
     }
-    if (gruposSelecionados.length === 0) {
+    if (grupoAvisosId === "none" && grupoPedidosId === "none") {
       toast.error("Selecione pelo menos um grupo de WhatsApp destino");
       return;
     }
@@ -264,7 +266,8 @@ export function CatalogoBroadcasterDialog({
       formData.append("imagem", fotoBlob, "recorte.jpg");
       formData.append("fornecedorId", fornecedorId);
       formData.append("catalogoId", catalogoId);
-      formData.append("grupoJids", JSON.stringify(gruposSelecionados));
+      formData.append("grupoAvisosId", grupoAvisosId === "none" ? "" : grupoAvisosId);
+      formData.append("grupoPedidosId", grupoPedidosId === "none" ? "" : grupoPedidosId);
       formData.append("texto", mensagemPersonalizada);
       formData.append("dados", JSON.stringify({
         nome: nomeProduto,
@@ -394,25 +397,40 @@ export function CatalogoBroadcasterDialog({
 
                   <div className="flex flex-col gap-3">
                     <Label>Grupo de Destino</Label>
-                    <div className="flex flex-col gap-2">
-                      {grupos.map((g) => (
-                        <Label key={g.grupoId} className="flex items-center gap-2 font-normal">
-                          <input 
-                            type="checkbox" 
-                            className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                            checked={gruposSelecionados.includes(g.grupoId)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setGruposSelecionados([...gruposSelecionados, g.grupoId]);
-                              } else {
-                                setGruposSelecionados(gruposSelecionados.filter(id => id !== g.grupoId));
-                              }
-                            }}
-                          />
-                          {g.grupoNome} ({g.categoria === "AVISOS_COMUNIDADE" ? "Avisos" : g.categoria === "SOLICITACOES" ? "Solicitações" : g.categoria})
-                        </Label>
-                      ))}
-                    </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <Label className="text-xs text-muted-foreground">Grupo de Divulgação (Avisos)</Label>
+                          <Select value={grupoAvisosId} onValueChange={setGrupoAvisosId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Nenhum" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Não enviar</SelectItem>
+                              {grupos.map((g) => (
+                                <SelectItem key={`aviso-${g.grupoId}`} value={g.grupoId}>
+                                  {g.grupoNome} ({g.categoria})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <Label className="text-xs text-muted-foreground">Grupo de Pedidos (Extrai Link)</Label>
+                          <Select value={grupoPedidosId} onValueChange={setGrupoPedidosId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Nenhum" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Não enviar</SelectItem>
+                              {grupos.map((g) => (
+                                <SelectItem key={`pedido-${g.grupoId}`} value={g.grupoId}>
+                                  {g.grupoNome} ({g.categoria})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     {grupos.length === 0 && (
                       <p className="text-xs text-destructive">Nenhum grupo do WhatsApp vinculado. Configure-os na aba de WhatsApp.</p>
                     )}

@@ -108,8 +108,9 @@ export function CatalogoDivulgacaoDialog({
 
   // WhatsApp state
   const [paginasSelecionadas, setPaginasSelecionadas] = useState<number[]>([]);
-  const [gruposSelecionados, setGruposSelecionados] = useState<string[]>([]);
-  const [legenda, setLegenda] = useState(`📦 *Novo Catálogo Disponível!*\n\nLinha: *${embaralharNome(fornecedorNome)}*\n\nConfira as páginas a seguir.\n⚠️ *Atenção:* Este grupo é apenas para divulgação. Peça pelo código do produto no grupo de pedidos:\n👉 https://chat.whatsapp.com/KjxiZRsevrc8cnkpRcTPNL`);
+  const [grupoAvisosId, setGrupoAvisosId] = useState<string>("none");
+  const [grupoPedidosId, setGrupoPedidosId] = useState<string>("none");
+  const [legendaBase, setLegendaBase] = useState(`📦 *Novo Catálogo Disponível!*\n\nFornecedor: *${fornecedorNome}*\n\nConfira as páginas a seguir.`);
 
   // Instagram state
   const [igStatus, setIgStatus] = useState<StatusInstagram>(null);
@@ -138,6 +139,10 @@ export function CatalogoDivulgacaoDialog({
       // Mostra todos os grupos configurados no WhatsApp, não apenas algumas categorias.
       const unicos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
       setGrupos(unicos);
+      const grupoAvisos = unicos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
+      const grupoPedidos = unicos.find(g => g.categoria === "SOLICITACOES")?.grupoId || "none";
+      setGrupoAvisosId(grupoAvisos);
+      setGrupoPedidosId(grupoPedidos);
     }
 
     const jsonIg = await resIg.json();
@@ -174,7 +179,7 @@ export function CatalogoDivulgacaoDialog({
       toast.error("Adicione pelo menos uma página para enviar.");
       return;
     }
-    if (gruposSelecionados.length === 0) {
+    if (grupoAvisosId === "none" && grupoPedidosId === "none") {
       toast.error("Selecione pelo menos um grupo de WhatsApp destino.");
       return;
     }
@@ -192,10 +197,14 @@ export function CatalogoDivulgacaoDialog({
 
         toast.loading(`Enviando página ${p}...`, { id: "divulgacao" });
         const formData = new FormData();
-        formData.append("imagem", blob, `pagina_${p}.jpg`);
-        formData.append("grupoJids", JSON.stringify(gruposSelecionados));
-        if (i === 0 && legenda) {
-          formData.append("legenda", legenda);
+        formData.append("imagem", await comprimirParaEnvio(blob), "pagina.jpg");
+        formData.append("grupoAvisosId", grupoAvisosId === "none" ? "" : grupoAvisosId);
+        formData.append("grupoPedidosId", grupoPedidosId === "none" ? "" : grupoPedidosId);
+        
+        if (isFirstPage) {
+          const link = grupos.find(g => g.grupoId === grupoPedidosId)?.linkConvite || "";
+          formData.append("legenda", legendaBase);
+          formData.append("linkPedidos", link);
         }
 
         const res = await fetch("/api/admin/atacado/whatsapp/divulgar-pagina", {
@@ -404,53 +413,58 @@ export function CatalogoDivulgacaoDialog({
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-2">
-                          <Label>Enviar para Grupo</Label>
-                          <div className="flex flex-col gap-2">
-                            {grupos.map((g) => (
-                              <Label key={g.grupoId} className="flex items-center gap-2 font-normal">
-                                <input
-                                  type="checkbox"
-                                  className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                                  checked={gruposSelecionados.includes(g.grupoId)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setGruposSelecionados([...gruposSelecionados, g.grupoId]);
-                                    } else {
-                                      setGruposSelecionados(gruposSelecionados.filter((id) => id !== g.grupoId));
-                                    }
-                                  }}
-                                />
-                                {g.grupoNome}{" "}
-                                {g.categoria === "AVISOS_COMUNIDADE"
-                                  ? "(Avisos)"
-                                  : g.categoria === "SOLICITACOES"
-                                  ? "(Pedidos)"
-                                  : g.categoria === "CATALOGOS_FORNECEDORES"
-                                  ? "(Catálogos)"
-                                  : null}
-                              </Label>
-                            ))}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex flex-col gap-1.5">
+                            <Label className="text-xs text-muted-foreground">Grupo de Divulgação (Avisos)</Label>
+                            <Select value={grupoAvisosId} onValueChange={setGrupoAvisosId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nenhum" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Não enviar</SelectItem>
+                                {grupos.map((g) => (
+                                  <SelectItem key={`aviso-${g.grupoId}`} value={g.grupoId}>
+                                    {g.grupoNome} ({g.categoria})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          {grupos.length === 0 && (
-                            <p className="text-xs text-destructive">Nenhum grupo configurado para Solicitações ou Avisos.</p>
-                          )}
+                          <div className="flex flex-col gap-1.5">
+                            <Label className="text-xs text-muted-foreground">Grupo de Pedidos (Extrai Link)</Label>
+                            <Select value={grupoPedidosId} onValueChange={setGrupoPedidosId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nenhum" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Não enviar</SelectItem>
+                                {grupos.map((g) => (
+                                  <SelectItem key={`pedido-${g.grupoId}`} value={g.grupoId}>
+                                    {g.grupoNome} ({g.categoria})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                          <Label>Legenda (Apenas na 1ª Imagem)</Label>
+                        <div className="flex flex-col gap-2 relative mt-2">
+                          <Label>Legenda Base (Apenas na 1ª Imagem)</Label>
                           <Textarea
-                            value={legenda}
-                            onChange={(e) => setLegenda(e.target.value)}
+                            value={legendaBase}
+                            onChange={(e) => setLegendaBase(e.target.value)}
                             rows={6}
-                            className="text-sm font-mono"
+                            className="text-xs font-mono"
                             placeholder="Escreva a mensagem..."
                           />
+                          <div className="text-[10px] text-muted-foreground italic px-1">
+                            * O link do grupo de pedidos será anexado automaticamente no final dessa mensagem apenas para o Grupo de Divulgação.
+                          </div>
                         </div>
 
                         <Button
                           type="submit"
-                          disabled={salvando || paginasSelecionadas.length === 0 || gruposSelecionados.length === 0}
+                          disabled={salvando || paginasSelecionadas.length === 0 || (grupoAvisosId === "none" && grupoPedidosId === "none")}
                           className="w-full h-12 mt-4 text-base"
                         >
                           {salvando ? (
