@@ -23,7 +23,7 @@ export function DisparadorCaixasButton({ naoAnunciadas }: { naoAnunciadas: numbe
       .then((json) => {
         const vs: Vinculo[] = json.data?.vinculos ?? [];
         setVinculos(vs);
-        const sugerido = vs.find((v) => v.categoria === "PRODUTOS_DISPONIVEIS");
+        const sugerido = vs.find((v) => v.categoria === "CAIXAS_ABERTAS") ?? vs.find((v) => v.categoria === "PRODUTOS_DISPONIVEIS");
         setGrupoEscolhido(sugerido?.grupoId ?? vs[0]?.grupoId ?? "");
       })
       .catch(() => toast.error("Erro ao carregar grupos"))
@@ -93,7 +93,7 @@ export function DisparadorCaixasButton({ naoAnunciadas }: { naoAnunciadas: numbe
                 <option value="">Selecione um grupo...</option>
                 {vinculos.map((v) => (
                   <option key={v.grupoId} value={v.grupoId}>
-                    {v.grupoNome} — {v.categoria === "PRODUTOS_DISPONIVEIS" ? "Produtos Disponíveis ⭐" : v.categoria}
+                    {v.grupoNome} — {v.categoria === "CAIXAS_ABERTAS" ? "Caixas Abertas ⭐" : v.categoria === "PRODUTOS_DISPONIVEIS" ? "Produtos Disponíveis" : v.categoria}
                   </option>
                 ))}
               </select>

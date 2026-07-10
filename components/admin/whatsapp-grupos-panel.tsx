@@ -196,14 +196,15 @@ export function WhatsappGruposPanel() {
               <CriarGrupoForm onCriado={carregar} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                {["MODERADOR_AUTOMATICO", "ROBO_APRENDIZ", "SOLICITACOES", "AVISOS_COMUNIDADE", "PRODUTOS_DISPONIVEIS", ...categorias.filter(c => !["MODERADOR_AUTOMATICO","ROBO_APRENDIZ","SOLICITACOES","AVISOS_COMUNIDADE","PRODUTOS_DISPONIVEIS"].includes(c))].map((categoria) => {
+                {["MODERADOR_AUTOMATICO", "ROBO_APRENDIZ", "SOLICITACOES", "AVISOS_COMUNIDADE", "CAIXAS_ABERTAS", "PRODUTOS_DISPONIVEIS", ...categorias.filter(c => !["MODERADOR_AUTOMATICO","ROBO_APRENDIZ","SOLICITACOES","AVISOS_COMUNIDADE","CAIXAS_ABERTAS","PRODUTOS_DISPONIVEIS"].includes(c))].map((categoria) => {
                   const vinculo = vinculos.find((v) => v.categoria === categoria);
                   const isModerador = categoria === "MODERADOR_AUTOMATICO";
                   const isRobo = categoria === "ROBO_APRENDIZ";
                   const isSolicitacoes = categoria === "SOLICITACOES";
                   const isAvisos = categoria === "AVISOS_COMUNIDADE";
                   const isProdutos = categoria === "PRODUTOS_DISPONIVEIS";
-                  const titulo = isModerador ? "Moderador Automático" : isRobo ? "Robô Aprendiz (IA)" : isSolicitacoes ? "Solicitações de Catálogo" : isAvisos ? "Avisos da Comunidade" : isProdutos ? "Produtos Disponíveis" : categoria;
+                  const isCaixas = categoria === "CAIXAS_ABERTAS";
+                  const titulo = isModerador ? "Moderador Automático" : isRobo ? "Robô Aprendiz (IA)" : isSolicitacoes ? "Solicitações de Catálogo" : isAvisos ? "Avisos da Comunidade" : isProdutos ? "Produtos Disponíveis" : isCaixas ? "Caixas Abertas" : categoria;
                   
                   return (
                     <div key={categoria} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">

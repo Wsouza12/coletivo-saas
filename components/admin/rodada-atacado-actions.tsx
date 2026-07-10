@@ -117,8 +117,9 @@ export function RodadaAtacadoActions({
       const res = await fetch("/api/admin/atacado/whatsapp/vinculos", { cache: "no-store" });
       const json = await res.json();
       const vinculos: Vinculo[] = json.data?.vinculos ?? [];
-      // 1) vínculo específico da categoria; 2) fallback pro grupo padrão "Produtos Disponíveis"
+      // 1) vínculo específico da categoria; 2) fallback pro grupo CAIXAS_ABERTAS; 3) fallback pro PRODUTOS_DISPONIVEIS
       const vinculo = vinculos.find((v) => v.categoria === produtoCategoria)
+        ?? vinculos.find((v) => v.categoria === "CAIXAS_ABERTAS")
         ?? vinculos.find((v) => v.categoria === "PRODUTOS_DISPONIVEIS");
       if (vinculo) {
         await abrirCaixaNoGrupo(vinculo.grupoId);

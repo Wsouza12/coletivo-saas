@@ -845,11 +845,13 @@ export async function notificarFechamentoCaixa(rodadaId: string): Promise<void> 
 
 // Resolve o grupo de WhatsApp de uma categoria de produto:
 // 1) vínculo específico da categoria (se o admin criou um dedicado)
-// 2) senão, cai no grupo padrão "Produtos Disponíveis" (PRODUTOS_DISPONIVEIS)
-// Assim toda categoria nova funciona sozinha, sem precisar vincular na mão.
+// 2) senão, cai no grupo "Caixas Abertas" (CAIXAS_ABERTAS) (mais adequado para abertura de caixa)
+// 3) senão, cai no grupo padrão "Produtos Disponíveis" (PRODUTOS_DISPONIVEIS)
 export async function resolverGrupoCategoria(categoria: string): Promise<string | null> {
   const especifico = await prisma.grupoWhatsappCategoria.findUnique({ where: { categoria } });
   if (especifico?.grupoId) return especifico.grupoId;
+  const caixasAbertas = await prisma.grupoWhatsappCategoria.findFirst({ where: { categoria: "CAIXAS_ABERTAS" } });
+  if (caixasAbertas?.grupoId) return caixasAbertas.grupoId;
   const padrao = await prisma.grupoWhatsappCategoria.findFirst({ where: { categoria: "PRODUTOS_DISPONIVEIS" } });
   return padrao?.grupoId ?? null;
 }
