@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Send, Plus, Trash2, Loader2, ImagePlus, CheckCheck, Sparkles, ExternalLink, Camera } from "lucide-react";
+import { Send, Plus, Trash2, Loader2, ImagePlus, CheckCheck, Sparkles, ExternalLink, Camera, Lock } from "lucide-react";
 
 function IgIcon({ className }: { className?: string }) {
   return (
@@ -61,7 +61,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GrupoWhatsappSelect } from "@/components/admin/grupo-whatsapp-select";
 import { PdfPageViewer, type PdfViewerRef } from "@/components/admin/pdf-page-viewer";
 import { Badge } from "@/components/ui/badge";
 
@@ -103,6 +102,7 @@ export function CatalogoDivulgacaoDialog({
   // WhatsApp state
   const [paginasSelecionadas, setPaginasSelecionadas] = useState<number[]>([]);
   const [grupoDestinoId, setGrupoDestinoId] = useState<string>("none");
+  const [grupoDestinoNome, setGrupoDestinoNome] = useState<string>("");
   const [legendaBase, setLegendaBase] = useState(`📦 *Novo Catálogo Disponível!*\n\nFornecedor: *${fornecedorNome}*\n\nConfira as páginas a seguir.`);
 
   // Instagram state
@@ -129,21 +129,16 @@ export function CatalogoDivulgacaoDialog({
 
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      // Normaliza grupos da Evolution API para formato do componente
-      const gruposNormalizados = (jsonGrupos.data.grupos || []).map((g: any) => ({
-        grupoId: g.id,
-        grupoNome: g.nome || g.subject || g.id,
-        categoria: "",
-      }));
-      const allGroups = [...gruposNormalizados, ...jsonGrupos.data.vinculos];
-      const unicos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
-      setGrupos(unicos);
-      // Pré-seleciona: CATALOGOS primeiro, fallback AVISOS_COMUNIDADE
       const vinculos = jsonGrupos.data.vinculos as any[];
+      setGrupos(vinculos);
+      // Pré-seleciona: CATALOGOS primeiro, fallback AVISOS_COMUNIDADE (travado)
       const grupoCatalogos = vinculos.find((v: any) => v.categoria === "CATALOGOS");
       const grupoAvisos = vinculos.find((v: any) => v.categoria === "AVISOS_COMUNIDADE");
-      if (grupoCatalogos) setGrupoDestinoId(grupoCatalogos.grupoId);
-      else if (grupoAvisos) setGrupoDestinoId(grupoAvisos.grupoId);
+      const vinculoEscolhido = grupoCatalogos || grupoAvisos;
+      if (vinculoEscolhido) {
+        setGrupoDestinoId(vinculoEscolhido.grupoId);
+        setGrupoDestinoNome(vinculoEscolhido.grupoNome);
+      }
     }
 
     const jsonIg = await resIg.json();
@@ -416,13 +411,17 @@ export function CatalogoDivulgacaoDialog({
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <div className="grid grid-cols-1 gap-4">
-                          <GrupoWhatsappSelect
-                            label="Grupo de Destino (Catálogos)"
-                            value={grupoDestinoId}
-                            onChange={(val) => setGrupoDestinoId(val)}
-                            grupos={grupos}
-                          />
+                        <div className="flex flex-col gap-2">
+                          <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><Lock className="size-3" /> Grupo de Destino (Catálogos)</Label>
+                          <div className="rounded-md border border-border bg-muted/50 px-3 py-2.5 text-sm font-medium text-foreground">
+                            {grupoDestinoNome || "Nenhum grupo vinculado"}
+                          </div>
+                          {grupoDestinoId === "none" && (
+                            <p className="text-xs text-destructive">Configure o grupo "Catálogos" no painel WhatsApp › Vínculos.</p>
+                          )}
+                          {grupoDestinoId !== "none" && (
+                            <p className="text-[10px] text-muted-foreground">⚙️ Para alterar, vá em WhatsApp › Vínculos › Catálogos</p>
+                          )}
                         </div>
 
                         <div className="flex flex-col gap-2 relative mt-2">

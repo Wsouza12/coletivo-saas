@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GrupoWhatsappSelect } from "@/components/admin/grupo-whatsapp-select";
+import { Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PdfPageViewer, type PdfViewerRef } from "@/components/admin/pdf-page-viewer";
 
@@ -84,6 +84,7 @@ export function CatalogoBroadcasterDialog({
   const [sugerindoMedidas, setSugerindoMedidas] = useState(false);
 
   const [grupoDestinoId, setGrupoDestinoId] = useState<string>("none");
+  const [grupoDestinoNome, setGrupoDestinoNome] = useState<string>("");
   const [mensagemPersonalizada, setMensagemPersonalizada] = useState("");
 
   // Instagram
@@ -142,19 +143,13 @@ export function CatalogoBroadcasterDialog({
     const resGrupos = await fetch(`/api/admin/atacado/whatsapp/grupos`);
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      // Normaliza grupos da Evolution API (id/nome) para formato do componente (grupoId/grupoNome)
-      const gruposNormalizados = (jsonGrupos.data.grupos || []).map((g: any) => ({
-        grupoId: g.id,
-        grupoNome: g.nome || g.subject || g.id,
-        categoria: "",
-      }));
-      // Combina todos os grupos (da API + vinculados no banco) e deduplica por grupoId
-      const allGroups = [...gruposNormalizados, ...jsonGrupos.data.vinculos];
-      const destinos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
-      setGrupos(destinos);
-      // Pré-seleciona grupo vinculado a PRODUTOS_DISPONIVEIS
-      const grupoProdutos = (jsonGrupos.data.vinculos as any[]).find((v: any) => v.categoria === "PRODUTOS_DISPONIVEIS");
-      if (grupoProdutos) setGrupoDestinoId(grupoProdutos.grupoId);
+      const vinculos = jsonGrupos.data.vinculos as any[];
+      // Pré-seleciona grupo vinculado a PRODUTOS_DISPONIVEIS (travado)
+      const grupoProdutos = vinculos.find((v: any) => v.categoria === "PRODUTOS_DISPONIVEIS");
+      if (grupoProdutos) {
+        setGrupoDestinoId(grupoProdutos.grupoId);
+        setGrupoDestinoNome(grupoProdutos.grupoNome);
+      }
     }
   }
 
@@ -396,18 +391,16 @@ export function CatalogoBroadcasterDialog({
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <Label>Grupo de Destino</Label>
-                      <div className="grid grid-cols-1 gap-4">
-                        <GrupoWhatsappSelect
-                          label="Grupo de Destino (Produtos Disponíveis)"
-                          value={grupoDestinoId}
-                          onChange={(val) => setGrupoDestinoId(val)}
-                          grupos={grupos}
-                        />
+                    <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><Lock className="size-3" /> Grupo de Destino (Produtos Disponíveis)</Label>
+                      <div className="rounded-md border border-border bg-muted/50 px-3 py-2.5 text-sm font-medium text-foreground">
+                        {grupoDestinoNome || "Nenhum grupo vinculado"}
                       </div>
-                    {grupos.length === 0 && (
-                      <p className="text-xs text-destructive">Nenhum grupo do WhatsApp vinculado. Configure-os na aba de WhatsApp.</p>
-                    )}
+                      {grupoDestinoId === "none" && (
+                        <p className="text-xs text-destructive">Configure o grupo "Produtos Disponíveis" no painel WhatsApp › Vínculos.</p>
+                      )}
+                      {grupoDestinoId !== "none" && (
+                        <p className="text-[10px] text-muted-foreground">⚙️ Para alterar, vá em WhatsApp › Vínculos › Produtos Disponíveis</p>
+                      )}
 
                     <Label>Mensagem a ser enviada</Label>
                     <Textarea 
