@@ -293,14 +293,14 @@ export async function gerarPromptImagem(ideia: string): Promise<string> {
 export async function sugerirPesoDimensoes(
   nome: string,
   categoria?: string
-): Promise<{ pesoKg: number; comprimentoCm: number; larguraCm: number; alturaCm: number }> {
+): Promise<{ pesoKg: number; comprimentoCm: number; larguraCm: number; alturaCm: number; categoria?: string }> {
   const chat = await criarChatComFallback({
     temperature: 0.2,
     messages: [
       {
         role: 'system',
         content:
-          'Você estima peso e dimensões de EMBALAGEM INDIVIDUAL (1 unidade, como vendida no varejo/blister/caixinha) de produtos, baseado em conhecimento geral de produtos parecidos. Nunca invente medidas absurdas — pense num produto real desse tipo e estime a caixinha dele. Retorne APENAS JSON válido sem markdown.',
+          'Você estima peso e dimensões de EMBALAGEM INDIVIDUAL (1 unidade, como vendida no varejo/blister/caixinha) de produtos, baseado em conhecimento geral de produtos parecidos. Nunca invente medidas absurdas — pense num produto real desse tipo e estime a caixinha dele. Também sugira a categoria mais adequada dentre as opções disponíveis. Retorne APENAS JSON válido sem markdown.',
       },
       {
         role: 'user',
@@ -308,12 +308,14 @@ export async function sugerirPesoDimensoes(
 Produto: ${nome}
 ${categoria ? `Categoria: ${categoria}` : ''}
 
-Estime peso e dimensões da embalagem individual deste produto (não da caixa fechada com várias unidades). Retorne JSON:
+Estime peso e dimensões da embalagem individual deste produto (não da caixa fechada com várias unidades). Também sugira a categoria mais adequada dentre: Eletrônicos, Casa, Moda, Esporte, Beleza, Outros.
+Retorne JSON:
 {
   "pesoKg": número em kg (ex: 0.12),
   "comprimentoCm": número inteiro em cm,
   "larguraCm": número inteiro em cm,
-  "alturaCm": número inteiro em cm
+  "alturaCm": número inteiro em cm,
+  "categoria": "uma das categorias acima"
 }`,
       },
     ],

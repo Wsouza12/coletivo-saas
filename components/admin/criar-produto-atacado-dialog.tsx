@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Sparkles } from "lucide-react";
@@ -26,6 +26,14 @@ import { formatBRL } from "@/lib/format";
 
 type Fornecedor = { id: string; nome: string };
 
+function gerarCodigoSugestao(): string {
+  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const l1 = letras[Math.floor(Math.random() * letras.length)];
+  const l2 = letras[Math.floor(Math.random() * letras.length)];
+  const num = String(Math.floor(Math.random() * 900) + 100); // 100-999
+  return `${l1}${l2}-${num}`;
+}
+
 export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?: Fornecedor[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -39,19 +47,21 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
   const [voltagem, setVoltagem] = useState("");
   const [codigoAnatel, setCodigoAnatel] = useState("");
   const [custoUnitario, setCustoUnitario] = useState("");
-  const [precoCatalogo, setPrecoCatalogo] = useState("");
   const [precoVendaSugerido, setPrecoVendaSugerido] = useState("");
-  const [linkReferencia, setLinkReferencia] = useState("");
-  const [posicaoMaisVendido, setPosicaoMaisVendido] = useState("");
   const [unidadesPorCaixa, setUnidadesPorCaixa] = useState("");
   const [reservaLojaPadrao, setReservaLojaPadrao] = useState("");
   const [pesoKg, setPesoKg] = useState("");
   const [comprimentoCm, setComprimentoCm] = useState("");
   const [larguraCm, setLarguraCm] = useState("");
   const [alturaCm, setAlturaCm] = useState("");
-  const [fornecedorId, setFornecedorId] = useState("");
-  const [isEstoqueProprio, setIsEstoqueProprio] = useState(false);
   const [sugerindoMedidas, setSugerindoMedidas] = useState(false);
+
+  // Gera código sugerido ao abrir o dialog
+  useEffect(() => {
+    if (open) {
+      setCodigo(gerarCodigoSugestao());
+    }
+  }, [open]);
 
   async function sugerirMedidas() {
     if (!nome.trim()) {
@@ -74,6 +84,10 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
       setComprimentoCm(String(json.data.comprimentoCm));
       setLarguraCm(String(json.data.larguraCm));
       setAlturaCm(String(json.data.alturaCm));
+      // IA também sugere a categoria
+      if (json.data.categoria && !categoria) {
+        setCategoria(json.data.categoria);
+      }
       toast.success("Sugestão da IA — confira antes de salvar, é uma estimativa");
     } finally {
       setSugerindoMedidas(false);
@@ -112,7 +126,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          codigo: codigo || undefined,
+          codigo,
           nome,
           descricao,
           categoria,
@@ -120,17 +134,14 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
           voltagem: voltagem || undefined,
           codigoAnatel: codigoAnatel || undefined,
           custoUnitario: Number(custoUnitario),
-          precoCatalogo: precoCatalogo ? Number(precoCatalogo) : undefined,
           precoVendaSugerido: precoVendaSugerido ? Number(precoVendaSugerido) : undefined,
-          linkReferencia: linkReferencia || undefined,
-          posicaoMaisVendido: posicaoMaisVendido ? Number(posicaoMaisVendido) : undefined,
           unidadesPorCaixa: Number(unidadesPorCaixa),
           reservaLojaPadrao: reservaLojaPadrao ? Number(reservaLojaPadrao) : undefined,
           pesoKg: Number(pesoKg),
           comprimentoCm: Number(comprimentoCm),
           larguraCm: Number(larguraCm),
           alturaCm: Number(alturaCm),
-          fornecedorId: isEstoqueProprio ? "ESTOQUE_PROPRIO" : (fornecedorId || undefined),
+          fornecedorId: "ESTOQUE_PROPRIO",
         }),
       });
       const json = await res.json();
@@ -148,14 +159,9 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
       setVoltagem("");
       setCodigoAnatel("");
       setCustoUnitario("");
-      setPrecoCatalogo("");
-      setIsEstoqueProprio(false);
       setPrecoVendaSugerido("");
-      setLinkReferencia("");
-      setPosicaoMaisVendido("");
       setUnidadesPorCaixa("");
       setReservaLojaPadrao("");
-      setFornecedorId("");
       setPesoKg("");
       setComprimentoCm("");
       setLarguraCm("");
@@ -175,15 +181,19 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-full max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-lg sm:max-h-[85vh]">
           <DialogHeader>
-            <DialogTitle>Novo produto do atacado</DialogTitle>
+            <DialogTitle>Novo produto — Estoque Próprio</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Label>Código do produto (opcional)</Label>
+            <Label>Código do produto</Label>
             <Input
               value={codigo}
               onChange={(e) => setCodigo(e.target.value)}
-              placeholder="Ex: LE-519-1 (do catálogo do fornecedor)"
+              placeholder="Ex: RF-123"
+              required
             />
+            <span className="text-xs text-muted-foreground">
+              Código gerado automaticamente. Altere se quiser.
+            </span>
 
             <Label>Nome</Label>
             <Input value={nome} onChange={(e) => setNome(e.target.value)} required />
@@ -207,7 +217,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
             <Label>Categoria</Label>
             <Select value={categoria} onValueChange={(v) => v && setCategoria(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
+                <SelectValue placeholder="Selecione (ou a IA preenche)" />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIAS.map((c) => (
@@ -218,7 +228,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
               </SelectContent>
             </Select>
             <span className="text-xs text-muted-foreground">
-              Vai ser usada pra vincular o grupo de WhatsApp certo quando essa integração entrar.
+              A IA preenche automaticamente ao clicar em "Sugerir com IA" abaixo.
             </span>
 
             <div className="grid grid-cols-2 gap-3">
@@ -258,78 +268,16 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
             />
 
             <Label>Preços (R$)</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <Input type="number" step="0.01" min="0" value={custoUnitario} onChange={(e) => setCustoUnitario(e.target.value)} placeholder="Custo" required />
-                <span className="text-xs text-muted-foreground">Custo do catálogo</span>
+                <span className="text-xs text-muted-foreground">Preço de custo</span>
               </div>
               <div>
-                <Input type="number" step="0.01" min="0" value={precoCatalogo} onChange={(e) => setPrecoCatalogo(e.target.value)} placeholder="Opcional" />
-                <span className="text-xs text-muted-foreground">Preço no catálogo</span>
-              </div>
-              <div>
-                <Input type="number" step="0.01" min="0" value={precoVendaSugerido} onChange={(e) => setPrecoVendaSugerido(e.target.value)} placeholder="Opcional" />
-                <span className="text-xs text-muted-foreground">Venda sugerida</span>
+                <Input type="number" step="0.01" min="0" value={precoVendaSugerido} onChange={(e) => setPrecoVendaSugerido(e.target.value)} placeholder="Venda" required />
+                <span className="text-xs text-muted-foreground">Preço de venda</span>
               </div>
             </div>
-
-            <Label>Prova social — Mais vendidos no ML (opcional)</Label>
-            <div className="grid grid-cols-[1fr_auto] gap-2">
-              <Input
-                type="url"
-                value={linkReferencia}
-                onChange={(e) => setLinkReferencia(e.target.value)}
-                placeholder="https://www.mercadolivre.com.br/mais-vendidos/..."
-              />
-              <Input
-                type="number"
-                min="1"
-                value={posicaoMaisVendido}
-                onChange={(e) => setPosicaoMaisVendido(e.target.value)}
-                placeholder="Posição"
-                className="w-24"
-              />
-            </div>
-            <span className="text-xs text-muted-foreground">
-              Link da página de mais vendidos do ML + a posição do produto (ex: 19). Vira o selo
-              &quot;Nº mais vendido&quot; na vitrine.
-            </span>
-
-            <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">
-              <label className="flex items-center gap-2 text-sm font-medium">
-                <input
-                  type="checkbox"
-                  checked={isEstoqueProprio}
-                  onChange={(e) => {
-                    setIsEstoqueProprio(e.target.checked);
-                    if (e.target.checked) setFornecedorId("");
-                  }}
-                  className="rounded border-input text-primary focus:ring-primary"
-                />
-                📦 Este produto é do meu Estoque Próprio
-              </label>
-              <span className="text-xs text-muted-foreground ml-6">
-                Ele será adicionado automaticamente ao Catálogo de Estoque Próprio.
-              </span>
-            </div>
-
-            {!isEstoqueProprio && (
-              <>
-                <Label>Fornecedor (uso interno, opcional)</Label>
-                <Select value={fornecedorId} onValueChange={(v) => setFornecedorId(v ?? "")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nenhum" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fornecedores.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </>
-            )}
 
             <div className="flex items-center justify-between">
               <Label>Peso e dimensões da embalagem individual (obrigatório — pra calcular frete real)</Label>
@@ -359,9 +307,11 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
               type="submit"
               disabled={
                 loading ||
+                !codigo ||
                 !nome ||
                 !categoria ||
                 !custoUnitario ||
+                !precoVendaSugerido ||
                 !unidadesPorCaixa ||
                 !pesoKg ||
                 !comprimentoCm ||
