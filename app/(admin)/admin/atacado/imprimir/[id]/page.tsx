@@ -63,12 +63,6 @@ export default async function ImprimirCaixaPage({
           <h1 className="text-xl font-bold">Impressão de Documentos</h1>
           <p className="text-sm text-gray-500">Caixa: {produtoNomeCompleto}</p>
         </div>
-        <button
-          onClick={() => window.print()}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded shadow hover:bg-primary/90"
-        >
-          🖨️ Imprimir Tudo
-        </button>
       </div>
 
       {/* 1. FICHA DE SEPARAÇÃO (1 página) */}
@@ -306,16 +300,6 @@ export default async function ImprimirCaixaPage({
         );
       })}
       
-      {/* Botão flutuante para impressão (não aparece na impressão) */}
-      <div className="fixed bottom-4 right-4 no-print">
-        <button
-          onClick={() => window.print()}
-          className="bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg text-lg font-bold hover:bg-primary/90 flex items-center gap-2"
-        >
-          🖨️ IMPRIMIR
-        </button>
-      </div>
-
     </div>
   );
 }
