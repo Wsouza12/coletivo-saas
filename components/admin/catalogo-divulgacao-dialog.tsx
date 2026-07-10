@@ -72,7 +72,7 @@ import { PdfPageViewer, type PdfViewerRef } from "@/components/admin/pdf-page-vi
 import { Badge } from "@/components/ui/badge";
 
 type Catalogo = { id: string; nome: string; arquivoUrl: string };
-type GrupoWhatsapp = { categoria: string; grupoId: string; grupoNome: string };
+type GrupoWhatsapp = { categoria: string; grupoId: string; grupoNome: string; linkConvite?: string; };
 type StatusInstagram = { conectado: boolean; username?: string; expiry?: string } | null;
 type IgFormato = "POST" | "STORY" | "REELS";
 
@@ -201,7 +201,7 @@ export function CatalogoDivulgacaoDialog({
         formData.append("grupoAvisosId", grupoAvisosId === "none" ? "" : grupoAvisosId);
         formData.append("grupoPedidosId", grupoPedidosId === "none" ? "" : grupoPedidosId);
         
-        if (isFirstPage) {
+        if (i === 0) {
           const link = grupos.find(g => g.grupoId === grupoPedidosId)?.linkConvite || "";
           formData.append("legenda", legendaBase);
           formData.append("linkPedidos", link);
@@ -416,7 +416,7 @@ export function CatalogoDivulgacaoDialog({
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col gap-1.5">
                             <Label className="text-xs text-muted-foreground">Grupo de Divulgação (Avisos)</Label>
-                            <Select value={grupoAvisosId} onValueChange={setGrupoAvisosId}>
+                            <Select value={grupoAvisosId} onValueChange={(v) => setGrupoAvisosId(v || "none")}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Nenhum" />
                               </SelectTrigger>
@@ -432,7 +432,7 @@ export function CatalogoDivulgacaoDialog({
                           </div>
                           <div className="flex flex-col gap-1.5">
                             <Label className="text-xs text-muted-foreground">Grupo de Pedidos (Extrai Link)</Label>
-                            <Select value={grupoPedidosId} onValueChange={setGrupoPedidosId}>
+                            <Select value={grupoPedidosId} onValueChange={(v) => setGrupoPedidosId(v || "none")}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Nenhum" />
                               </SelectTrigger>

@@ -400,7 +400,7 @@ export function CatalogoBroadcasterDialog({
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
                           <Label className="text-xs text-muted-foreground">Grupo de Divulgação (Avisos)</Label>
-                          <Select value={grupoAvisosId} onValueChange={setGrupoAvisosId}>
+                          <Select value={grupoAvisosId} onValueChange={(v) => setGrupoAvisosId(v || "none")}>
                             <SelectTrigger>
                               <SelectValue placeholder="Nenhum" />
                             </SelectTrigger>
@@ -416,7 +416,7 @@ export function CatalogoBroadcasterDialog({
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <Label className="text-xs text-muted-foreground">Grupo de Pedidos (Extrai Link)</Label>
-                          <Select value={grupoPedidosId} onValueChange={setGrupoPedidosId}>
+                          <Select value={grupoPedidosId} onValueChange={(v) => setGrupoPedidosId(v || "none")}>
                             <SelectTrigger>
                               <SelectValue placeholder="Nenhum" />
                             </SelectTrigger>
