@@ -20,13 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GrupoWhatsappSelect } from "@/components/admin/grupo-whatsapp-select";
 import { Textarea } from "@/components/ui/textarea";
 import { PdfPageViewer, type PdfViewerRef } from "@/components/admin/pdf-page-viewer";
 
@@ -398,38 +393,18 @@ export function CatalogoBroadcasterDialog({
                   <div className="flex flex-col gap-3">
                     <Label>Grupo de Destino</Label>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-xs text-muted-foreground">Grupo de Divulgação (Avisos)</Label>
-                          <Select value={grupoAvisosId} onValueChange={(v) => setGrupoAvisosId(v || "none")}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Nenhum" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Não enviar</SelectItem>
-                              {grupos.map((g) => (
-                                <SelectItem key={`aviso-${g.grupoId}`} value={g.grupoId}>
-                                  {g.grupoNome} ({g.categoria})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-xs text-muted-foreground">Grupo de Pedidos (Extrai Link)</Label>
-                          <Select value={grupoPedidosId} onValueChange={(v) => setGrupoPedidosId(v || "none")}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Nenhum" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Não enviar</SelectItem>
-                              {grupos.map((g) => (
-                                <SelectItem key={`pedido-${g.grupoId}`} value={g.grupoId}>
-                                  {g.grupoNome} ({g.categoria})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <GrupoWhatsappSelect
+                          label="Grupo de Divulgação (Avisos)"
+                          value={grupoAvisosId}
+                          onChange={(val) => setGrupoAvisosId(val)}
+                          grupos={grupos}
+                        />
+                        <GrupoWhatsappSelect
+                          label="Grupo de Pedidos (Extrai Link)"
+                          value={grupoPedidosId}
+                          onChange={(val) => setGrupoPedidosId(val)}
+                          grupos={grupos}
+                        />
                       </div>
                     {grupos.length === 0 && (
                       <p className="text-xs text-destructive">Nenhum grupo do WhatsApp vinculado. Configure-os na aba de WhatsApp.</p>
