@@ -468,7 +468,7 @@ const FORMATO_RESPOSTA_PRODUTO = `{
   "condicao": "Novo, Usado ou Recondicionado — use 'Novo' se não houver indicação em contrário",
   "atributos": {"cor": "...", "material": "...", "tamanho": "...", "voltagem": "...", "capacidade": "..."},
   "ncmSugerido": "código NCM de 8 dígitos mais provável para este tipo de produto — APENAS UMA SUGESTÃO, deixe vazio se não tiver confiança razoável",
-  "categoriaSugerida": "categoria de e-commerce em português (ex: Eletrônicos, Roupas, Casa)",
+  "categoriaSugerida": "Escolha OBRIGATORIAMENTE APENAS UMA das Macro Categorias: Acessórios para Veículos, Agro, Alimentos e Bebidas, Animais, Antiguidades e Coleções, Arte, Papelaria e Armarinho, Bebês, Beleza e Cuidado Pessoal, Brinquedos e Hobbies, Calçados, Roupas e Bolsas, Câmeras e Acessórios, Carros, Motos e Outros, Casa, Móveis e Decoração, Celulares e Telefones, Construção, Eletrodomésticos, Eletrônicos, Áudio e Vídeo, Esportes e Fitness, Ferramentas, Festas e Lembrancinhas, Games, Indústria e Comércio, Informática, Instrumentos Musicais, Joias e Relógios, Saúde. NUNCA crie subcategorias.",
   "tipoAnuncioSugerido": "Clássico, Premium ou Destaque — sugira Premium/Destaque só para produtos de ticket mais alto ou alta concorrência, senão Clássico",
   "garantiaTipoSugerida": "Garantia do fabricante, Garantia do vendedor ou Sem garantia",
   "garantiaPrazoSugerido": "prazo típico de garantia pra esse tipo de produto, ex: '90 dias', '12 meses'",
@@ -641,9 +641,7 @@ catálogo do fornecedor, então o preço impresso é o CUSTO de aquisição (qua
 Se houver SÓ UM preço (caso mais comum), devolva esse valor em "custoUnitario" e deixe
 "precoCatalogo" como null. Se houver DOIS preços (raro), o MENOR vai em "custoUnitario" e o
 MAIOR em "precoCatalogo". NUNCA coloque um preço em "precoCatalogo" se não há um segundo preço
-maior visível. A categoria é o
-tipo geral do produto (ex: Rádios, Eletrônicos, Ferramentas, Papelaria) — use o título da seção da
-página se aparecer, senão deduza do produto.
+maior visível. A categoria é o tipo geral do produto. Escolha OBRIGATORIAMENTE APENAS UMA das seguintes Macro Categorias oficiais: "Acessórios para Veículos", "Agro", "Alimentos e Bebidas", "Animais", "Antiguidades e Coleções", "Arte, Papelaria e Armarinho", "Bebês", "Beleza e Cuidado Pessoal", "Brinquedos e Hobbies", "Calçados, Roupas e Bolsas", "Câmeras e Acessórios", "Carros, Motos e Outros", "Casa, Móveis e Decoração", "Celulares e Telefones", "Construção", "Eletrodomésticos", "Eletrônicos, Áudio e Vídeo", "Esportes e Fitness", "Ferramentas", "Festas e Lembrancinhas", "Games", "Indústria e Comércio", "Informática", "Instrumentos Musicais", "Joias e Relógios", "Saúde". NUNCA crie uma categoria nova ou subcategoria específica (ex: use "Eletrônicos, Áudio e Vídeo", NUNCA "Pilhas" ou "Rádios").
 A MARCA costuma aparecer como LOGOTIPO no topo do quadro do produto (ex: "Átomo", "Tomate") — leia
 o nome do logo mesmo que estilizado.
 As MEDIDAS costumam aparecer como "C x L x A" seguidas da unidade (ex: "107 x 109 x 218 mm" ou
@@ -756,7 +754,7 @@ export async function extrairMultiplosProdutosDePagina(imageUrl: string): Promis
 Para cada produto, extraia os mesmos campos detalhados. Se não conseguir ler um campo de um produto específico, devolva string vazia (texto) ou null (número).
 PREÇOS: este é um catálogo do fornecedor, então o preço impresso é o CUSTO de aquisição.
 Se houver SÓ UM preço no produto, devolva esse valor em "custoUnitario" e deixe "precoCatalogo" como null.
-A categoria é o tipo geral do produto. Escolha OBRIGATORIAMENTE APENAS UMA das seguintes Macro Categorias oficiais: "Acessórios para Veículos", "Agro", "Alimentos e Bebidas", "Animais", "Antiguidades e Coleções", "Arte, Papelaria e Armarinho", "Bebês", "Beleza e Cuidado Pessoal", "Brinquedos e Hobbies", "Calçados, Roupas e Bolsas", "Câmeras e Acessórios", "Carros, Motos e Outros", "Casa, Móveis e Decoração", "Celulares e Telefones", "Construção", "Eletrodomésticos", "Eletrônicos, Áudio e Vídeo", "Esportes e Fitness", "Ferramentas", "Festas e Lembrancinhas", "Games", "Indústria e Comércio", "Informática", "Instrumentos Musicais", "Joias e Relógios", "Saúde". NUNCA crie uma categoria nova.
+A categoria é o tipo geral do produto. Escolha OBRIGATORIAMENTE APENAS UMA das seguintes Macro Categorias oficiais: "Acessórios para Veículos", "Agro", "Alimentos e Bebidas", "Animais", "Antiguidades e Coleções", "Arte, Papelaria e Armarinho", "Bebês", "Beleza e Cuidado Pessoal", "Brinquedos e Hobbies", "Calçados, Roupas e Bolsas", "Câmeras e Acessórios", "Carros, Motos e Outros", "Casa, Móveis e Decoração", "Celulares e Telefones", "Construção", "Eletrodomésticos", "Eletrônicos, Áudio e Vídeo", "Esportes e Fitness", "Ferramentas", "Festas e Lembrancinhas", "Games", "Indústria e Comércio", "Informática", "Instrumentos Musicais", "Joias e Relógios", "Saúde". NUNCA crie uma categoria nova ou subcategoria específica (ex: use "Eletrônicos, Áudio e Vídeo", NUNCA "Pilhas" ou "Rádios").
 A MARCA costuma aparecer como LOGOTIPO no topo do quadro do produto.
 As MEDIDAS convertidas para centímetros. O PESO em KG. O CÓDIGO ANATEL lido do selo.
 Retorne APENAS um JSON contendo uma lista "produtos" com todos os itens identificados, sem markdown:
