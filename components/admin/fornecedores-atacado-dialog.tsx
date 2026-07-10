@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Trash2, Upload, Pencil, Check, X, Truck, FileText, Phone, MapPin, User, Clock, Search, CheckCircle2, Circle, ShoppingBag, Sparkles } from "lucide-react";
+import { Plus, Trash2, Upload, Pencil, Check, X, Truck, FileText, Phone, MapPin, User, Clock, Search, CheckCircle2, Circle, ShoppingBag, Sparkles, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +65,7 @@ export function FornecedoresAtacadoPanel() {
     if (res.ok) setFornecedores(json.data);
   }
 
-  async function handleGerarCatalogoProprio(fornecedorId: string) {
+  async function handleGerarCatalogoProprio(fornecedorId: string, customLogo?: string) {
     const loadingId = toast.loading("Buscando produtos...");
     try {
       const res = await fetch(`/api/admin/atacado/produtos?fornecedorId=${fornecedorId}`);
@@ -79,7 +79,7 @@ export function FornecedoresAtacadoPanel() {
       }
       
       toast.loading("Desenhando PDF...", { id: loadingId });
-      const file = await gerarCatalogoPdf(produtos);
+      const file = await gerarCatalogoPdf(produtos, customLogo);
       
       toast.loading("Enviando PDF gerado...", { id: loadingId });
       
@@ -122,6 +122,7 @@ export function FornecedoresAtacadoPanel() {
       
       toast.success("Catálogo de Estoque Próprio gerado e publicado!", { id: loadingId });
       carregar(); // Refresh everything
+      setTimeout(() => window.location.reload(), 1500); // refresh the page
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Erro inesperado", { id: loadingId });
@@ -218,7 +219,8 @@ export function FornecedoresAtacadoPanel() {
               onRemover={() => remover(f.id)}
               onAtualizado={carregar}
               onCatalogosCarregados={(lista) => registrarCatalogos(f.id, lista)}
-              onGerarCatalogoProprio={() => handleGerarCatalogoProprio(f.id)}
+              catalogos={catalogosTodos[f.id]}
+              onGerarCatalogoProprio={(logo) => handleGerarCatalogoProprio(f.id, logo)}
             />
           ))}
         </div>
@@ -238,7 +240,7 @@ function FornecedorCard({
   onRemover: () => void;
   onAtualizado: () => void;
   onCatalogosCarregados?: (lista: CatalogoPdf[]) => void;
-  onGerarCatalogoProprio?: () => void;
+  onGerarCatalogoProprio?: (logoBase64?: string) => void;
 }) {
   const [catalogos, setCatalogos] = useState<CatalogoPdf[] | null>(null);
   const [editando, setEditando] = useState(false);
@@ -247,6 +249,20 @@ function FornecedorCard({
   const [dataCatalogo, setDataCatalogo] = useState("");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [capaBase64, setCapaBase64] = useState<string | undefined>();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setCapaBase64(undefined);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => setCapaBase64(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
 
   async function carregarCatalogos() {
     const res = await fetch(`/api/admin/atacado/fornecedores/${fornecedor.id}/catalogos`, { cache: "no-store" });
@@ -474,10 +490,28 @@ function FornecedorCard({
               <p className="text-xs text-muted-foreground">
                 Catálogo gerado automaticamente com base nos seus produtos cadastrados como <b>Estoque Próprio</b>.
               </p>
+              
+              <div className="w-full flex flex-col items-center gap-1 my-1">
+                <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full text-[10px] h-7"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  <ImageIcon className="size-3 mr-1" />
+                  {capaBase64 ? "Logo selecionada (trocar)" : "Inserir logo da capa (opcional)"}
+                </Button>
+                {capaBase64 && (
+                   <span className="text-[10px] text-success font-medium">✓ Logo pronta pra gerar</span>
+                )}
+              </div>
+
               <Button 
                 size="sm" 
-                className="w-full mt-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                onClick={onGerarCatalogoProprio}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => onGerarCatalogoProprio?.(capaBase64)}
               >
                 <Sparkles className="size-3.5 mr-1" />
                 Gerar Catálogo PDF

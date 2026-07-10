@@ -34,7 +34,7 @@ function getBase64ImageFromUrl(imageUrl: string): Promise<string> {
   });
 }
 
-export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<File> {
+export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLogoBase64?: string): Promise<File> {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -74,8 +74,13 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[]): Promise<
   doc.rect(0, 0, pageWidth, pageHeight, "F");
   
   try {
-    const logoUrl = window.location.origin + "/logo-jn.png.jpeg";
-    const base64Logo = await getBase64ImageFromUrl(logoUrl);
+    let base64Logo = customLogoBase64;
+    if (!base64Logo) {
+      const logoUrl = window.location.origin + "/logo-jn.png.jpeg";
+      base64Logo = await getBase64ImageFromUrl(logoUrl);
+    }
+    
+    // Logo centralizada (width = 80px, height = 80px)
     const logoSize = 80;
     doc.addImage(base64Logo, "JPEG", (pageWidth - logoSize) / 2, pageHeight / 2 - 70, logoSize, logoSize);
   } catch (e) {
