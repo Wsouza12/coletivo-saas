@@ -142,7 +142,7 @@ export default async function VitrineAtacadoPage({
       {/* Top Yellow Block */}
       <div className="absolute top-0 left-0 w-full h-[320px] bg-[#FFE600] z-0" />
       
-      <header className="relative z-10 bg-transparent">
+      <header className="sticky top-0 z-50 bg-[#FFE600] shadow-sm">
         <div className="mx-auto flex max-w-6xl flex-col sm:flex-row sm:items-center justify-between px-4 py-4 gap-4 sm:gap-6">
           <div className="w-full sm:w-auto flex items-center justify-between">
             <Link href="/" className="flex items-center gap-1.5 text-xl font-extrabold text-[#2D3277] shrink-0">
