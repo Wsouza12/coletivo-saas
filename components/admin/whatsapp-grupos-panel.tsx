@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MessageCircle, Link2, Plus, X, Pin, Loader2 } from "lucide-react";
+import { MessageCircle, Link2, Plus, X, Pin, Loader2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -196,7 +196,7 @@ export function WhatsappGruposPanel() {
               <CriarGrupoForm onCriado={carregar} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                {["MODERADOR_AUTOMATICO", "ROBO_APRENDIZ", "SOLICITACOES", "AVISOS_COMUNIDADE", "CAIXAS_ABERTAS", "PRODUTOS_DISPONIVEIS", ...categorias.filter(c => !["MODERADOR_AUTOMATICO","ROBO_APRENDIZ","SOLICITACOES","AVISOS_COMUNIDADE","CAIXAS_ABERTAS","PRODUTOS_DISPONIVEIS"].includes(c))].map((categoria) => {
+                {["MODERADOR_AUTOMATICO", "ROBO_APRENDIZ", "SOLICITACOES", "AVISOS_COMUNIDADE", "CAIXAS_ABERTAS", "PRODUTOS_DISPONIVEIS", "CATALOGOS", ...categorias.filter(c => !["MODERADOR_AUTOMATICO","ROBO_APRENDIZ","SOLICITACOES","AVISOS_COMUNIDADE","CAIXAS_ABERTAS","PRODUTOS_DISPONIVEIS","CATALOGOS"].includes(c))].map((categoria) => {
                   const vinculo = vinculos.find((v) => v.categoria === categoria);
                   const isModerador = categoria === "MODERADOR_AUTOMATICO";
                   const isRobo = categoria === "ROBO_APRENDIZ";
@@ -204,13 +204,36 @@ export function WhatsappGruposPanel() {
                   const isAvisos = categoria === "AVISOS_COMUNIDADE";
                   const isProdutos = categoria === "PRODUTOS_DISPONIVEIS";
                   const isCaixas = categoria === "CAIXAS_ABERTAS";
-                  const titulo = isModerador ? "Moderador Automático" : isRobo ? "Robô Aprendiz (IA)" : isSolicitacoes ? "Solicitações de Catálogo" : isAvisos ? "Avisos da Comunidade" : isProdutos ? "Produtos Disponíveis" : isCaixas ? "Caixas Abertas" : categoria;
+                  const isCatalogos = categoria === "CATALOGOS";
+                  const titulo = isModerador ? "Moderador Automático" : isRobo ? "Robô Aprendiz (IA)" : isSolicitacoes ? "Solicitações de Catálogo" : isAvisos ? "Avisos da Comunidade" : isProdutos ? "Produtos Disponíveis" : isCaixas ? "Caixas Abertas" : isCatalogos ? "Catálogos" : categoria;
+
+                  const tooltipMap: Record<string, { emoji: string; funcao: string; dica: string }> = {
+                    MODERADOR_AUTOMATICO: { emoji: "🛡️", funcao: "Monitora mensagens no grupo. Se alguém manda 2 perguntas sem resposta, avisa o admin por DM.", dica: "Vincule ao grupo de dúvidas/perguntas dos clientes." },
+                    ROBO_APRENDIZ: { emoji: "🤖", funcao: "A IA responde dúvidas automaticamente. Se não souber, chama o admin e aprende com a resposta.", dica: "Vincule ao grupo de dúvidas/suporte." },
+                    SOLICITACOES: { emoji: "📋", funcao: "Clientes enviam códigos de produto para solicitar abertura de caixa. O sistema lê e cria as solicitações.", dica: "Vincule ao grupo de pedidos/solicitações." },
+                    AVISOS_COMUNIDADE: { emoji: "📢", funcao: "Canal oficial da comunidade para avisos gerais e comunicados importantes.", dica: "Vincule ao canal principal da comunidade." },
+                    CAIXAS_ABERTAS: { emoji: "📦", funcao: "Postagem automática quando uma caixa é aberta (manual, repost ou disparo em massa).", dica: "Vincule ao grupo de caixas abertas." },
+                    PRODUTOS_DISPONIVEIS: { emoji: "🏷️", funcao: "Envio de recortes individuais de produto do catálogo via 'Envio Direto'.", dica: "Vincule ao grupo de produtos disponíveis." },
+                    CATALOGOS: { emoji: "📄", funcao: "Disparo de páginas inteiras do catálogo via 'Divulgar Catálogo'.", dica: "Vincule ao grupo de catálogos." },
+                  };
+                  const tooltip = tooltipMap[categoria] || { emoji: "📂", funcao: "Sub-categoria de produto. Caixas dessa categoria vão para o grupo vinculado aqui.", dica: "Vincule ao grupo de caixas abertas ou a um grupo específico." };
                   
                   return (
                     <div key={categoria} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <span className="w-full truncate text-base font-semibold text-card-foreground" title={titulo}>
-                        {titulo}
-                      </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="truncate text-base font-semibold text-card-foreground" title={titulo}>
+                          {tooltip.emoji} {titulo}
+                        </span>
+                        <div className="relative group shrink-0">
+                          <HelpCircle className="size-4 text-muted-foreground cursor-help" />
+                          <div className="absolute right-0 top-6 z-50 hidden group-hover:block w-64 p-3 rounded-lg border border-border bg-popover text-popover-foreground shadow-lg text-xs">
+                            <p className="font-semibold mb-1">Função:</p>
+                            <p className="text-muted-foreground mb-2">{tooltip.funcao}</p>
+                            <p className="font-semibold mb-1">💡 Dica de vínculo:</p>
+                            <p className="text-muted-foreground">{tooltip.dica}</p>
+                          </div>
+                        </div>
+                      </div>
                       {vinculo ? (
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-2.5 py-1.5 text-sm">

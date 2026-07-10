@@ -102,8 +102,7 @@ export function CatalogoDivulgacaoDialog({
 
   // WhatsApp state
   const [paginasSelecionadas, setPaginasSelecionadas] = useState<number[]>([]);
-  const [grupoAvisosId, setGrupoAvisosId] = useState<string>("none");
-  const [grupoPedidosId, setGrupoPedidosId] = useState<string>("none");
+  const [grupoDestinoId, setGrupoDestinoId] = useState<string>("none");
   const [legendaBase, setLegendaBase] = useState(`📦 *Novo Catálogo Disponível!*\n\nFornecedor: *${fornecedorNome}*\n\nConfira as páginas a seguir.`);
 
   // Instagram state
@@ -130,13 +129,21 @@ export function CatalogoDivulgacaoDialog({
 
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      // Mostra todos os grupos configurados no WhatsApp, não apenas algumas categorias.
-      const unicos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
+      // Normaliza grupos da Evolution API para formato do componente
+      const gruposNormalizados = (jsonGrupos.data.grupos || []).map((g: any) => ({
+        grupoId: g.id,
+        grupoNome: g.nome || g.subject || g.id,
+        categoria: "",
+      }));
+      const allGroups = [...gruposNormalizados, ...jsonGrupos.data.vinculos];
+      const unicos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
       setGrupos(unicos);
-      const grupoAvisos = unicos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
-      const grupoPedidos = unicos.find(g => g.categoria === "SOLICITACOES")?.grupoId || "none";
-      setGrupoAvisosId(grupoAvisos);
-      setGrupoPedidosId(grupoPedidos);
+      // Pré-seleciona: CATALOGOS primeiro, fallback AVISOS_COMUNIDADE
+      const vinculos = jsonGrupos.data.vinculos as any[];
+      const grupoCatalogos = vinculos.find((v: any) => v.categoria === "CATALOGOS");
+      const grupoAvisos = vinculos.find((v: any) => v.categoria === "AVISOS_COMUNIDADE");
+      if (grupoCatalogos) setGrupoDestinoId(grupoCatalogos.grupoId);
+      else if (grupoAvisos) setGrupoDestinoId(grupoAvisos.grupoId);
     }
 
     const jsonIg = await resIg.json();
@@ -173,8 +180,8 @@ export function CatalogoDivulgacaoDialog({
       toast.error("Adicione pelo menos uma página para enviar.");
       return;
     }
-    if (grupoAvisosId === "none" && grupoPedidosId === "none") {
-      toast.error("Selecione pelo menos um grupo de WhatsApp destino.");
+    if (grupoDestinoId === "none") {
+      toast.error("Selecione um grupo de WhatsApp destino.");
       return;
     }
 
@@ -192,11 +199,13 @@ export function CatalogoDivulgacaoDialog({
         toast.loading(`Enviando página ${p}...`, { id: "divulgacao" });
         const formData = new FormData();
         formData.append("imagem", await comprimirParaEnvio(blob), "pagina.jpg");
-        formData.append("grupoAvisosId", grupoAvisosId === "none" ? "" : grupoAvisosId);
-        formData.append("grupoPedidosId", grupoPedidosId === "none" ? "" : grupoPedidosId);
+        formData.append("grupoAvisosId", grupoDestinoId);
+        formData.append("grupoPedidosId", "");
         
         if (i === 0) {
-          const link = grupos.find(g => g.grupoId === grupoPedidosId)?.linkConvite || "";
+          // Busca link de pedidos automaticamente do vínculo SOLICITACOES
+          const solicitacoes = grupos.find(g => g.categoria === "SOLICITACOES");
+          const link = solicitacoes?.linkConvite || "";
           formData.append("legenda", legendaBase);
           formData.append("linkPedidos", link);
         }
@@ -407,17 +416,11 @@ export function CatalogoDivulgacaoDialog({
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <GrupoWhatsappSelect
-                            label="Grupo de Divulgação (Avisos)"
-                            value={grupoAvisosId}
-                            onChange={(val) => setGrupoAvisosId(val)}
-                            grupos={grupos}
-                          />
-                          <GrupoWhatsappSelect
-                            label="Grupo de Pedidos (Extrai Link)"
-                            value={grupoPedidosId}
-                            onChange={(val) => setGrupoPedidosId(val)}
+                            label="Grupo de Destino (Catálogos)"
+                            value={grupoDestinoId}
+                            onChange={(val) => setGrupoDestinoId(val)}
                             grupos={grupos}
                           />
                         </div>
@@ -438,7 +441,7 @@ export function CatalogoDivulgacaoDialog({
 
                         <Button
                           type="submit"
-                          disabled={salvando || paginasSelecionadas.length === 0 || (grupoAvisosId === "none" && grupoPedidosId === "none")}
+                          disabled={salvando || paginasSelecionadas.length === 0 || grupoDestinoId === "none"}
                           className="w-full h-12 mt-4 text-base"
                         >
                           {salvando ? (

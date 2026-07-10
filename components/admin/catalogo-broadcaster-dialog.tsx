@@ -83,8 +83,7 @@ export function CatalogoBroadcasterDialog({
   const [alturaCm, setAlturaCm] = useState("");
   const [sugerindoMedidas, setSugerindoMedidas] = useState(false);
 
-  const [grupoAvisosId, setGrupoAvisosId] = useState<string>("none");
-  const [grupoPedidosId, setGrupoPedidosId] = useState<string>("none");
+  const [grupoDestinoId, setGrupoDestinoId] = useState<string>("none");
   const [mensagemPersonalizada, setMensagemPersonalizada] = useState("");
 
   // Instagram
@@ -153,10 +152,9 @@ export function CatalogoBroadcasterDialog({
       const allGroups = [...gruposNormalizados, ...jsonGrupos.data.vinculos];
       const destinos = Array.from(new Map(allGroups.map((g: any) => [g.grupoId, g])).values()) as GrupoWhatsapp[];
       setGrupos(destinos);
-      const grupoAvisos = destinos.find(g => g.categoria === "AVISOS_COMUNIDADE")?.grupoId || "none";
-      const grupoPedidos = destinos.find(g => g.categoria === "SOLICITACOES")?.grupoId || "none";
-      setGrupoAvisosId(grupoAvisos);
-      setGrupoPedidosId(grupoPedidos);
+      // Pré-seleciona grupo vinculado a PRODUTOS_DISPONIVEIS
+      const grupoProdutos = (jsonGrupos.data.vinculos as any[]).find((v: any) => v.categoria === "PRODUTOS_DISPONIVEIS");
+      if (grupoProdutos) setGrupoDestinoId(grupoProdutos.grupoId);
     }
   }
 
@@ -254,8 +252,8 @@ export function CatalogoBroadcasterDialog({
       toast.error("Recorte uma imagem do PDF primeiro!");
       return;
     }
-    if (grupoAvisosId === "none" && grupoPedidosId === "none") {
-      toast.error("Selecione pelo menos um grupo de WhatsApp destino");
+    if (grupoDestinoId === "none") {
+      toast.error("Selecione um grupo de WhatsApp destino");
       return;
     }
     
@@ -268,8 +266,8 @@ export function CatalogoBroadcasterDialog({
       formData.append("imagem", fotoBlob, "recorte.jpg");
       formData.append("fornecedorId", fornecedorId);
       formData.append("catalogoId", catalogoId);
-      formData.append("grupoAvisosId", grupoAvisosId === "none" ? "" : grupoAvisosId);
-      formData.append("grupoPedidosId", grupoPedidosId === "none" ? "" : grupoPedidosId);
+      formData.append("grupoAvisosId", grupoDestinoId);
+      formData.append("grupoPedidosId", "");
       formData.append("texto", mensagemPersonalizada);
       formData.append("dados", JSON.stringify({
         nome: nomeProduto,
@@ -399,17 +397,11 @@ export function CatalogoBroadcasterDialog({
 
                   <div className="flex flex-col gap-3">
                     <Label>Grupo de Destino</Label>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <GrupoWhatsappSelect
-                          label="Grupo de Divulgação (Avisos)"
-                          value={grupoAvisosId}
-                          onChange={(val) => setGrupoAvisosId(val)}
-                          grupos={grupos}
-                        />
-                        <GrupoWhatsappSelect
-                          label="Grupo de Pedidos (Extrai Link)"
-                          value={grupoPedidosId}
-                          onChange={(val) => setGrupoPedidosId(val)}
+                          label="Grupo de Destino (Produtos Disponíveis)"
+                          value={grupoDestinoId}
+                          onChange={(val) => setGrupoDestinoId(val)}
                           grupos={grupos}
                         />
                       </div>
@@ -430,13 +422,11 @@ export function CatalogoBroadcasterDialog({
                     type="submit"
                     size="lg"
                     className="w-full bg-emerald-600 hover:bg-emerald-700 mt-2"
-                    disabled={salvando || lendoIa || !fotoBlob || !pesoKg || !comprimentoCm || !larguraCm || !alturaCm}
+                    disabled={salvando || lendoIa || !fotoBlob || !pesoKg || !comprimentoCm || !larguraCm || !alturaCm || grupoDestinoId === "none"}
                   >
                     {salvando ? "Enviando..." : "Salvar Rascunho & Enviar pro WhatsApp"}
                   </Button>
                 </form>
-
-
               </div>
             </div>
           ) : (
