@@ -135,10 +135,8 @@ export function CatalogoDivulgacaoDialog({
 
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      const relevantes = jsonGrupos.data.vinculos.filter(
-        (v: any) => v.categoria === "SOLICITACOES" || v.categoria === "AVISOS_COMUNIDADE" || v.categoria === "CATALOGOS_FORNECEDORES"
-      );
-      const unicos = Array.from(new Map(relevantes.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
+      // Mostra todos os grupos configurados no WhatsApp, não apenas algumas categorias.
+      const unicos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
       setGrupos(unicos);
     }
 

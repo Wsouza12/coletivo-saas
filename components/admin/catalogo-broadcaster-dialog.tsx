@@ -147,9 +147,8 @@ export function CatalogoBroadcasterDialog({
     const resGrupos = await fetch(`/api/admin/atacado/whatsapp/grupos`);
     const jsonGrupos = await resGrupos.json();
     if (resGrupos.ok && jsonGrupos.data?.vinculos) {
-      const destinos = jsonGrupos.data.vinculos.filter(
-        (v: any) => v.categoria === "SOLICITACOES" || v.categoria === "AVISOS_COMUNIDADE"
-      );
+      // Remove o filtro para permitir selecionar qualquer grupo vinculado no sistema
+      const destinos = Array.from(new Map(jsonGrupos.data.vinculos.map((v: any) => [v.grupoId, v])).values()) as GrupoWhatsapp[];
       setGrupos(destinos);
       // Já marca todos os grupos de destino por padrão — o disparo normalmente vai
       // pros dois (Pedidos + Avisos da Comunidade). Admin pode desmarcar se quiser.
@@ -410,12 +409,12 @@ export function CatalogoBroadcasterDialog({
                               }
                             }}
                           />
-                          {g.grupoNome} ({g.categoria === "AVISOS_COMUNIDADE" ? "Avisos" : "Solicitações"})
+                          {g.grupoNome} ({g.categoria === "AVISOS_COMUNIDADE" ? "Avisos" : g.categoria === "SOLICITACOES" ? "Solicitações" : g.categoria})
                         </Label>
                       ))}
                     </div>
                     {grupos.length === 0 && (
-                      <p className="text-xs text-destructive">Nenhum grupo configurado para Solicitações ou Avisos.</p>
+                      <p className="text-xs text-destructive">Nenhum grupo do WhatsApp vinculado. Configure-os na aba de WhatsApp.</p>
                     )}
 
                     <Label>Mensagem a ser enviada</Label>
