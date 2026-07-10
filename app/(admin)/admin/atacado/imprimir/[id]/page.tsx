@@ -17,15 +17,16 @@ const formatCurrency = (value: number) => {
 export default async function ImprimirCaixaPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     notFound();
   }
 
   const rodada = await prisma.rodadaAtacado.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       produtoAtacado: true,
       variacao: true,

@@ -32,6 +32,7 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
   const [loading, setLoading] = useState(false);
   const [enviandoPix, setEnviandoPix] = useState<string | null>(null);
   const [reservas, setReservas] = useState<Reserva[] | null>(null);
+  const [printOpen, setPrintOpen] = useState(false);
 
   async function abrir() {
     setOpen(true);
@@ -70,7 +71,7 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
         <DialogContent className="w-full max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-2xl sm:max-h-[80vh]">
           <DialogHeader className="flex flex-row items-center justify-between mt-2 pr-6">
             <DialogTitle>Compradores dessa caixa</DialogTitle>
-            <Button variant="outline" size="sm" onClick={() => window.open(`/admin/atacado/imprimir/${rodadaId}`, '_blank')}>
+            <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
               🖨️ Imprimir Docs
             </Button>
           </DialogHeader>
@@ -119,6 +120,29 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
               ))}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={printOpen} onOpenChange={setPrintOpen}>
+        <DialogContent className="w-full max-w-4xl h-[90vh] flex flex-col p-4">
+          <DialogHeader className="flex flex-row items-center justify-between pr-6 border-b pb-2">
+            <DialogTitle>Preview de Impressão</DialogTitle>
+            <Button onClick={() => {
+              const iframe = document.getElementById(`print-frame-${rodadaId}`) as HTMLIFrameElement;
+              iframe?.contentWindow?.print();
+            }}>
+              🖨️ Imprimir Agora
+            </Button>
+          </DialogHeader>
+          <div className="flex-1 w-full relative bg-gray-100 rounded-md overflow-hidden">
+            {printOpen && (
+              <iframe 
+                id={`print-frame-${rodadaId}`}
+                src={`/admin/atacado/imprimir/${rodadaId}`} 
+                className="w-full h-full border-0"
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
