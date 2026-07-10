@@ -920,14 +920,26 @@ export async function repostarCaixaWhatsapp(rodadaId: string): Promise<void> {
     bannerUrl = rodada.produtoAtacado.imagemUrl;
   }
 
+  let grupoIdParaEnvio = rodada.grupoIdUsado;
+  
+  // Re-resolve a categoria para caso o usuário tenha alterado o vínculo 
+  // do painel (ex: Caixas Abertas) depois da caixa já ter sido aberta.
+  const grupoAtualizado = await resolverGrupoCategoria(rodada.produtoAtacado.categoria);
+  if (grupoAtualizado) {
+    grupoIdParaEnvio = grupoAtualizado;
+  }
+
   if (bannerUrl) {
-    await enviarImagemGrupo(rodada.grupoIdUsado, bannerUrl, text, mentions);
+    await enviarImagemGrupo(grupoIdParaEnvio, bannerUrl, text, mentions);
   } else {
-    await enviarMensagemGrupo(rodada.grupoIdUsado, text, undefined, mentions);
+    await enviarMensagemGrupo(grupoIdParaEnvio, text, undefined, mentions);
   }
 
   await prisma.rodadaAtacado.update({
     where: { id: rodadaId },
-    data: { ultimoLoopEnviadoEm: new Date() },
+    data: {
+      ultimoLoopEnviadoEm: new Date(),
+      grupoIdUsado: grupoIdParaEnvio,
+    },
   });
 }

@@ -19,9 +19,14 @@ export async function POST(req: Request) {
       grupoId = body.grupoId;
       grupoNome = body.grupoNome ?? body.grupoId;
     } else {
-      const grupoVinculo = await prisma.grupoWhatsappCategoria.findFirst({
-        where: { categoria: "PRODUTOS_DISPONIVEIS" },
+      let grupoVinculo = await prisma.grupoWhatsappCategoria.findFirst({
+        where: { categoria: "CAIXAS_ABERTAS" },
       });
+      if (!grupoVinculo) {
+        grupoVinculo = await prisma.grupoWhatsappCategoria.findFirst({
+          where: { categoria: "PRODUTOS_DISPONIVEIS" },
+        });
+      }
       if (!grupoVinculo) {
         return NextResponse.json(
           { error: { code: "GRUPO_NAO_CONFIGURADO", message: "Grupo 'Produtos Disponíveis' não vinculado. Configure no painel WhatsApp ou escolha um grupo." } },
