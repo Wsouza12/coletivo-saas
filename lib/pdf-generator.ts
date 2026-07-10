@@ -14,7 +14,7 @@ export type ProdutoCatalogoPDF = {
   esgotado?: boolean;
 };
 
-function getBase64ImageFromUrl(imageUrl: string): Promise<string> {
+function getBase64ImageFromUrl(imageUrl: string, grayscale: boolean = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -24,6 +24,10 @@ function getBase64ImageFromUrl(imageUrl: string): Promise<string> {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject(new Error("Failed to get canvas context"));
+      
+      if (grayscale) {
+        ctx.filter = "grayscale(100%) opacity(40%)";
+      }
       ctx.drawImage(img, 0, 0);
       const dataURL = canvas.toDataURL("image/jpeg", 0.8);
       resolve(dataURL);
@@ -132,7 +136,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
 
     if (p.imagemUrl) {
       try {
-        const base64Img = await getBase64ImageFromUrl(p.imagemUrl);
+        const base64Img = await getBase64ImageFromUrl(p.imagemUrl, p.esgotado);
         doc.addImage(base64Img, "JPEG", imgX, imgY, imgSize, imgSize);
       } catch (e) {
         console.error("Erro ao baixar imagem", p.imagemUrl, e);
@@ -158,7 +162,7 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     // Título
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.setTextColor(15, 23, 42);
+    doc.setTextColor(p.esgotado ? 150 : 15, p.esgotado ? 150 : 23, p.esgotado ? 150 : 42);
     const maxTitleLen = 42;
     let title = p.nome.toUpperCase();
     if (title.length > maxTitleLen) title = title.substring(0, maxTitleLen) + "...";
@@ -171,35 +175,41 @@ export async function gerarCatalogoPdf(produtos: ProdutoCatalogoPDF[], customLog
     // Código e Caixa
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
+    doc.setTextColor(p.esgotado ? 180 : 100, p.esgotado ? 180 : 100, p.esgotado ? 180 : 100);
     doc.text(`CÓD: ${p.codigo || "S/CÓD"}  •  CX: ${p.unidadesPorCaixa} un`, currentX + colWidth / 2, textY, { align: "center" });
     textY += 10;
 
     // Preços
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.setTextColor(22, 163, 74); // green-600
+    doc.setTextColor(p.esgotado ? 150 : 22, p.esgotado ? 150 : 163, p.esgotado ? 150 : 74); 
     doc.text(formatBRL(p.custoUnitario), currentX + colWidth / 2, textY, { align: "center" });
     
     if (p.precoVendaSugerido) {
       textY += 6;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.setTextColor(120, 120, 120);
+      doc.setTextColor(p.esgotado ? 180 : 120, p.esgotado ? 180 : 120, p.esgotado ? 180 : 120);
       doc.text(`Sugestão revenda: ${formatBRL(p.precoVendaSugerido)}`, currentX + colWidth / 2, textY, { align: "center" });
     }
 
     // Carimbo de Esgotado
     if (p.esgotado) {
-      doc.setDrawColor(220, 38, 38); // red-600
-      doc.setFillColor(254, 226, 226); // red-100
-      doc.setLineWidth(1.5);
-      doc.rect(currentX + (colWidth - 50) / 2, imgY + (imgSize - 15) / 2, 50, 15, "FD");
+      // Create a large, diagonal watermark stamp in the center of the card
+      const cx = currentX + colWidth / 2;
+      const cy = currentY + rowHeight / 2;
       
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.setTextColor(220, 38, 38);
-      doc.text("ESGOTADO", currentX + colWidth / 2, imgY + (imgSize - 15) / 2 + 10.5, { align: "center" });
+      doc.setFontSize(36);
+      doc.setTextColor(220, 38, 38); // red-600
+      
+      // jsPDF accepts angle parameter in text options
+      // Rotated 30 degrees counter-clockwise
+      doc.text("ESGOTADO", cx, cy, { align: "center", angle: 30 });
+      
+      // Optionally draw a border around the rotated text
+      // However, drawing a rotated rect natively is not supported by standard jsPDF API easily,
+      // so we rely just on the bold red text.
     }
   }
 
