@@ -34,7 +34,6 @@ export default async function AdminAtacadoProdutosPage() {
             Todos os produtos cadastrados e ativados vão aparecer no site.
           </p>
         </div>
-        <CriarProdutoAtacadoDialog fornecedores={fornecedores} />
       </div>
 
       <ProdutoAtacadoList
