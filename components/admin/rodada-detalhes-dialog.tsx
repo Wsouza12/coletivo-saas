@@ -138,7 +138,7 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
             {printOpen && (
               <iframe 
                 id={`print-frame-${rodadaId}`}
-                src={`/admin/atacado/imprimir/${rodadaId}`} 
+                src={`/imprimir/atacado/${rodadaId}`} 
                 className="w-full h-full border-0"
               />
             )}
