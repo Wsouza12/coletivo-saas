@@ -59,6 +59,12 @@
     - Desconto dinâmico configurável (ex: assinante paga 10% de taxa no checkout em vez de 15%).
     - Nova rota autônoma `/assinatura` para venda manual/divulgação por link externo (gera QR Code Pix e atualiza instantaneamente).
     - Botão "Copiar Link" incluído no painel admin em "Assinantes".
+  - **PDF do Estoque Próprio (Catálogo Pronta Entrega)**: Refatorado para incluir capa com logo da marca, layout de cards otimizado (foco no preço), e exclusão automática do PDF antigo ao regerar, garantindo apenas um catálogo atualizado. Layout da grid do painel admin otimizada para os cards.
+
+## ⚠️ ERROS MAPEADOS E RESOLVIDOS (Guia Rápido)
+- **Supabase e Chaves JWT**: A lib `@supabase/supabase-js` (versões antigas ou uso direto local) frequentemente falha em decodificar JWS compacto com as novas chaves `sb_...` opacas geradas pelo Supabase ("Invalid Compact JWS" / "signature verification failed"). Use as chaves *Legacy anon, service_role API keys* (formato `eyJ...`).
+- **NEXT_PUBLIC_* Variáveis**: Variáveis prefixadas com `NEXT_PUBLIC_` (como `NEXT_PUBLIC_SUPABASE_URL`) são inlinadas no build do frontend pelo Next.js. Elas **NÃO PODEM** ser sobrescritas dinamicamente pelo painel Desenvolvedor/ConfigApp no banco. Mudanças nelas exigem atualização direto na Vercel e um **redeploy completo**.
+- **Duplo Push (Deploy Vercel)**: A base local possui os remotes `origin` (código base) e `vercelrepo` (conectado à Vercel do cliente). Ao empurrar atualizações para disparar deploy, lembre-se sempre de fazer `git push vercelrepo main`, caso contrário a atualização não sobe!
 
 ## ⏳ PENDENTE
 1. **Deploy na Vercel** (você) — importar repo + `.env` mínimo (bootstrap + `NEXT_PUBLIC_*`).

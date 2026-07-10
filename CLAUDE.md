@@ -57,6 +57,11 @@ As chaves de API de cada cliente são configuradas **pela UI** (não só `.env`)
 - **NÃO** geridas pelo painel (ficam no `.env` da Vercel):
   - **Bootstrap:** `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_SECRET`, `ML_ENCRYPTION_KEY`, `CRON_SECRET`
   - **Build-time (inlinadas):** `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`
+    *(⚠️ ATENÇÃO: As chaves `NEXT_PUBLIC_*` são gravadas no build da Vercel e não mudam sozinhas. Se trocar de Supabase, é preciso setar a variável na dashboard da Vercel e disparar um REDEPLOY MANUAL)*.
+
+## 🚨 ARMADILHAS / ERROS CONHECIDOS (Troubleshooting)
+1. **Supabase "Signature Verification Failed" / "Invalid Compact JWS"**: Ocorre porque a biblioteca oficial (`@supabase/supabase-js`) usada em conjunto com JWT local tem bugs lidando com o formato novo de chaves secretas do Supabase (as opacas que começam com `sb_...`). SEMPRE utilize o formato antigo (*Legacy anon, service_role API keys*) que começam com `eyJ...`.
+2. **Deploy não atualiza na Vercel**: Lembre-se que o código possui DOIS remotes. O `origin` (Wsouza12) e o `vercelrepo` (do cliente). Para forçar o deploy, precisa rodar `git push vercelrepo main`. Somente dar push no origin não atualiza o site.
 
 ## 🏗️ STACK (não mudar sem perguntar)
 Next.js 14 App Router + TypeScript + Tailwind + Shadcn/UI · NextAuth v5 (JWT) · Prisma + PostgreSQL
