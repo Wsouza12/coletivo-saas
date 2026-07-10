@@ -1,13 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
+import { getConfig } from "./config-app";
 
 const BUCKET = "produtos";
 const BUCKET_ETAPAS = "etapas-pedidos"; // bucket privado — prova interna de envio, nunca exposta a cliente/lojista
 // Catálogos de fornecedor (PDF) migraram para Cloudflare R2 — ver lib/storage-r2.ts.
 // O plano Free da Supabase Storage limita uploads a ~50MB, insuficiente pra esses arquivos.
 
-function getClient() {
+async function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/['"]/g, '').trim();
-  const key = process.env.SUPABASE_SERVICE_KEY?.replace(/['"]/g, '').trim();
+  let key = await getConfig("SUPABASE_SERVICE_KEY");
+  key = key?.replace(/['"]/g, '').trim();
   if (!url || !key) {
     throw new Error("Supabase Storage não configurado (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_KEY)");
   }
@@ -15,7 +17,7 @@ function getClient() {
 }
 
 export async function uploadProdutoImagem(file: File, produtoId: string): Promise<string> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `${produtoId}/${crypto.randomUUID()}.${ext}`;
 
@@ -32,7 +34,7 @@ export async function uploadProdutoImagem(file: File, produtoId: string): Promis
 // Recorte de crop do catálogo (base64 → bucket "produtos", prefixo crops/).
 // Reaproveita o bucket existente pra não precisar criar/config outro.
 export async function uploadCropImagem(base64: string, cropId: string): Promise<string> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const path = `crops/${cropId}.jpg`;
   const buffer = Buffer.from(base64, "base64");
 
@@ -53,7 +55,7 @@ export async function uploadPostagemMidia(
   ext = "jpg",
   contentType = "image/jpeg",
 ): Promise<string> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const path = `postagens/${crypto.randomUUID()}.${ext}`;
 
   let payload: Buffer | File;
@@ -75,7 +77,7 @@ export async function uploadPostagemMidia(
 }
 
 export async function deleteProdutoImagemPorUrl(url: string): Promise<void> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const marker = `/${BUCKET}/`;
   const idx = url.indexOf(marker);
   if (idx === -1) return;
@@ -85,7 +87,7 @@ export async function deleteProdutoImagemPorUrl(url: string): Promise<void> {
 
 // Foto de prova de envio — bucket privado, path interno salvo em EtapaPedido.fotoUrl.
 export async function uploadEtapaFoto(file: File, pedidoId: string, etapa: string): Promise<string> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `${pedidoId}/${etapa}_${Date.now()}.${ext}`;
 
@@ -100,14 +102,14 @@ export async function uploadEtapaFoto(file: File, pedidoId: string, etapa: strin
 
 // URL assinada de curta duração — só admin deve chamar isso.
 export async function getEtapaFotoSignedUrl(path: string, expiresInSeconds = 300): Promise<string> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const { data, error } = await supabase.storage.from(BUCKET_ETAPAS).createSignedUrl(path, expiresInSeconds);
   if (error || !data) throw new Error(`Falha ao gerar URL assinada: ${error?.message}`);
   return data.signedUrl;
 }
 
 export async function downloadEtapaFoto(path: string): Promise<Blob> {
-  const supabase = getClient();
+  const supabase = await getClient();
   const { data, error } = await supabase.storage.from(BUCKET_ETAPAS).download(path);
   if (error || !data) throw new Error(`Falha ao baixar foto de prova: ${error?.message}`);
   return data;
