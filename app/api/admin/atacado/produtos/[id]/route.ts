@@ -71,11 +71,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  if (fornecedorId) {
-    const f = await prisma.fornecedorAtacado.findUnique({ where: { id: fornecedorId } });
+  if (produto.fornecedorId) {
+    const f = await prisma.fornecedorAtacado.findUnique({ where: { id: produto.fornecedorId } });
     if (f?.isEstoqueProprio) {
       await prisma.fornecedorAtacado.update({
-        where: { id: fornecedorId },
+        where: { id: produto.fornecedorId },
         data: { catalogoDesatualizado: true },
       });
     }
