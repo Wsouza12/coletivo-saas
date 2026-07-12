@@ -62,6 +62,13 @@
   - **Cadastro de Estoque Próprio Refatorado**: Regras rígidas (Preço de Custo, Preço de Venda, Pesos e Medidas obrigatórios). Geração de SKU automático de 5 dígitos (ex: RF-123). Auto-categorização por IA. A Prova Social de Vendas agora é opcional.
   - **Impressão de Documentos (Caixas Fechadas)**: Refatoração completa da impressão. Geração inteligente: Ficha de Separação em folha A4 cheia, e Etiquetas + Declaração de Conteúdo dimensionadas para A5 Paisagem, de forma que o Chrome empilha duas unidades perfeitas em uma folha A4 (economizando papel). Botão "🖨️ Imprimir" movido direto para o card principal.
   - **Automatização (Cron Jobs)**: Painel de Desenvolvedor atualizado com instruções e URLs prontas para configurar no Cron-Job.org (bypassando limite do plano free da Vercel). Loop de mensagens do atacado e Postagens Agendadas 100% ativos via requisições externas com autenticação `CRON_SECRET`.
+  - **Melhorias no Webhook do WhatsApp (Bot)**: 
+    - Busca de código 100% tolerante a erros de digitação (ignora hífens, espaços, pontos e corrige confusão entre 'I' maiúsculo e 'L' minúsculo via SQL puro).
+    - O bot agora responde a administradores interagindo do seu número pessoal, removendo o loop infinito (ignora apenas a si mesmo).
+    - Remoção de dupla marcação (@) para mensagens mais limpas em modo *reply*.
+    - Tratamento de solicitações duplicadas: alerta quando a caixa do produto já se encontra pendente de aprovação.
+    - Produtos podem ser solicitados pelo código mesmo que estejam ocultos na vitrine pública.
+  - **Admin**: Máscaras automáticas de CPF/CNPJ e Telefone aplicadas nos modais de detalhes de compradores de caixas.
 
 ## ⚠️ ERROS MAPEADOS E RESOLVIDOS (Guia Rápido)
 - **Supabase e Chaves JWT**: A lib `@supabase/supabase-js` (versões antigas ou uso direto local) frequentemente falha em decodificar JWS compacto com as novas chaves `sb_...` opacas geradas pelo Supabase ("Invalid Compact JWS" / "signature verification failed"). Use as chaves *Legacy anon, service_role API keys* (formato `eyJ...`).
