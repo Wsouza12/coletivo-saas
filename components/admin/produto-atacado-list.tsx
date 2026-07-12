@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Camera, Trash2, Send, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,7 +50,8 @@ export function ProdutoAtacadoList({
   taxaServicoPadrao?: number;
 }) {
   const router = useRouter();
-  const [busca, setBusca] = useState("");
+  const searchParams = useSearchParams();
+  const [busca, setBusca] = useState(searchParams.get("q") || "");
 
   const termo = busca.trim().toLowerCase();
   const produtosFiltrados = termo

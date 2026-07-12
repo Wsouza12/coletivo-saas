@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Check, X, Clock, Image as ImageIcon } from "lucide-react";
@@ -36,6 +37,7 @@ type Solicitacao = {
 };
 
 export function SolicitacoesList({ initialData, coresProduto }: { initialData: Solicitacao[], coresProduto: Record<string, any[]> }) {
+  const router = useRouter();
   const [solicitacoes, setSolicitacoes] = useState(initialData);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Record<string, string>>({});
@@ -173,7 +175,14 @@ export function SolicitacoesList({ initialData, coresProduto }: { initialData: S
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700" 
                   size="sm"
                   disabled={loadingId === s.id}
-                  onClick={() => p.isRascunho ? toast.error("Este produto é um rascunho enviado no grupo! Vá em 'Catálogo do Atacado', conclua o cadastro dele e tente novamente.") : handleAprovar(s)}
+                  onClick={() => {
+                    if (p.isRascunho) {
+                      toast.info("Conclua o cadastro desse produto na Loja (vitrine) antes de abrir a caixa.");
+                      router.push("/admin/atacado/produtos?q=" + encodeURIComponent(p.codigo || p.nome));
+                    } else {
+                      handleAprovar(s);
+                    }
+                  }}
                 >
                   <Check className="size-4 mr-2" /> {p.isRascunho ? "Concluir Cadastro" : "Aprovar"}
                 </Button>
