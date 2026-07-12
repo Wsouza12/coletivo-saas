@@ -243,6 +243,7 @@ export const criarProdutoAtacadoSchema = z.object({
 
 export const updateProdutoAtacadoSchema = criarProdutoAtacadoSchema.partial().extend({
   ativo: z.boolean().optional(),
+  isRascunho: z.boolean().optional(),
 });
 
 export const fornecedorAtacadoSchema = z.object({

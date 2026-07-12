@@ -151,6 +151,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           ...(parsed.data.larguraCm ? { larguraCm: parsed.data.larguraCm } : {}),
           ...(parsed.data.alturaCm ? { alturaCm: parsed.data.alturaCm } : {}),
           fornecedorId: catalogo.fornecedorId,
+          isRascunho: false,
         },
       });
       acao = "criado";

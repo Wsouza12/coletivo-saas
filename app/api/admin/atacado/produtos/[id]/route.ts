@@ -30,7 +30,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: { code: "VALIDATION", message: parsed.error.flatten() } }, { status: 422 });
   }
 
-  let { tamanhosInput, coresInput, coresVariadas, fornecedorId, ...dadosProduto } = parsed.data;
+  let { tamanhosInput, coresInput, coresVariadas, fornecedorId, isRascunho, ...dadosProduto } = parsed.data;
 
   if (fornecedorId === "ESTOQUE_PROPRIO") {
     let f = await prisma.fornecedorAtacado.findFirst({ where: { isEstoqueProprio: true } });
@@ -44,7 +44,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const produto = await prisma.produtoAtacado.update({
     where: { id },
-    data: { ...dadosProduto, fornecedorId, ...(coresVariadas !== undefined ? { coresVariadas } : {}) },
+    data: { 
+      ...dadosProduto, 
+      fornecedorId, 
+      ...(coresVariadas !== undefined ? { coresVariadas } : {}),
+      ...(isRascunho !== undefined ? { isRascunho } : {})
+    },
   });
 
   // Se veio tamanhosInput, substitui todas as variações de tamanho

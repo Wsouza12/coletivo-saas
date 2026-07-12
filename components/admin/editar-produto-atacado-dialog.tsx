@@ -47,6 +47,7 @@ type ProdutoAtacado = {
   larguraCm: number;
   alturaCm: number;
   coresVariadas?: boolean;
+  isRascunho?: boolean;
   fornecedor?: { id: string; nome: string } | null;
 };
 
@@ -146,6 +147,7 @@ export function EditarProdutoAtacadoDialog({
           alturaCm: Number(alturaCm),
           fornecedorId: isEstoqueProprio ? "ESTOQUE_PROPRIO" : (fornecedorId || undefined),
           coresVariadas,
+          ...(produto.isRascunho ? { isRascunho: false } : {}),
         }),
       });
       const json = await res.json();
@@ -341,8 +343,8 @@ export function EditarProdutoAtacadoDialog({
 
             <CoresAtacadoEditor produtoId={produto.id} />
 
-            <Button type="submit" disabled={loading || !nome || !categoria || !custoUnitario || !unidadesPorCaixa}>
-              {loading ? "Salvando..." : "Salvar alterações"}
+            <Button type="submit" disabled={loading || !nome || !categoria || !custoUnitario || !unidadesPorCaixa || !pesoKg || !comprimentoCm || !larguraCm || !alturaCm || !descricao}>
+              {loading ? "Salvando..." : produto.isRascunho ? "Concluir Cadastro" : "Salvar alterações"}
             </Button>
           </form>
         </DialogContent>
