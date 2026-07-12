@@ -208,19 +208,20 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
       }
 
       if (intent.tipo !== "nenhum" && intent.termo) {
-        // Busca unificada: tenta achar por código EXATO ou por parte do nome
-        let produtosEncontrados = await prisma.produtoAtacado.findMany({
-          where: {
-            OR: [
-              { codigo: { equals: intent.termo, mode: "insensitive" } },
-              { nome: { contains: intent.termo, mode: "insensitive" } }
-            ],
-            AND: [
-              { OR: [{ ativo: true }, { isRascunho: true }] }
-            ]
-          },
-          take: 3
-        });
+        const termoLimpo = intent.termo.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+        let produtosEncontrados: any[] = [];
+        
+        if (termoLimpo.length > 0) {
+          produtosEncontrados = await prisma.$queryRaw`
+            SELECT id, nome, codigo FROM "ProdutoAtacado"
+            WHERE (
+              LOWER(REGEXP_REPLACE(codigo, '[^a-zA-Z0-9]', '', 'g')) = ${termoLimpo}
+              OR nome ILIKE ${'%' + intent.termo + '%'}
+            )
+            AND (ativo = true OR "isRascunho" = true)
+            LIMIT 3
+          `;
+        }
 
         // Se não achou pelo termo inteiro, tenta quebrar em palavras (se for nome longo)
         if (produtosEncontrados.length === 0 && intent.tipo === "nome") {
