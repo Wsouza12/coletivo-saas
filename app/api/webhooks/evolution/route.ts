@@ -215,10 +215,9 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
           produtosEncontrados = await prisma.$queryRaw`
             SELECT id, nome, codigo FROM "ProdutoAtacado"
             WHERE (
-              LOWER(REGEXP_REPLACE(codigo, '[^a-zA-Z0-9]', '', 'g')) = ${termoLimpo}
+              REPLACE(LOWER(REGEXP_REPLACE(codigo, '[^a-zA-Z0-9]', '', 'g')), 'i', 'l') = REPLACE(${termoLimpo}, 'i', 'l')
               OR nome ILIKE ${'%' + intent.termo + '%'}
             )
-            AND (ativo = true OR "isRascunho" = true)
             LIMIT 3
           `;
         }
@@ -231,8 +230,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
               where: {
                 AND: searchTerms.map(term => ({
                   nome: { contains: term, mode: "insensitive" }
-                })),
-                OR: [{ ativo: true }, { isRascunho: true }]
+                }))
               },
               take: 3
             });
