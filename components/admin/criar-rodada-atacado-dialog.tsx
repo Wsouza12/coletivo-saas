@@ -39,6 +39,7 @@ type Produto = {
   unidadesPorCaixa: number;
   imagemUrl?: string | null;
   reservaLojaPadrao?: number | null;
+  minimoUnidadesPadrao?: number | null;
   coresVariadas?: boolean;
   cores?: Variacao[];
 };
@@ -79,6 +80,7 @@ export function CriarRodadaAtacadoDialog({
     if (produto) {
       setMetaUnidades(String(produto.unidadesPorCaixa));
       setUnidadesReservadasLoja(String(produto.reservaLojaPadrao ?? 0));
+      setMinimoUnidadesPorReserva(String(produto.minimoUnidadesPadrao ?? 1));
     }
     setVariacaoId("");
     // eslint-disable-next-line react-hooks/exhaustive-deps

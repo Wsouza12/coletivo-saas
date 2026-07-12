@@ -39,8 +39,7 @@ type ProdutoAtacado = {
   custoUnitario: number;
   precoCatalogo?: number | null;
   precoVendaSugerido?: number | null;
-  linkReferencia?: string | null;
-  posicaoMaisVendido?: number | null;
+  minimoUnidadesPadrao?: number | null;
   reservaLojaPadrao?: number | null;
   unidadesPorCaixa: number;
   pesoKg: number;
@@ -80,9 +79,8 @@ export function EditarProdutoAtacadoDialog({
   const [precoVendaSugerido, setPrecoVendaSugerido] = useState(
     produto.precoVendaSugerido != null ? String(produto.precoVendaSugerido) : ""
   );
-  const [linkReferencia, setLinkReferencia] = useState(produto.linkReferencia ?? "");
-  const [posicaoMaisVendido, setPosicaoMaisVendido] = useState(
-    produto.posicaoMaisVendido != null ? String(produto.posicaoMaisVendido) : ""
+  const [minimoUnidadesPadrao, setMinimoUnidadesPadrao] = useState(
+    produto.minimoUnidadesPadrao != null ? String(produto.minimoUnidadesPadrao) : "1"
   );
   const [reservaLojaPadrao, setReservaLojaPadrao] = useState(
     produto.reservaLojaPadrao != null ? String(produto.reservaLojaPadrao) : ""
@@ -139,9 +137,8 @@ export function EditarProdutoAtacadoDialog({
           custoUnitario: Number(custoUnitario),
           precoCatalogo: precoCatalogo ? Number(precoCatalogo) : undefined,
           precoVendaSugerido: precoVendaSugerido ? Number(precoVendaSugerido) : undefined,
-          linkReferencia: linkReferencia || "",
-          posicaoMaisVendido: posicaoMaisVendido ? Number(posicaoMaisVendido) : undefined,
           reservaLojaPadrao: reservaLojaPadrao ? Number(reservaLojaPadrao) : undefined,
+          minimoUnidadesPadrao: Number(minimoUnidadesPadrao) || 1,
           unidadesPorCaixa: Number(unidadesPorCaixa),
           pesoKg: Number(pesoKg),
           comprimentoCm: Number(comprimentoCm),
@@ -269,26 +266,16 @@ export function EditarProdutoAtacadoDialog({
               </div>
             </div>
 
-            <Label>Prova social — Mais vendidos no ML (opcional)</Label>
-            <div className="grid grid-cols-[1fr_auto] gap-2">
-              <Input
-                type="url"
-                value={linkReferencia}
-                onChange={(e) => setLinkReferencia(e.target.value)}
-                placeholder="https://www.mercadolivre.com.br/mais-vendidos/..."
-              />
-              <Input
-                type="number"
-                min="1"
-                value={posicaoMaisVendido}
-                onChange={(e) => setPosicaoMaisVendido(e.target.value)}
-                placeholder="Posição"
-                className="w-24"
-              />
-            </div>
-            <span className="text-xs text-muted-foreground">
-              Link da página de mais vendidos do ML + a posição (ex: 19). Vira o selo &quot;Nº mais
-              vendido&quot; na vitrine.
+            <Label>Quantidade mínima por comprador (opcional)</Label>
+            <Input
+              type="number"
+              min="1"
+              value={minimoUnidadesPadrao}
+              onChange={(e) => setMinimoUnidadesPadrao(e.target.value)}
+              placeholder="Padrão: 1"
+            />
+            <span className="text-xs text-muted-foreground mt-[-8px]">
+              O comprador será obrigado a pedir pelo menos essa quantidade.
             </span>
 
             <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">

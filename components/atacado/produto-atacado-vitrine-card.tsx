@@ -29,32 +29,10 @@ export type ProdutoAtacadoVitrine = {
   preco: number | null;
   // Link de convite do grupo de WhatsApp da categoria (pode não existir ainda).
   linkConvite: string | null;
-  // Prova social: link da página "mais vendidos" do ML + posição no ranking.
-  linkReferencia: string | null;
-  posicaoMaisVendido: number | null;
   // Variações disponíveis (cor com foto / tamanho / voltagem). A vitrine é
   // só pra olhar — escolha real da variação da caixa acontece na rodada.
   cores: { id: string; tipo: "COR" | "TAMANHO" | "VOLTAGEM"; nome: string; imagemUrl: string | null }[];
 };
-
-// Abre o link do ML numa janela popup separada (não aba) — o ML bloqueia iframe/
-// modal, mas janela separada é página real e funciona, mantendo o catálogo atrás.
-// Largura precisa ser grande (~1100px) pra o ML renderizar no layout desktop e
-// dar pra ver os produtos; numa janela estreita ele fica apertado/ilegível.
-function abrirReferencia(url: string) {
-  const largura = Math.min(1100, Math.round(window.screen.availWidth * 0.9));
-  const altura = Math.min(850, Math.round(window.screen.availHeight * 0.9));
-  const left = Math.max(0, Math.round((window.screen.availWidth - largura) / 2));
-  const top = Math.max(0, Math.round((window.screen.availHeight - altura) / 2));
-  // popup=yes força a janela minimalista (sem abas/barra de favoritos/botões) em
-  // vez de uma aba/janela cheia. A barra de endereço NÃO pode ser ocultada — o
-  // navegador sempre mostra a URL em popups (segurança/anti-phishing).
-  window.open(
-    url,
-    "ml-mais-vendidos",
-    `popup=yes,width=${largura},height=${altura},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
-  );
-}
 
 export function ProdutoAtacadoVitrineCard({ produto }: { produto: ProdutoAtacadoVitrine }) {
   const [detalhes, setDetalhes] = useState(false);
@@ -187,23 +165,7 @@ export function ProdutoAtacadoVitrineCard({ produto }: { produto: ProdutoAtacado
             <span className="text-xs text-muted-foreground">{produto.unidadesPorCaixa} un/caixa</span>
           </div>
 
-          {produto.linkReferencia && produto.posicaoMaisVendido ? (
-            <button
-              type="button"
-              onClick={() => abrirReferencia(produto.linkReferencia!)}
-              title="Ver no ranking de mais vendidos do Mercado Livre"
-              className="group/ml flex w-full min-w-0 items-center gap-1.5 rounded-md bg-[#FFE600] px-2 py-1.5 text-left shadow-sm transition hover:brightness-95"
-            >
-              <Handshake className="size-4 shrink-0 text-[#2D3277]" />
-              <span className="shrink-0 rounded bg-[#FF5A1F] px-1.5 py-0.5 text-[9px] font-extrabold uppercase leading-none text-white">
-                Mais vendido
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#2D3277]">
-                {produto.posicaoMaisVendido}º em {produto.categoria}
-              </span>
-              <ExternalLink className="size-3 shrink-0 text-[#2D3277] transition group-hover/ml:translate-x-0.5" />
-            </button>
-          ) : null}
+
 
           <div className="mt-1 flex flex-col gap-1.5">
             <Button type="button" size="sm" className="w-full" onClick={() => {
@@ -398,25 +360,6 @@ export function ProdutoAtacadoVitrineCard({ produto }: { produto: ProdutoAtacado
                   Grupo em breve
                 </Button>
               )}
-              {produto.linkReferencia ? (
-                <button
-                  type="button"
-                  onClick={() => abrirReferencia(produto.linkReferencia!)}
-                  title="Ver no ranking de mais vendidos do Mercado Livre"
-                  className="group/ml flex w-full items-center gap-2 rounded-lg bg-[#FFE600] px-3 py-2 text-left shadow transition hover:brightness-95"
-                >
-                  <Handshake className="size-5 shrink-0 text-[#2D3277]" />
-                  <span className="rounded bg-[#FF5A1F] px-2 py-0.5 text-[11px] font-extrabold uppercase leading-none text-white">
-                    Mais vendido
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#2D3277]">
-                    {produto.posicaoMaisVendido
-                      ? `${produto.posicaoMaisVendido}º em ${produto.categoria}`
-                      : "no Mercado Livre"}
-                  </span>
-                  <ExternalLink className="size-3.5 shrink-0 text-[#2D3277] transition group-hover/ml:translate-x-0.5" />
-                </button>
-              ) : null}
             </div>
           </div>
         </DialogContent>

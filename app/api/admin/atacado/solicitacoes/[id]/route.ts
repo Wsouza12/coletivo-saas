@@ -66,7 +66,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       custoUnitario: solicitacao.produtoAtacado.custoUnitario,
       taxaServicoPercentual: config.taxaServicoPadraoAtacado,
       precoFinalUnitario,
-      minimoUnidadesPorReserva: 1, // default
+      minimoUnidadesPorReserva: solicitacao.produtoAtacado.minimoUnidadesPadrao,
       unidadesReservadasLoja: solicitacao.produtoAtacado.reservaLojaPadrao || 0,
       loopAtivo: false,
       variacaoId: variacaoId || undefined,

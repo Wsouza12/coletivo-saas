@@ -844,11 +844,8 @@ model ProdutoAtacado {
   // Reserva padrão pra loja — pré-preenche o campo de reserva ao criar uma rodada
   // desse produto (a diluição do custo continua acontecendo na rodada).
   reservaLojaPadrao Int?
-  // Prova social na vitrine pública: link da página "mais vendidos" do ML e a
-  // posição do produto nesse ranking (digitada pelo admin — o ML bloqueia leitura
-  // automática). Selo laranja "Nº MAIS VENDIDO" + popup do link na vitrine.
-  linkReferencia     String?
-  posicaoMaisVendido Int?
+  // Quantidade mínima de unidades por comprador para esse produto (padrão 1).
+  minimoUnidadesPadrao Int @default(1)
   // Link de convite de grupo WhatsApp específico deste produto. Quando
   // preenchido, o botão "Quero!" da vitrine usa este link em vez do vinculado
   // à categoria (fallback). Permite mandar produtos de uma categoria pra grupos

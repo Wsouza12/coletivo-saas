@@ -63,6 +63,7 @@ export default async function AdminAtacadoPage({
         unidadesPorCaixa: true,
         imagemUrl: true,
         reservaLojaPadrao: true,
+        minimoUnidadesPadrao: true,
         coresVariadas: true,
         cores: { select: { id: true, tipo: true, nome: true, imagemUrl: true }, orderBy: [{ ordem: "asc" }, { createdAt: "asc" }] },
       },

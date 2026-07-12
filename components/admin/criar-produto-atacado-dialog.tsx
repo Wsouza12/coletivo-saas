@@ -50,6 +50,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
   const [precoVendaSugerido, setPrecoVendaSugerido] = useState("");
   const [unidadesPorCaixa, setUnidadesPorCaixa] = useState("");
   const [reservaLojaPadrao, setReservaLojaPadrao] = useState("");
+  const [minimoUnidadesPadrao, setMinimoUnidadesPadrao] = useState("");
   const [pesoKg, setPesoKg] = useState("");
   const [comprimentoCm, setComprimentoCm] = useState("");
   const [larguraCm, setLarguraCm] = useState("");
@@ -135,6 +136,7 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
           codigoAnatel: codigoAnatel || undefined,
           custoUnitario: Number(custoUnitario),
           precoVendaSugerido: precoVendaSugerido ? Number(precoVendaSugerido) : undefined,
+          minimoUnidadesPadrao: Number(minimoUnidadesPadrao) || 1,
           unidadesPorCaixa: Number(unidadesPorCaixa),
           reservaLojaPadrao: reservaLojaPadrao ? Number(reservaLojaPadrao) : undefined,
           pesoKg: Number(pesoKg),
@@ -260,6 +262,18 @@ export function CriarProdutoAtacadoDialog({ fornecedores = [] }: { fornecedores?
               onChange={(e) => setReservaLojaPadrao(e.target.value)}
               placeholder="Pré-preenche a reserva ao criar a rodada"
             />
+
+            <Label>Quantidade mínima por comprador (opcional)</Label>
+            <Input
+              type="number"
+              min="1"
+              value={minimoUnidadesPadrao}
+              onChange={(e) => setMinimoUnidadesPadrao(e.target.value)}
+              placeholder="Padrão: 1"
+            />
+            <span className="text-xs text-muted-foreground mt-[-8px]">
+              O comprador será obrigado a pedir pelo menos essa quantidade.
+            </span>
 
             <ReservaPreview
               custo={Number(custoUnitario)}

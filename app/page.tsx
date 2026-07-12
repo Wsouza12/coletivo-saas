@@ -68,8 +68,7 @@ export default async function VitrineAtacadoPage({
         unidadesPorCaixa: true,
         precoVendaSugerido: true,
         precoCatalogo: true,
-        linkReferencia: true,
-        posicaoMaisVendido: true,
+
         cores: {
           select: { id: true, tipo: true, nome: true, imagemUrl: true },
           orderBy: [{ ordem: "asc" }, { createdAt: "asc" }],
@@ -109,8 +108,6 @@ export default async function VitrineAtacadoPage({
         ? Number(p.precoVendaSugerido)
         : null,
     linkConvite: linkPorCategoria.get(p.categoria) ?? null,
-    linkReferencia: p.linkReferencia,
-    posicaoMaisVendido: p.posicaoMaisVendido,
     cores: p.cores,
   }));
 
