@@ -54,6 +54,7 @@ export function CatalogoFornecedorViewerDialog({
   const [voltagem, setVoltagem] = useState("");
   const [codigoAnatel, setCodigoAnatel] = useState("");
   const [unidadesPorCaixa, setUnidadesPorCaixa] = useState("");
+  const [minimoUnidadesPadrao, setMinimoUnidadesPadrao] = useState("1");
   const [reservaLojaPadrao, setReservaLojaPadrao] = useState("");
   const [custoUnitario, setCustoUnitario] = useState("");
   const [precoCatalogo, setPrecoCatalogo] = useState("");
@@ -180,6 +181,8 @@ export function CatalogoFornecedorViewerDialog({
         setVoltagem(p.voltagem || "");
         setCodigoAnatel(p.codigoAnatel || "");
         setUnidadesPorCaixa(p.unidadesPorCaixa.toString());
+        setMinimoUnidadesPadrao(p.minimoUnidadesPadrao?.toString() || "1");
+        setReservaLojaPadrao(p.reservaLojaPadrao?.toString() || "");
         setCustoUnitario(p.custoUnitario.toString());
         setPrecoCatalogo(p.precoCatalogo?.toString() || "");
         setPrecoVendaSugerido(p.precoVendaSugerido?.toString() || "");
@@ -374,6 +377,8 @@ export function CatalogoFornecedorViewerDialog({
       if (typeof d.custoUnitario === "number") setCustoUnitario(String(d.custoUnitario));
       if (typeof d.precoCatalogo === "number") setPrecoCatalogo(String(d.precoCatalogo));
       if (typeof d.unidadesPorCaixa === "number") setUnidadesPorCaixa(String(d.unidadesPorCaixa));
+      if (typeof d.minimoUnidadesPadrao === "number") setMinimoUnidadesPadrao(String(d.minimoUnidadesPadrao));
+      if (typeof d.reservaLojaPadrao === "number") setReservaLojaPadrao(String(d.reservaLojaPadrao));
       if (typeof d.pesoKg === "number") setPesoKg(String(d.pesoKg));
       if (typeof d.comprimentoCm === "number") setComprimentoCm(String(d.comprimentoCm));
       if (typeof d.larguraCm === "number") setLarguraCm(String(d.larguraCm));
@@ -415,6 +420,7 @@ export function CatalogoFornecedorViewerDialog({
       if (voltagem) formData.append("voltagem", voltagem);
       if (codigoAnatel) formData.append("codigoAnatel", codigoAnatel);
       formData.append("unidadesPorCaixa", unidadesPorCaixa);
+      if (minimoUnidadesPadrao) formData.append("minimoUnidadesPadrao", minimoUnidadesPadrao);
       if (reservaLojaPadrao) formData.append("reservaLojaPadrao", reservaLojaPadrao);
       formData.append("custoUnitario", custoUnitario);
       if (precoCatalogo) formData.append("precoCatalogo", precoCatalogo);
@@ -475,6 +481,7 @@ export function CatalogoFornecedorViewerDialog({
       setVoltagem("");
       setCodigoAnatel("");
       setUnidadesPorCaixa("");
+      setMinimoUnidadesPadrao("1");
       setReservaLojaPadrao("");
       setCustoUnitario("");
       setPrecoCatalogo("");
@@ -780,14 +787,24 @@ export function CatalogoFornecedorViewerDialog({
                     title="Número de homologação Anatel, ex: 00279-20-15621"
                   />
 
-                  <Input
-                    type="number"
-                    min="1"
-                    value={unidadesPorCaixa}
-                    onChange={(e) => setUnidadesPorCaixa(e.target.value)}
-                    placeholder="Und/caixa"
-                    required
-                  />
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <Input
+                      type="number"
+                      min="1"
+                      value={unidadesPorCaixa}
+                      onChange={(e) => setUnidadesPorCaixa(e.target.value)}
+                      placeholder="Und/caixa"
+                      required
+                    />
+                    <Input
+                      type="number"
+                      min="1"
+                      value={minimoUnidadesPadrao}
+                      onChange={(e) => setMinimoUnidadesPadrao(e.target.value)}
+                      placeholder="Mín. p/ lojista (padrão: 1)"
+                      title="Quantidade mínima que cada lojista deve pedir deste produto"
+                    />
+                  </div>
                   <Input
                     type="number"
                     min="0"
