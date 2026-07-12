@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { formatBRL } from "@/lib/format";
+import { formatBRL, mascararCpfCnpj, mascararTelefone } from "@/lib/format";
 
 type Reserva = {
   id: string;
@@ -97,7 +97,7 @@ export function RodadaDetalhesDialog({ rodadaId }: { rodadaId: string }) {
                     <StatusBadge status={r.status} />
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {r.compradorDoc} — {r.compradorTelefone}
+                    {mascararCpfCnpj(r.compradorDoc)} — {mascararTelefone(r.compradorTelefone)}
                     {r.assinatura?.compradorEmail ? ` — ${r.assinatura.compradorEmail}` : ""}
                   </span>
                   <div className="flex items-center justify-between text-xs">
