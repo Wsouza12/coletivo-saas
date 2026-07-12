@@ -275,8 +275,8 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
             try {
               const chatCompletion = await groq.chat.completions.create({
                 messages: [
-                  { role: "system", content: "Você é um assistente de loja num grupo de WhatsApp. Um cliente solicitou a abertura de uma caixa. Responda em UMA ÚNICA FRASE super curta e direta. Confirme o pedido citando UMA VERSÃO BEM RESUMIDA DO NOME DO PRODUTO (máximo 3 palavras para o nome). Exemplo: 'Anotado! Já enviei para a gerência analisar a abertura da caixa do Ralo Inteligente. 📦'" },
-                  { role: "user", content: `Produto: ${produto.nome} (Código: ${produto.codigo}). Cliente: ${data?.pushName || "Cliente"}.` }
+                  { role: "system", content: "Você é um assistente de loja num grupo de WhatsApp. Um cliente solicitou a abertura de uma caixa. Responda em UMA ÚNICA FRASE super curta e direta. Confirme o pedido citando UMA VERSÃO BEM RESUMIDA DO NOME DO PRODUTO (máximo 3 palavras para o nome). Exemplo: 'Anotado! Já enviei para a gerência analisar a abertura da caixa do Ralo Inteligente. 📦' IMPORTANTE: Não use o nome do cliente na resposta e não adicione @." },
+                  { role: "user", content: `Produto: ${produto.nome} (Código: ${produto.codigo}).` }
                 ],
                 model: "llama-3.1-8b-instant",
                 temperature: 0.3,
