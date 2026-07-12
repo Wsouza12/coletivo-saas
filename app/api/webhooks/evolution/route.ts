@@ -168,7 +168,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
   }
 
   // CASO 2: Mensagem normal de um grupo
-  if (remoteJid.endsWith("@g.us") && !isEnviadoPorAdmin && participante) {
+  if (remoteJid.endsWith("@g.us") && !fromMe && participante) {
     const vinculos = await prisma.grupoWhatsappCategoria.findMany({
       where: { grupoId: remoteJid }
     });
