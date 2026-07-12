@@ -9,7 +9,7 @@ import {
   ProdutoAtacadoVitrineCard,
   type ProdutoAtacadoVitrine,
 } from "@/components/atacado/produto-atacado-vitrine-card";
-import { Crown, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Crown, Search, ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { VitrineHero } from "@/components/atacado/vitrine-hero";
 import { VitrineBenefits } from "@/components/atacado/vitrine-benefits";
 import { Footer } from "@/components/shared/footer";
@@ -149,10 +149,14 @@ export default async function VitrineAtacadoPage({
               <img src="/icon.png" alt="Logo" className="size-8 object-contain" />
               <span>{APP_NAME}</span>
             </Link>
-            
-            <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition shrink-0 sm:hidden">
-              Entrar
-            </Link>
+            <div className="flex items-center gap-4 sm:hidden shrink-0">
+              <Link href="/atacado/rastreio" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition flex items-center gap-1">
+                <Package className="size-4" />
+              </Link>
+              <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition">
+                Entrar
+              </Link>
+            </div>
           </div>
           
           <form action="/" method="GET" className="w-full sm:flex-1 flex items-center gap-2 max-w-2xl">
@@ -182,9 +186,15 @@ export default async function VitrineAtacadoPage({
             </button>
           </form>
 
-          <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition shrink-0 hidden sm:block">
-            Entrar
-          </Link>
+          <div className="hidden sm:flex items-center gap-6 shrink-0">
+            <Link href="/atacado/rastreio" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition flex items-center gap-1.5">
+              <Package className="size-4" />
+              Rastrear Pedido
+            </Link>
+            <Link href="/login" className="text-sm font-semibold text-[#2D3277] hover:opacity-80 transition">
+              Entrar
+            </Link>
+          </div>
         </div>
       </header>
 

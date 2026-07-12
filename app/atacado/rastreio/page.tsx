@@ -16,7 +16,12 @@ export default function RastreioBuscaPage() {
     e.preventDefault();
     const cleanCodigo = codigo.trim().toUpperCase();
     if (cleanCodigo) {
-      router.push(`/atacado/rastreio/${cleanCodigo}`);
+      const digitsOnly = cleanCodigo.replace(/\D/g, "");
+      if (digitsOnly.length === 11) {
+        router.push(`/atacado/rastreio/cliente/${digitsOnly}`);
+      } else {
+        router.push(`/atacado/rastreio/${cleanCodigo}`);
+      }
     }
   };
 
@@ -32,7 +37,7 @@ export default function RastreioBuscaPage() {
           </Badge>
           <CardTitle className="text-2xl font-bold tracking-tight font-sans">Rastrear Caixa</CardTitle>
           <CardDescription>
-            Insira o código da sua caixa coletiva para acompanhar as etapas de envio.
+            Insira o código da sua caixa coletiva ou o seu CPF para acompanhar as etapas de envio.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -40,7 +45,7 @@ export default function RastreioBuscaPage() {
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Ex: CX-123456"
+                placeholder="Ex: CX-123456 ou 123.456.789-00"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 className="text-center text-lg font-semibold tracking-wider uppercase placeholder:normal-case placeholder:font-normal placeholder:tracking-normal"
@@ -52,7 +57,7 @@ export default function RastreioBuscaPage() {
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center justify-center gap-2 py-6 text-base"
             >
               <Search className="size-5" />
-              Buscar Caixa
+              Buscar Rastreio
             </Button>
           </form>
         </CardContent>
