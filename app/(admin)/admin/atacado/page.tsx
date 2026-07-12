@@ -43,7 +43,7 @@ export default async function AdminAtacadoPage({
     }
   }
 
-  const [rodadas, produtos, config, solicitacoes, countNaoAnunciadas] = await Promise.all([
+  const [rodadas, produtos, config, solicitacoes, countNaoAnunciadas, fornecedores] = await Promise.all([
     prisma.rodadaAtacado.findMany({
       where,
       include: {
@@ -72,12 +72,15 @@ export default async function AdminAtacadoPage({
     tab === "solicitacoes" ? prisma.solicitacaoAberturaCaixa.findMany({
       include: {
         produtoAtacado: {
-          select: { id: true, nome: true, imagemUrl: true, codigo: true, unidadesPorCaixa: true, custoUnitario: true, isRascunho: true },
+          include: {
+            fornecedor: { select: { id: true, nome: true } },
+          },
         },
       },
       orderBy: { createdAt: "desc" },
     }) : Promise.resolve([]),
     prisma.rodadaAtacado.count({ where: { status: "ABERTA", grupoMensagemEnviada: false } }),
+    prisma.fornecedorAtacado.findMany({ select: { id: true, nome: true }, orderBy: { nome: "asc" } }),
   ]);
 
   const coresMap = produtos.reduce((acc, p) => {
@@ -115,7 +118,7 @@ export default async function AdminAtacadoPage({
       <RodadasFiltros />
 
       {tab === "solicitacoes" ? (
-        <SolicitacoesList initialData={solicitacoes as any} coresProduto={coresMap} />
+        <SolicitacoesList initialData={solicitacoes as any} coresProduto={coresMap} fornecedores={fornecedores} />
       ) : rodadas.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">

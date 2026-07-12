@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { EditarProdutoAtacadoDialog } from "@/components/admin/editar-produto-atacado-dialog";
 
 type Solicitacao = {
   id: string;
@@ -36,11 +37,12 @@ type Solicitacao = {
   };
 };
 
-export function SolicitacoesList({ initialData, coresProduto }: { initialData: Solicitacao[], coresProduto: Record<string, any[]> }) {
+export function SolicitacoesList({ initialData, coresProduto, fornecedores = [] }: { initialData: Solicitacao[], coresProduto: Record<string, any[]>, fornecedores?: any[] }) {
   const router = useRouter();
   const [solicitacoes, setSolicitacoes] = useState(initialData);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Record<string, string>>({});
+  const [produtoEditando, setProdutoEditando] = useState<any>(null);
 
   async function handleAprovar(solicitacao: Solicitacao) {
     const cores = coresProduto[solicitacao.produtoAtacado.id] || [];
@@ -177,8 +179,14 @@ export function SolicitacoesList({ initialData, coresProduto }: { initialData: S
                   disabled={loadingId === s.id}
                   onClick={() => {
                     if (p.isRascunho) {
-                      toast.info("Conclua o cadastro desse produto na Loja (vitrine) antes de abrir a caixa.");
-                      router.push("/admin/atacado/produtos?q=" + encodeURIComponent(p.codigo || p.nome));
+                      setProdutoEditando({
+                        ...p,
+                        custoUnitario: Number(p.custoUnitario || 0),
+                        pesoKg: Number(p.pesoKg || 0),
+                        comprimentoCm: p.comprimentoCm || 0,
+                        larguraCm: p.larguraCm || 0,
+                        alturaCm: p.alturaCm || 0,
+                      });
                     } else {
                       handleAprovar(s);
                     }
@@ -191,6 +199,17 @@ export function SolicitacoesList({ initialData, coresProduto }: { initialData: S
           </Card>
         );
       })}
+      
+      {produtoEditando && (
+        <EditarProdutoAtacadoDialog
+          produto={produtoEditando}
+          fornecedores={fornecedores}
+          onChange={() => {
+            setProdutoEditando(null);
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
