@@ -34,6 +34,14 @@ type Solicitacao = {
     unidadesPorCaixa: number;
     custoUnitario: any;
     isRascunho?: boolean;
+    pesoKg?: number;
+    comprimentoCm?: number;
+    larguraCm?: number;
+    alturaCm?: number;
+    categoria?: string;
+    marca?: string | null;
+    descricao?: string;
+    fornecedor?: any;
   };
 };
 
@@ -186,6 +194,8 @@ export function SolicitacoesList({ initialData, coresProduto, fornecedores = [] 
                         comprimentoCm: p.comprimentoCm || 0,
                         larguraCm: p.larguraCm || 0,
                         alturaCm: p.alturaCm || 0,
+                        categoria: p.categoria || "",
+                        descricao: p.descricao || "",
                       });
                     } else {
                       handleAprovar(s);
@@ -204,6 +214,8 @@ export function SolicitacoesList({ initialData, coresProduto, fornecedores = [] 
         <EditarProdutoAtacadoDialog
           produto={produtoEditando}
           fornecedores={fornecedores}
+          openByDefault={true}
+          hideTrigger={true}
           onChange={() => {
             setProdutoEditando(null);
             router.refresh();

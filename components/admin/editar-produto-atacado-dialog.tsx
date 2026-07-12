@@ -55,13 +55,17 @@ export function EditarProdutoAtacadoDialog({
   produto,
   fornecedores = [],
   onChange,
+  openByDefault = false,
+  hideTrigger = false,
 }: {
   produto: ProdutoAtacado;
   fornecedores?: Fornecedor[];
   onChange: () => void;
+  openByDefault?: boolean;
+  hideTrigger?: boolean;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(openByDefault);
   const [loading, setLoading] = useState(false);
   const [gerandoDescricao, setGerandoDescricao] = useState(false);
   const [codigo, setCodigo] = useState(produto.codigo ?? "");
@@ -163,10 +167,15 @@ export function EditarProdutoAtacadoDialog({
 
   return (
     <>
-      <Button type="button" size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setOpen(true)}>
-        <Pencil className="size-3.5" />
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      {!hideTrigger && (
+        <Button type="button" size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setOpen(true)}>
+          <Pencil className="size-3.5" />
+        </Button>
+      )}
+      <Dialog open={open} onOpenChange={(val) => {
+        setOpen(val);
+        if (!val && hideTrigger) onChange(); // When closed and has no trigger, it was mounted conditionally, so call onChange to unmount it.
+      }}>
         <DialogContent className="w-full max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-lg sm:max-h-[85vh]">
           <DialogHeader>
             <DialogTitle>Editar produto</DialogTitle>
