@@ -203,7 +203,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
       if (intent.tipo === "categoria" && intent.termo) {
         const linkCategoria = `${process.env.NEXT_PUBLIC_APP_URL || "https://drop-sync.vercel.app"}/?categoria=${encodeURIComponent(intent.termo)}`;
         const resposta = `Ah, você está procurando por produtos de ${intent.termo}! Para ver todos os itens dessa categoria que já temos na loja, acesse a vitrine aqui:\n${linkCategoria}`;
-        await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${resposta}`, mensagemId, [cleanJid]);
+        await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
         return NextResponse.json({ ok: true });
       }
 
@@ -250,7 +250,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
           if (rodadaAberta && rodadaAberta.slug) {
             const linkCaixa = `${process.env.NEXT_PUBLIC_APP_URL || "https://drop-sync.vercel.app"}/atacado/${rodadaAberta.slug}`;
             const resposta = `Boa notícia! Essa caixa já está aberta e disponível para reserva.\nClique no link abaixo para garantir suas unidades:\n${linkCaixa}`;
-            await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${resposta}`, mensagemId, [cleanJid]);
+            await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
             return NextResponse.json({ ok: true });
           }
 
@@ -286,7 +286,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
               }
             } catch (err) {}
 
-            await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${respostaGroq}`, mensagemId, [cleanJid]);
+            await enviarMensagemGrupo(remoteJid, respostaGroq, mensagemId);
           }
           return NextResponse.json({ ok: true });
         } else if (produtosEncontrados.length > 1) {
@@ -294,12 +294,12 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
           const listaStr = produtosEncontrados.map(p => `- ${p.nome} (Código: *${p.codigo}*)`).join("\n");
           
           const resposta = `Encontrei algumas opções parecidas com "${intent.termo}". Para solicitar, envie apenas o código do produto desejado abaixo:\n\n${listaStr}`;
-          await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${resposta}`, mensagemId, [cleanJid]);
+          await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
           return NextResponse.json({ ok: true });
         } else {
           // Não encontrou nenhum - envia no grupo
           const resposta = `Poxa, não encontrei esse produto no sistema no momento. Vou consultar a gerência para cadastrarmos!\n\nVocê sabe me dizer o nome do produto ou de qual catálogo você tirou esse código?`;
-          await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]} ${resposta}`, mensagemId, [cleanJid]);
+          await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
           
           // Notifica o admin no painel
           await prisma.notificacao.create({
@@ -319,7 +319,7 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
       if (!vinculoRobo) {
         const cleanJid = participante.replace(/:\\d+/, "");
         const resposta = `Olá! Para solicitar a abertura de uma caixa, por favor, envie o *código* ou o *nome* do produto que você deseja.`;
-        await enviarMensagemGrupo(remoteJid, `@${cleanJid.split("@")[0]}, ${resposta}`, mensagemId, [cleanJid]);
+        await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
         return NextResponse.json({ ok: true });
       }
     }
