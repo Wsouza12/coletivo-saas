@@ -287,6 +287,9 @@ Tom: pessoal, animado, sem parecer robô. Máximo 8 linhas. Varie o texto a cada
             } catch (err) {}
 
             await enviarMensagemGrupo(remoteJid, respostaGroq, mensagemId);
+          } else {
+            const resposta = `O pedido para abrir a caixa desse produto já está anotado e aguardando aprovação da gerência! 😉`;
+            await enviarMensagemGrupo(remoteJid, resposta, mensagemId);
           }
           return NextResponse.json({ ok: true });
         } else if (produtosEncontrados.length > 1) {
